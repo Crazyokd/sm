@@ -1,0 +1,9 @@
+[Unit]
+Description=SM nightly synchronization and resource improvement
+After=network-online.target
+
+[Service]
+Type=oneshot
+Environment={path}
+EnvironmentFile=-{environment}
+ExecStart={python} -m sm cycle --repo {repo}

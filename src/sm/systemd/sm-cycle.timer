@@ -1,0 +1,10 @@
+[Unit]
+Description=Run SM nightly
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+Unit=sm-cycle.service
+
+[Install]
+WantedBy=timers.target

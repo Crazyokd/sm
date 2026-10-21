@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}使用与改进{% endblock %}
+{% block breadcrumb %}使用与改进{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">OBSERVE & IMPROVE</p><h1>使用与改进</h1><p class="subtitle">查看自建资源的使用线索和有证据的改进尝试。</p></div><span class="pill self">仅分析用户自建</span></div>
+<p class="notice">记录反映可见调用；未观测不等于未使用。以下为已消化的本地记录，日常采集由夜间任务处理。</p>
+{% if recording_errors %}<p class="notice warning">存在 {{ recording_errors|length }} 处记录缺口，请到运行状态检查采集情况。</p>{% endif %}
+<h2>资源观测概况</h2><p class="quiet">累计可归因的事件和会话，供判断线索覆盖；事件数量不等于调用次数。</p>
+<div class="table-wrap article-section"><table><thead><tr><th>自建资源</th><th>观测事件</th><th>涉及会话</th><th>最近观测</th></tr></thead><tbody>{% for r in usage %}<tr><td><a href="/resources/{{ r.id }}">{{ r.id }}</a></td>{% if r.usage %}<td>{{ r.usage.events }} 条</td><td>{{ r.usage.sessions }} 个</td><td class="time">{{ r.usage.last_seen[:19].replace('T',' ') }} UTC</td>{% else %}<td colspan="3">未观测，使用情况未知</td>{% endif %}</tr>{% endfor %}</tbody></table></div>
+<h2>改进发现</h2>{% for f in findings %}<section class="finding"><div class="section-heading"><a href="/resources/{{ f.resource_id }}">{{ f.resource_id }}</a><span class="pill">{{ f.validation.status }}</span></div><h3>{{ f.issue }}</h3><p>{{ f.evidence|length }} 条证据 · {{ f.validation.unverified|join('；') }}</p><p>{% for id in f.evidence %}<a href="#event-{{ id }}">证据 {{ loop.index }}</a> {% endfor %}{% for p in f.proposals %}{% if p.mr_url %}<a href="{{ p.mr_url }}" target="_blank" rel="noopener noreferrer">打开 MR ↗</a>{% endif %}{% endfor %}</p><details><summary>查看检查结果</summary><ul>{% for check in f.validation.checks %}<li>{{ check.name }} · 原有：{{ ('通过' if check.before else '未通过') if check.before is defined else '未检查' }} · 修改后：{{ '通过' if check.after else '未通过' }}</li>{% endfor %}</ul></details></section>{% else %}<p class="empty compact">尚无可用的改进发现。没有足够证据时不会生成优化 MR。</p>{% endfor %}
+<h2>最近的使用线索</h2><div class="table-wrap"><table><thead><tr><th>时间</th><th>Agent</th><th>资源</th><th>事件</th><th>可见线索</th><th>覆盖情况</th></tr></thead><tbody>{% for e in events %}<tr id="event-{{ e.id }}"><td class="time">{{ e.timestamp[:19].replace('T',' ') }}</td><td>{{ e.agent }}</td><td>{% if e.resource_id %}<a href="/resources/{{ e.resource_id }}">{{ e.resource_id }}</a>{% else %}未归因{% endif %}</td><td>{{ e.event }}</td><td class="excerpt">{{ e.excerpt }}</td><td>{{ '已观测' if e.coverage=='observed' else '部分可见' }}</td></tr>{% else %}<tr><td colspan="6" class="empty">尚无可用记录。检查采集是否启用，不能据此判断资源使用频率。</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}作用域与项目{% endblock %}
+{% block breadcrumb %}作用域与项目{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">SCOPES & PROJECTS</p><h1>作用域与项目</h1><p class="subtitle">相同的项目组织，恢复到各台机器的对应位置。</p></div></div>
+{% for name,items in groups.items() %}<section class="scope-section"><div class="section-heading"><h2>{{ name }}</h2><span>{{ items|length }} 项资源</span></div>{% if name in catalog.projects %}<p class="directory">{{ catalog.projects[name] }}</p>{% endif %}<div class="scope-list">{% for r in items %}<a href="/resources/{{ r.id }}"><strong>{{ r.id }}</strong><span>{{ r.kind_label }} · {{ r.client_label }}</span><span class="pill {{ r.origin }}">{{ '自建' if r.origin=='self' else '上游' }}</span></a>{% endfor %}</div></section>{% else %}<p class="empty">尚无已同步的归属信息。新建项目级资源时可登记约定项目名和目录。</p>{% endfor %}
+{% endblock %}
