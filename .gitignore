@@ -1,0 +1,11 @@
+.worktrees/
+.superpowers/
+.venv/
+.codegraph/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.coverage
+dist/
+build/
