@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+sm_checkout=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ "${1:-}" = init ]; then
+    if [ ! -x "$sm_checkout/.venv/bin/python" ]; then
+        python3 -m venv "$sm_checkout/.venv"
+    fi
+    "$sm_checkout/.venv/bin/python" -m pip install -e "$sm_checkout"
+fi
+if [ ! -x "$sm_checkout/.venv/bin/python" ]; then
+    echo 'Run ./sm init first.' >&2
+    exit 1
+fi
+exec "$sm_checkout/.venv/bin/python" -m sm "$@"

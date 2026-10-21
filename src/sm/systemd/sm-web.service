@@ -1,0 +1,14 @@
+[Unit]
+Description=SM local resource manager
+After=network-online.target
+
+[Service]
+Type=simple
+Environment={path}
+EnvironmentFile=-{environment}
+ExecStart={python} -m sm serve --repo {repo}
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
