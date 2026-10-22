@@ -303,7 +303,6 @@ pub fn apply_source(
             hashes.insert(resource.id.clone(), content_hash(resource)?);
         }
     }
-    state.set("resources", &catalog.resources)?;
     state.set("catalog", &catalog)?;
     state.set("resource_contents", &contents)?;
     let owned = state
@@ -381,11 +380,9 @@ pub struct SubmittedProposal {
 }
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CycleDetails {
-    #[serde(default)]
     pub application: BTreeMap<String, ResourceResult>,
-    #[serde(default)]
     pub observations_processed: usize,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]

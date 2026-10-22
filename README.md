@@ -13,7 +13,7 @@ cd sm
 ./sm init
 ```
 
-前端：<http://127.0.0.1:8765>。构建需要 Rust 1.88+、C 编译器、Git 和 systemd 用户会话；复用本机 Codex／Kimi 和 GitLab 认证。运行不依赖 Python，普通初始化无需 Node。已有安装更新后重新执行 `./sm init`，原本地状态继续使用。
+前端：<http://127.0.0.1:8765>。构建需要 Rust 1.88+、C 编译器、Git 和 systemd 用户会话；复用本机 Codex／Kimi 和 GitLab 认证。运行不依赖 Python，普通初始化无需 Node。仅支持当前 Rust 数据格式；不提供旧安装状态的迁移或回退兼容。
 
 [使用说明](docs/usage.md) · [验证结果与限制](docs/verification.md) · [需求](docs/superpowers/specs/2026-10-21-sm-design.md) · [Rust 迁移计划](docs/superpowers/plans/2026-10-21-sm-rust.md)
 

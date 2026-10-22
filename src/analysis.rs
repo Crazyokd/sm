@@ -45,9 +45,7 @@ pub struct CandidateDraft {
     pub expected_checks: Vec<String>,
     #[serde(default)]
     pub operation: CandidateOperation,
-    #[serde(default)]
     pub scope: Option<Scope>,
-    #[serde(default)]
     pub project: Option<String>,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]

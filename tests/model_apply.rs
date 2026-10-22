@@ -88,27 +88,6 @@ fn invalid_metadata_cannot_enter_the_domain() {
 }
 
 #[test]
-fn existing_state_ownership_decodes_legacy_base64() {
-    let temp = tempdir().unwrap();
-    let state = State::open(temp.path().join("state.db")).unwrap();
-    let db = state.connect().unwrap();
-    db.execute("INSERT INTO ownership VALUES ('review','/legacy/file',?1)", [r#"{"resource_id":"review","path":"/legacy/file","mode":"file","content":"bWFuYWdlZA==","selectors":[],"executable":true,"binary":true}"#]).unwrap();
-    let writes = state.owned().unwrap();
-    assert_eq!(writes.len(), 1);
-    assert_eq!(
-        writes[0].body,
-        WriteBody::File {
-            bytes: b"managed".to_vec(),
-            executable: true
-        }
-    );
-    assert_eq!(
-        fs::metadata(state.path()).unwrap().permissions().mode() & 0o777,
-        0o600
-    );
-}
-
-#[test]
 fn project_directory_expands_under_each_home() {
     let entry = resource(
         json!({"id":"review","kind":"skill","origin":"self","scope":"project","project":"app","payload":"resources/review"}),

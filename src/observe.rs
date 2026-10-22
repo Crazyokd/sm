@@ -1,9 +1,9 @@
 use crate::{
     files::reject_symlink_path,
-    model::{Client, Resource},
+    model::{Catalog, Client},
     privacy::{redact, redact_text},
     state::State,
-    wire::{digest, legacy_json},
+    wire::digest,
 };
 use anyhow::{Context, Result, ensure};
 use rusqlite::params;
@@ -17,18 +17,16 @@ use std::{
     path::{Path, PathBuf},
 };
 
-#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum Coverage {
     Observed,
-    #[default]
     Partial,
 }
-#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum EvidenceKind {
     Execution,
-    #[default]
     Inferred,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -39,15 +37,10 @@ pub struct Observation {
     pub cwd: String,
     pub event: String,
     pub timestamp: String,
-    #[serde(default)]
     pub resource_id: Option<String>,
-    #[serde(default)]
     pub resource_content_hash: Option<String>,
-    #[serde(default)]
     pub evidence_kind: EvidenceKind,
-    #[serde(default)]
     pub facts: Map<String, Value>,
-    #[serde(default)]
     pub coverage: Coverage,
 }
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -68,15 +61,15 @@ pub struct RecordingError {
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct HookPayload {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     session_id: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     cwd: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     hook_event_name: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     event: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     resource_id: Option<String>,
     #[serde(flatten)]
     facts: Map<String, Value>,
@@ -87,25 +80,10 @@ struct Envelope {
     agent: Client,
     timestamp: String,
     payload: HookPayload,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     resource_id: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     resource_content_hash: Option<String>,
-}
-fn ascii_json(value: &Value) -> Result<String> {
-    let value = legacy_json(value)?;
-    let mut encoded = String::new();
-    for character in value.chars() {
-        if character.is_ascii() {
-            encoded.push(character);
-        } else {
-            let mut units = [0; 2];
-            for unit in character.encode_utf16(&mut units) {
-                encoded.push_str(&format!("\\u{unit:04x}"));
-            }
-        }
-    }
-    Ok(encoded)
 }
 pub fn record_event(agent: Client, payload: &Value, directory: &Path) -> Result<()> {
     if std::env::var("SM_INTERNAL_RUN").as_deref() == Ok("1") {
@@ -119,7 +97,10 @@ pub fn record_event(agent: Client, payload: &Value, directory: &Path) -> Result<
         .clone();
     for key in ["tool_output", "tool_response"] {
         if let Some(output) = payload.remove(key) {
-            payload.insert("result_hash".into(), json!(digest(ascii_json(&output)?)));
+            payload.insert(
+                "result_hash".into(),
+                json!(digest(serde_json::to_vec(&output)?)),
+            );
         }
     }
     let event = payload
@@ -203,7 +184,8 @@ pub fn record_event(agent: Client, payload: &Value, directory: &Path) -> Result<
     Ok(())
 }
 pub fn ingest_events(directory: &Path, state: &State) -> Result<Vec<Observation>> {
-    let resources: Vec<Resource> = state.get("resources")?;
+    let catalog: Catalog = state.get("catalog")?;
+    let resources = catalog.resources;
     let resources: BTreeMap<_, _> = resources.iter().map(|r| (r.id.as_str(), r)).collect();
     let mut offsets: BTreeMap<String, u64> = state.get("event_offsets")?;
     let mut errors: Vec<RecordingError> = state.get("recording_errors")?;

@@ -87,12 +87,6 @@ impl ResourceContent {
             Self::Mcp(_) => ResourceKind::Mcp,
         }
     }
-    pub fn native(&self) -> Option<&NativePayload> {
-        match self {
-            Self::Skill { .. } => None,
-            Self::Hook(p) | Self::Rule(p) | Self::Agent(p) | Self::Mcp(p) => Some(p),
-        }
-    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -135,15 +129,12 @@ struct RawResource {
     kind: ResourceKind,
     origin: String,
     scope: Scope,
-    #[serde(default)]
     project: Option<String>,
-    #[serde(default)]
     payload: Option<PathBuf>,
     #[serde(default)]
     agents: Vec<Client>,
     #[serde(default)]
     payloads: BTreeMap<Client, PathBuf>,
-    #[serde(default)]
     upstream: Option<UpstreamSource>,
 }
 impl<'de> Deserialize<'de> for Resource {
@@ -327,37 +318,25 @@ impl Catalog {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum WriteMode {
-    File,
-    MarkdownBlock,
-    JsonEntries,
-    TomlEntries,
-}
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(
+    tag = "kind",
+    content = "content",
+    rename_all = "snake_case",
+    deny_unknown_fields
+)]
 pub enum WriteBody {
     File { bytes: Vec<u8>, executable: bool },
     Markdown(Vec<u8>),
     Json(Map<String, Value>),
     Toml(Map<String, Value>),
 }
-impl WriteBody {
-    pub fn mode(&self) -> WriteMode {
-        match self {
-            Self::File { .. } => WriteMode::File,
-            Self::Markdown(_) => WriteMode::MarkdownBlock,
-            Self::Json(_) => WriteMode::JsonEntries,
-            Self::Toml(_) => WriteMode::TomlEntries,
-        }
-    }
-}
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct OwnedWrite {
     pub resource_id: String,
     pub path: PathBuf,
     pub body: WriteBody,
-    pub selectors: Vec<String>,
 }
 impl OwnedWrite {
     pub fn new(id: impl Into<String>, path: impl AsRef<Path>, body: WriteBody) -> Self {
@@ -365,7 +344,6 @@ impl OwnedWrite {
             resource_id: id.into(),
             path: path.as_ref().to_path_buf(),
             body,
-            selectors: Vec::new(),
         }
     }
 }
@@ -378,8 +356,6 @@ pub enum ApplyStatus {
     Conflict,
     Failed,
     Unknown,
-    NeedsAgentTrust,
-    NextSession,
 }
 impl ApplyStatus {
     pub fn label(self) -> &'static str {
@@ -389,8 +365,6 @@ impl ApplyStatus {
             Self::Conflict => "存在冲突",
             Self::Failed => "应用失败",
             Self::Unknown => "尚未应用",
-            Self::NeedsAgentTrust => "需原生信任",
-            Self::NextSession => "下次会话加载",
         }
     }
 }
@@ -432,22 +406,20 @@ pub enum ValidationStatus {
     #[default]
     Partial,
 }
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CheckKind {
-    #[default]
     Static,
     ApprovedFragmentCheck,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ValidationCheck {
     pub name: String,
-    #[serde(default)]
     pub kind: CheckKind,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub before: Option<bool>,
     pub after: bool,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
 }
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

@@ -1,5 +1,5 @@
 use crate::{
-    model::{Client, Resource, ResourceResult},
+    model::{Catalog, Client, Resource, ResourceResult},
     observe::record_event,
     privacy::redact_text,
     proposals::{ChangeSet, create_proposal},
@@ -107,7 +107,7 @@ pub fn run(args: Args, runtime: &Runtime) -> Result<CommandOutcome> {
                 runs.drain(..runs.len() - 5);
             }
             print(&Status {
-                resources: state.get("resources")?,
+                resources: state.get::<Catalog>("catalog")?.resources,
                 results: state.get("resource_results")?,
                 runs,
             })?;

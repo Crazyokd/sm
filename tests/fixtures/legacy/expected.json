@@ -1,8 +1,0 @@
-{
-  "proposal_key": "090d01525cfe21b7",
-  "event_id": "8576ebbb69a4cadf40d70f785806d67d2f9979eb55860e9e3697b7e015049a4c",
-  "owned_content": "Approved legacy content\n",
-  "resource_hash": "f5cb42e9704a32f15d52afcb0ed736c844bb5c2e49f6517917fd10c6dac5c864",
-  "old_state_dir": "/tmp/sm-legacy-fixture-v1f2fw6k",
-  "old_event_file": "2026-10-21.jsonl"
-}

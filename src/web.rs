@@ -278,7 +278,7 @@ struct ResourceView {
     status_message: String,
 }
 fn resource_rows(state: &State) -> Result<Vec<ResourceView>> {
-    let resources: Vec<Resource> = state.get("resources")?;
+    let resources = state.get::<Catalog>("catalog")?.resources;
     let results: BTreeMap<String, ResourceResult> = state.get("resource_results")?;
     Ok(resources
         .into_iter()

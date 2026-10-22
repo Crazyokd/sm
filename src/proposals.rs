@@ -5,7 +5,7 @@ use crate::{
     process::run_command,
     repository::git,
     state::State,
-    wire::{digest, legacy_json, truncate},
+    wire::{digest, truncate},
 };
 use anyhow::{Context, Result, ensure};
 use serde::{Deserialize, Serialize};
@@ -103,13 +103,12 @@ impl ChangeSet {
     pub fn key(&self) -> Result<String> {
         let mut ids = self.resource_ids.clone();
         ids.sort();
-        Ok(digest(legacy_json(&json!([ids, self.reason]))?.as_bytes())[..16].into())
+        Ok(digest(serde_json::to_vec(&json!([ids, self.reason]))?)[..16].into())
     }
 }
-#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum ProposalStatus {
-    #[default]
     Draft,
     Submitted,
 }
@@ -119,9 +118,7 @@ pub struct Proposal {
     pub directory: PathBuf,
     pub branch: String,
     pub change: ChangeSet,
-    #[serde(default)]
     pub status: ProposalStatus,
-    #[serde(default)]
     pub mr_url: Option<String>,
 }
 impl Proposal {

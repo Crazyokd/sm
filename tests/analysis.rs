@@ -231,21 +231,17 @@ fn python_and_shell_syntax_checks_use_native_parsing_without_execution() {
     );
 }
 #[test]
-fn resource_hash_matches_previous_implementation() {
+fn resource_hash_tracks_paths_and_content() {
     let (root, catalog, _, _) = fixture();
-    let path = root.path().join("resources/review/evals.json");
-    fs::remove_file(path).unwrap();
-    fs::write(
-        root.path().join("resources/review/SKILL.md"),
-        "Approved legacy content\n",
-    )
-    .unwrap();
-    let expected: Value =
-        serde_json::from_str(include_str!("fixtures/legacy/expected.json")).unwrap();
-    assert_eq!(
-        content_hash(&catalog.resources[0]).unwrap(),
-        expected["resource_hash"].as_str().unwrap()
-    );
+    let resource = &catalog.resources[0];
+    let first = content_hash(resource).unwrap();
+    assert_eq!(first, content_hash(resource).unwrap());
+    let path = root.path().join("resources/review/SKILL.md");
+    fs::write(&path, "Changed content").unwrap();
+    let changed = content_hash(resource).unwrap();
+    assert_ne!(first, changed);
+    fs::rename(&path, path.with_file_name("RENAMED.md")).unwrap();
+    assert_ne!(changed, content_hash(resource).unwrap());
 }
 #[test]
 fn native_analysis_runners_have_no_business_tools_and_keep_large_input_off_argv() {

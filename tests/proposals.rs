@@ -49,11 +49,10 @@ fn paths_and_credentials_are_rejected_at_proposal_boundary() {
     assert!(input.validate().is_ok());
 }
 #[test]
-fn proposal_key_and_saved_state_remain_legacy_compatible() {
+fn repeated_proposals_reuse_the_same_key_and_saved_draft() {
     let repo = Repo::new();
     let state = repo.state();
     let first = create_proposal(&repo.work, &change(), &state).unwrap();
-    assert_eq!(first.key, "c010c2c0a588f9d2");
     let restored: std::collections::BTreeMap<String, Proposal> = state.get("proposals").unwrap();
     assert_eq!(restored[&first.key].directory, first.directory);
     let second = create_proposal(&repo.work, &change(), &state).unwrap();
@@ -62,6 +61,22 @@ fn proposal_key_and_saved_state_remain_legacy_compatible() {
         fs::read_to_string(repo.work.join("resources/review/SKILL.md")).unwrap(),
         "Approved"
     );
+}
+#[test]
+fn proposal_identity_ignores_resource_order_and_preserves_unicode_reasons() {
+    let mut first = change();
+    first.resource_ids = vec!["review".into(), "other".into()];
+    first.reason = "减少重复步骤 🚀".into();
+    let mut second = first.clone();
+    second.resource_ids.reverse();
+    assert_eq!(first.key().unwrap(), second.key().unwrap());
+    second.reason.push_str("，保留校验");
+    assert_ne!(first.key().unwrap(), second.key().unwrap());
+}
+#[test]
+fn gitlab_nullable_description_is_accepted_at_the_external_boundary() {
+    let mr:sm::gitlab::Mr=serde_json::from_value(json!({"iid":1,"web_url":"https://git.example.invalid/mr/1","source_branch":"sm/one","target_branch":"main","title":"Draft: update","description":null})).unwrap();
+    assert!(mr.description.is_empty());
 }
 #[test]
 fn approved_export_ignores_dirty_checkout_and_unmerged_proposals() {

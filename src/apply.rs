@@ -2,7 +2,6 @@ use crate::{
     files::{atomic_write, contained, reject_symlink_path},
     model::{
         ApplyPlan, ApplyReport, ApplyStatus, Catalog, OwnedWrite, ResourceResult, Scope, WriteBody,
-        WriteMode,
     },
     providers::{self, UnsupportedResource},
     state::State,
@@ -247,23 +246,25 @@ type ContentChange = (Option<Vec<u8>>, Option<Vec<u8>>);
 
 fn prepare(path: &Path, new: &[OwnedWrite], old: &[OwnedWrite]) -> Result<ContentChange> {
     reject_symlink_path(path).map_err(|e| conflict(e.to_string()))?;
-    let modes: BTreeSet<_> = new.iter().chain(old).map(|w| w.body.mode()).collect();
-    if modes.len() != 1 {
-        return Err(conflict("incompatible writes to the same path"));
-    }
-    let mode = new
+    let body = &new
         .first()
         .or_else(|| old.first())
         .context("target has no owner")?
-        .body
-        .mode();
+        .body;
+    if new
+        .iter()
+        .chain(old)
+        .any(|w| std::mem::discriminant(&w.body) != std::mem::discriminant(body))
+    {
+        return Err(conflict("incompatible writes to the same path"));
+    }
     let content = if path.exists() {
         Some(fs::read(path)?)
     } else {
         None
     };
-    let result = match mode {
-        WriteMode::File => {
+    let result = match body {
+        WriteBody::File { .. } => {
             if old.len() > 1 {
                 return Err(conflict("multiple file owners"));
             }
@@ -286,7 +287,7 @@ fn prepare(path: &Path, new: &[OwnedWrite], old: &[OwnedWrite]) -> Result<Conten
                 _ => return Err(conflict("invalid file write")),
             }
         }
-        WriteMode::MarkdownBlock => {
+        WriteBody::Markdown(_) => {
             let mut text = String::from_utf8(content.clone().unwrap_or_default())?;
             for write in old {
                 let WriteBody::Markdown(bytes) = &write.body else {
@@ -316,9 +317,9 @@ fn prepare(path: &Path, new: &[OwnedWrite], old: &[OwnedWrite]) -> Result<Conten
                 Some(text.into_bytes())
             }
         }
-        WriteMode::JsonEntries | WriteMode::TomlEntries => {
+        WriteBody::Json(_) | WriteBody::Toml(_) => {
             let text = std::str::from_utf8(content.as_deref().unwrap_or_default())?;
-            let original: Value = if mode == WriteMode::TomlEntries {
+            let original: Value = if matches!(body, WriteBody::Toml(_)) {
                 toml_edit::de::from_str(text)?
             } else if text.is_empty() {
                 Value::Object(Map::new())
@@ -335,7 +336,7 @@ fn prepare(path: &Path, new: &[OwnedWrite], old: &[OwnedWrite]) -> Result<Conten
                     merge_entries(&mut document, fragment, remove)?;
                 }
             }
-            if mode == WriteMode::TomlEntries {
+            if matches!(body, WriteBody::Toml(_)) {
                 let mut edited: DocumentMut = text.parse()?;
                 patch_table(
                     edited.as_table_mut(),
@@ -420,7 +421,9 @@ pub fn apply_writes(plan: &ApplyPlan, state: &State) -> Result<ApplyReport> {
     order.sort_by_key(|(path, p)| {
         (
             p.after.is_none(),
-            p.writes.iter().any(|w| w.body.mode() != WriteMode::File),
+            p.writes
+                .iter()
+                .any(|w| !matches!(w.body, WriteBody::File { .. })),
             path.clone(),
         )
     });

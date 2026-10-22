@@ -1,6 +1,6 @@
-use serde_json::{Value, json};
+use serde_json::json;
 use sm::{
-    model::{Client, Resource},
+    model::{Catalog, Client, Resource},
     observe::{ingest_events, pending_observations, record_event},
     privacy::{redact, redact_text},
     state::State,
@@ -10,7 +10,15 @@ use tempfile::tempdir;
 fn state(root: &std::path::Path) -> State {
     let state = State::open(root.join("state.sqlite3")).unwrap();
     let resource:Resource=serde_json::from_value(json!({"id":"review","kind":"skill","origin":"self","scope":"user","project":null,"payload":"resources/review"})).unwrap();
-    state.set("resources", &vec![resource]).unwrap();
+    state
+        .set(
+            "catalog",
+            &Catalog {
+                resources: vec![resource],
+                ..Default::default()
+            },
+        )
+        .unwrap();
     state
 }
 #[test]
@@ -88,7 +96,15 @@ fn upstream_events_never_enter_optimization_records() {
     let root = tempdir().unwrap();
     let state = state(root.path());
     let upstream:Resource=serde_json::from_value(json!({"id":"external","kind":"skill","origin":"upstream","scope":"user","project":null,"payload":".","upstream":{"git":"https://example.invalid/skill"}})).unwrap();
-    state.set("resources", &vec![upstream]).unwrap();
+    state
+        .set(
+            "catalog",
+            &Catalog {
+                resources: vec![upstream],
+                ..Default::default()
+            },
+        )
+        .unwrap();
     record_event(
         Client::Codex,
         &json!({"resource_id":"external","hook_event_name":"Stop"}),
@@ -99,18 +115,32 @@ fn upstream_events_never_enter_optimization_records() {
     assert!(pending_observations(&state, 100).unwrap().is_empty());
 }
 #[test]
-fn output_hash_and_event_identity_match_the_previous_runtime() {
+fn outputs_are_digest_only_with_deterministic_unicode_hashes() {
     let root = tempdir().unwrap();
     let state = state(root.path());
-    let event = json!({"session_id":"legacy-session","event_id":"legacy-event","resource_id":"review","hook_event_name":"PostToolUse","tool_input":{"command":"cat config.json"},"tool_output":{"status":"unchanged"}});
-    record_event(Client::Codex, &event, root.path()).unwrap();
-    let row = ingest_events(root.path(), &state).unwrap().remove(0);
-    let expected: Value =
-        serde_json::from_str(include_str!("fixtures/legacy/expected.json")).unwrap();
-    let legacy: Value = serde_json::from_str(include_str!("fixtures/legacy/event.jsonl")).unwrap();
-    assert_eq!(row.id, expected["event_id"].as_str().unwrap());
-    assert_eq!(row.facts["result_hash"], legacy["payload"]["result_hash"]);
-    assert!(!row.facts.contains_key("tool_output"));
+    let mut hashes = Vec::new();
+    for (index, output) in [
+        json!({"status":"完成 🚀","secret":"raw-sensitive-output"}),
+        json!({"secret":"raw-sensitive-output","status":"完成 🚀"}),
+        json!({"status":"改变","secret":"raw-sensitive-output"}),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let event = json!({"session_id":"session","event_id":index,"resource_id":"review","hook_event_name":"PostToolUse","tool_output":output});
+        record_event(Client::Codex, &event, root.path()).unwrap();
+        let row = ingest_events(root.path(), &state).unwrap().remove(0);
+        assert!(!row.facts.contains_key("tool_output"));
+        assert!(
+            !serde_json::to_string(&row)
+                .unwrap()
+                .contains("raw-sensitive-output")
+        );
+        hashes.push(row.facts["result_hash"].as_str().unwrap().to_owned());
+    }
+    assert_eq!(hashes[0], hashes[1]);
+    assert_ne!(hashes[0], hashes[2]);
+    assert!(hashes.iter().all(|hash| hash.len() == 64));
 }
 #[test]
 fn active_projection_paths_attach_content_hash_without_claiming_hidden_behavior() {

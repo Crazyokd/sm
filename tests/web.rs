@@ -7,7 +7,7 @@ use common::{FakeMrApi, Repo};
 use http_body_util::BodyExt;
 use serde_json::{Value, json};
 use sm::{
-    model::{ApplyStatus, Resource, ResourceResult},
+    model::{ApplyStatus, ResourceResult},
     observe::{ingest_events, record_event},
     proposals::Proposal,
     service::{Finding, Runtime, Submitter, synchronize},
@@ -234,24 +234,21 @@ async fn editing_only_creates_mr_and_keeps_live_content() {
 #[tokio::test]
 async fn five_types_statuses_and_project_groups_use_same_catalog() {
     let f = Fixture::new();
-    let mut resources: Vec<Resource> = f.state.get("resources").unwrap();
+    let mut catalog: sm::model::Catalog = f.state.get("catalog").unwrap();
     let kinds = ["hook", "rule", "agent", "mcp"];
     let statuses = [
         ApplyStatus::Unsupported,
-        ApplyStatus::NeedsAgentTrust,
+        ApplyStatus::Conflict,
         ApplyStatus::Failed,
         ApplyStatus::Unknown,
     ];
     let mut results = BTreeMap::new();
     for (kind, status) in kinds.into_iter().zip(statuses) {
-        resources.push(serde_json::from_value(json!({"id":kind,"kind":kind,"origin":"self","scope":"project","project":"app","agents":["codex"],"payloads":{"codex":format!("resources/{kind}")}})).unwrap());
+        catalog.resources.push(serde_json::from_value(json!({"id":kind,"kind":kind,"origin":"self","scope":"project","project":"app","agents":["codex"],"payloads":{"codex":format!("resources/{kind}")}})).unwrap());
         results.insert(kind, ResourceResult::new(status, "status evidence"));
     }
-    f.state.set("resources", &resources).unwrap();
     f.state.set("resource_results", &results).unwrap();
-    let mut catalog: sm::model::Catalog = f.state.get("catalog").unwrap();
     catalog.projects.insert("app".into(), "~/repo/app".into());
-    catalog.resources = resources;
     f.state.set("catalog", &catalog).unwrap();
     let page = f.get("/resources").await.1;
     for label in [
@@ -261,7 +258,7 @@ async fn five_types_statuses_and_project_groups_use_same_catalog() {
         "Agent 定义",
         "MCP 配置",
         "暂不支持",
-        "需原生信任",
+        "存在冲突",
         "应用失败",
         "尚未应用",
     ] {
@@ -300,7 +297,7 @@ async fn findings_link_actual_evidence_and_related_mr() {
     let event = ingest_events(f.state.directory().unwrap(), &f.state)
         .unwrap()
         .remove(0);
-    let validation=serde_json::from_value(json!({"status":"partial","checks":[{"name":"required","before":true,"after":true}],"unverified":["No business replay"]})).unwrap();
+    let validation=serde_json::from_value(json!({"status":"partial","checks":[{"name":"required","kind":"approved_fragment_check","before":true,"after":true}],"unverified":["No business replay"]})).unwrap();
     f.state
         .set(
             "findings",
