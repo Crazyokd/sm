@@ -1,6 +1,8 @@
 use crate::{
     files::{atomic_write, reject_symlink_path},
-    model::{ApplyStatus, Client, ResourceResult, valid_id},
+    model::{
+        ApplyStatus, Catalog, Client, InstallationPolicy, ResourceContent, ResourceResult, valid_id,
+    },
     process::run_command,
     state::State,
 };
@@ -19,12 +21,8 @@ use std::{
 #[serde(deny_unknown_fields)]
 pub struct Installation {
     pub id: String,
-    pub agent: Client,
-    pub source: String,
-    pub selector: String,
-    pub enabled: bool,
-    pub paths: Vec<PathBuf>,
-    pub update: Vec<Vec<String>>,
+    #[serde(flatten)]
+    pub policy: InstallationPolicy,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -35,13 +33,21 @@ struct Receipt {
 }
 
 pub fn load(source: &Path) -> Result<Vec<Installation>> {
-    let path = source.join("resources/native-installations/installations.json");
-    if !path.exists() {
-        return Ok(Vec::new());
-    }
+    let path = source.join("catalog.json");
     reject_symlink_path(&path)?;
-    let declarations: Vec<Installation> = serde_json::from_slice(&fs::read(path)?)
-        .map_err(|_| anyhow::anyhow!("invalid installation manifest"))?;
+    let catalog: Catalog = serde_json::from_slice(&fs::read(path)?)
+        .map_err(|_| anyhow::anyhow!("invalid installation catalog"))?;
+    let declarations: Vec<_> = catalog
+        .resources
+        .into_iter()
+        .filter_map(|resource| match resource.content {
+            ResourceContent::Installation { installation } => Some(Installation {
+                id: resource.id,
+                policy: installation,
+            }),
+            _ => None,
+        })
+        .collect();
     let mut ids = BTreeSet::new();
     let mut selectors = BTreeSet::new();
     for declaration in &declarations {
@@ -50,15 +56,18 @@ pub fn load(source: &Path) -> Result<Vec<Installation>> {
             "invalid or duplicate installation id"
         );
         ensure!(
-            !declaration.source.trim().is_empty()
-                && !declaration.selector.trim().is_empty()
-                && selectors.insert((declaration.agent, &declaration.selector)),
+            !declaration.policy.source.trim().is_empty()
+                && !declaration.policy.selector.trim().is_empty()
+                && selectors.insert((declaration.policy.agent, &declaration.policy.selector)),
             "invalid or duplicate installation selector"
         );
-        ensure!(!declaration.paths.is_empty(), "installation paths required");
         ensure!(
-            !declaration.update.is_empty()
-                && declaration.update.iter().all(|argv| {
+            !declaration.policy.paths.is_empty(),
+            "installation paths required"
+        );
+        ensure!(
+            !declaration.policy.update.is_empty()
+                && declaration.policy.update.iter().all(|argv| {
                     !argv.is_empty()
                         && !argv[0].is_empty()
                         && argv.iter().all(|arg| !arg.contains('\0'))
@@ -86,7 +95,7 @@ fn target(path: &Path, home: &Path) -> Result<PathBuf> {
 }
 
 fn restore_enabled(declaration: &Installation, home: &Path, update_failed: bool) -> Result<()> {
-    match declaration.agent {
+    match declaration.policy.agent {
         Client::Codex => {
             let path = target(&home.join(".codex/config.toml"), home)?;
             if !path.exists() {
@@ -97,7 +106,7 @@ fn restore_enabled(declaration: &Installation, home: &Path, update_failed: bool)
                 .map_err(|_| anyhow::anyhow!("invalid native plugin configuration"))?;
             let Some(plugin) = document
                 .get_mut("plugins")
-                .and_then(|plugins| plugins.get_mut(&declaration.selector))
+                .and_then(|plugins| plugins.get_mut(&declaration.policy.selector))
             else {
                 return Ok(());
             };
@@ -105,8 +114,10 @@ fn restore_enabled(declaration: &Installation, home: &Path, update_failed: bool)
                 plugin.is_table() || plugin.is_inline_table(),
                 "invalid native plugin configuration"
             );
-            if plugin.get("enabled").and_then(|item| item.as_bool()) != Some(declaration.enabled) {
-                plugin["enabled"] = toml_edit::value(declaration.enabled);
+            if plugin.get("enabled").and_then(|item| item.as_bool())
+                != Some(declaration.policy.enabled)
+            {
+                plugin["enabled"] = toml_edit::value(declaration.policy.enabled);
                 atomic_write(&path, document.to_string().as_bytes(), None)?;
             }
         }
@@ -124,9 +135,12 @@ fn restore_enabled(declaration: &Installation, home: &Path, update_failed: bool)
                 .as_array_mut()
                 .context("invalid native plugin registry")?;
             // A failed native API operation may have enabled the plugin before exiting.
-            if let Some(plugin) = plugins.iter_mut().find(|p| p["id"] == declaration.selector) {
-                if plugin["enabled"] != declaration.enabled {
-                    plugin["enabled"] = declaration.enabled.into();
+            if let Some(plugin) = plugins
+                .iter_mut()
+                .find(|p| p["id"] == declaration.policy.selector)
+            {
+                if plugin["enabled"] != declaration.policy.enabled {
+                    plugin["enabled"] = declaration.policy.enabled.into();
                     atomic_write(&path, &serde_json::to_vec_pretty(&registry)?, None)?;
                 }
             }
@@ -140,7 +154,7 @@ fn verify(declaration: &Installation, home: &Path, paths: &[PathBuf]) -> Result<
         target(path, home)?;
         ensure!(path.is_dir(), "native installation path missing");
     }
-    match declaration.agent {
+    match declaration.policy.agent {
         Client::Codex => {
             let path = target(&home.join(".codex/config.toml"), home)?;
             let document = fs::read_to_string(path)?
@@ -149,13 +163,14 @@ fn verify(declaration: &Installation, home: &Path, paths: &[PathBuf]) -> Result<
             ensure!(
                 document
                     .get("plugins")
-                    .and_then(|plugins| plugins.get(&declaration.selector))
+                    .and_then(|plugins| plugins.get(&declaration.policy.selector))
                     .and_then(|plugin| plugin.get("enabled"))
                     .and_then(|enabled| enabled.as_bool())
-                    == Some(declaration.enabled),
+                    == Some(declaration.policy.enabled),
                 "native plugin registration missing or enabled state differs"
             );
             let (_, market) = declaration
+                .policy
                 .selector
                 .split_once('@')
                 .context("invalid native plugin selector")?;
@@ -176,7 +191,7 @@ fn verify(declaration: &Installation, home: &Path, paths: &[PathBuf]) -> Result<
                         source.to_owned()
                     };
                 ensure!(
-                    same_source(&actual, &declaration.source),
+                    same_source(&actual, &declaration.policy.source),
                     "native marketplace source differs from declaration"
                 );
             }
@@ -187,16 +202,18 @@ fn verify(declaration: &Installation, home: &Path, paths: &[PathBuf]) -> Result<
                 .map_err(|_| anyhow::anyhow!("invalid native plugin registry"))?;
             let plugin = registry["plugins"]
                 .as_array()
-                .and_then(|plugins| plugins.iter().find(|p| p["id"] == declaration.selector))
+                .and_then(|plugins| {
+                    plugins
+                        .iter()
+                        .find(|p| p["id"] == declaration.policy.selector)
+                })
                 .context("native plugin registration missing")?;
             ensure!(
-                plugin["enabled"] == declaration.enabled && plugin["state"] == "ok",
-                "native plugin is not ready or enabled state differs"
+                plugin["enabled"] == declaration.policy.enabled,
+                "native plugin enabled state differs"
             );
             ensure!(
-                plugin["originalSource"]
-                    .as_str()
-                    .is_some_and(|s| same_source(s, &declaration.source)),
+                same_kimi_source(plugin, &declaration.policy.source),
                 "native plugin source differs from declaration"
             );
             let root = target(
@@ -210,6 +227,22 @@ fn verify(declaration: &Installation, home: &Path, paths: &[PathBuf]) -> Result<
             ensure!(
                 root.is_dir() && paths.iter().any(|path| root.starts_with(path)),
                 "native plugin root does not match declared paths"
+            );
+            // Kimi persists registrations; readiness is computed only when its runtime loads them.
+            let root_manifest = root.join("kimi.plugin.json");
+            let manifest_path = if root_manifest.is_file() {
+                root_manifest
+            } else {
+                root.join(".kimi-plugin/plugin.json")
+            };
+            reject_symlink_path(&manifest_path)?;
+            let manifest: Value = serde_json::from_slice(&fs::read(manifest_path)?)
+                .map_err(|_| anyhow::anyhow!("invalid native plugin manifest"))?;
+            ensure!(
+                manifest["name"]
+                    .as_str()
+                    .is_some_and(|name| name.trim().to_lowercase() == declaration.policy.selector),
+                "native plugin manifest identity differs from declaration"
             );
         }
     }
@@ -227,6 +260,46 @@ fn same_source(left: &str, right: &str) -> bool {
     normalize(left) == normalize(right)
 }
 
+fn same_kimi_source(plugin: &Value, source: &str) -> bool {
+    let Some(installed_source) = plugin["originalSource"].as_str() else {
+        return false;
+    };
+    if same_source(installed_source, source) {
+        return true;
+    }
+    let github = |value: &str| -> Option<Vec<String>> {
+        let url = url::Url::parse(value).ok()?;
+        (url.scheme() == "https"
+            && matches!(url.host_str(), Some("github.com" | "www.github.com"))
+            && url.username().is_empty()
+            && url.password().is_none()
+            && url.port().is_none()
+            && url.query().is_none()
+            && url.fragment().is_none())
+        .then(|| {
+            url.path_segments()
+                .map(|p| p.filter(|v| !v.is_empty()).map(str::to_owned).collect())
+        })
+        .flatten()
+    };
+    let (Some(declared), Some(installed)) = (github(source), github(installed_source)) else {
+        return false;
+    };
+    declared.len() == 2
+        && installed.len() == 4
+        && declared[0] == installed[0]
+        && declared[1].trim_end_matches(".git") == installed[1]
+        && installed[2] == "commit"
+        && installed[3].len() == 40
+        && installed[3].bytes().all(|b| b.is_ascii_hexdigit())
+        && plugin["source"] == "github"
+        && plugin["github"]["owner"] == declared[0]
+        && plugin["github"]["repo"] == installed[1]
+        && plugin["github"]["installedSha"] == installed[3]
+        && plugin["github"]["ref"]["kind"] == "sha"
+        && plugin["github"]["ref"]["value"] == installed[3]
+}
+
 pub fn synchronize(
     source: &Path,
     home: &Path,
@@ -239,13 +312,20 @@ pub fn synchronize(
     // Validate every target before any approved installer can run.
     let targets: Vec<Vec<PathBuf>> = declarations
         .iter()
-        .map(|declaration| declaration.paths.iter().map(|p| target(p, home)).collect())
+        .map(|declaration| {
+            declaration
+                .policy
+                .paths
+                .iter()
+                .map(|p| target(p, home))
+                .collect()
+        })
         .collect::<Result<_>>()?;
     let mut results = BTreeMap::new();
     let mut receipts = Vec::new();
     for (declaration, paths) in declarations.iter().zip(&targets) {
         let updated = (|| -> Result<()> {
-            for argv in &declaration.update {
+            for argv in &declaration.policy.update {
                 if matches!(
                     Path::new(&argv[0]).file_name().and_then(|s| s.to_str()),
                     Some("codex" | "kimi")
@@ -254,7 +334,7 @@ pub fn synchronize(
                         std::env::var_os("HOME").as_deref() == Some(home.as_os_str()),
                         "native installer home differs from runtime home"
                     );
-                    let (key, expected) = match declaration.agent {
+                    let (key, expected) = match declaration.policy.agent {
                         Client::Codex => ("CODEX_HOME", home.join(".codex")),
                         Client::Kimi => ("KIMI_CODE_HOME", home.join(".kimi-code")),
                     };
@@ -267,7 +347,7 @@ pub fn synchronize(
                 command
                     .args(argv[1..].iter().map(|arg| {
                         if arg == "${SM_ENABLED}" {
-                            declaration.enabled.to_string()
+                            declaration.policy.enabled.to_string()
                         } else {
                             arg.clone()
                         }
@@ -300,7 +380,7 @@ pub fn synchronize(
         let result = if checked.is_ok() {
             ResourceResult::new(
                 ApplyStatus::Applied,
-                "native installation updated and verified",
+                "native installer completed; registration and installed files verified",
             )
         } else {
             ResourceResult::new(
@@ -320,6 +400,7 @@ pub fn register_existing(source: &Path, home: &Path, state: &State) -> Result<()
     let mut receipts = Vec::new();
     for declaration in &declarations {
         let paths = declaration
+            .policy
             .paths
             .iter()
             .map(|p| target(p, home))

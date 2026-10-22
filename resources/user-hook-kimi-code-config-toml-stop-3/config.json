@@ -1,0 +1,9 @@
+{
+  "hooks": [
+    {
+      "command": "/home/standard/.local/bin/tmux-agent-state.sh",
+      "event": "Stop",
+      "timeout": 5
+    }
+  ]
+}

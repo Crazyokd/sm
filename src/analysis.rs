@@ -70,14 +70,9 @@ pub struct Candidate {
     pub evidence_details: Vec<String>,
 }
 pub fn content_hash(resource: &Resource) -> Result<String> {
-    let mut files = BTreeSet::new();
-    for path in resource.paths() {
-        for (file, _) in payload_files(&contained(&resource.root, &path)?)? {
-            files.insert(file);
-        }
-    }
     let mut hash = Sha256::new();
-    for path in files {
+    hash.update(serde_json::to_vec(resource)?);
+    for path in resource_files(resource)? {
         hash.update(
             path.strip_prefix(&resource.root)?
                 .to_str()
@@ -85,14 +80,33 @@ pub fn content_hash(resource: &Resource) -> Result<String> {
                 .as_bytes(),
         );
         hash.update([0]);
+        use std::os::unix::fs::PermissionsExt;
+        hash.update([u8::from(
+            fs::metadata(&path)?.permissions().mode() & 0o111 != 0,
+        )]);
         hash.update(fs::read(path)?);
     }
     Ok(format!("{:x}", hash.finalize()))
 }
+fn resource_files(resource: &Resource) -> Result<BTreeSet<PathBuf>> {
+    let mut files = BTreeSet::new();
+    for path in resource.paths() {
+        let path = contained(&resource.root, &path)?;
+        if path.is_file() {
+            files.insert(path);
+        } else {
+            files.extend(payload_files(&path)?.into_iter().map(|(file, _)| file));
+        }
+    }
+    Ok(files)
+}
 pub fn editable_text(path: &Path) -> bool {
-    path.extension()
-        .and_then(|e| e.to_str())
-        .is_some_and(|e| ["md", "json", "toml", "py", "sh", "txt"].contains(&e))
+    path.extension().and_then(|e| e.to_str()).is_some_and(|e| {
+        [
+            "md", "mdc", "rules", "json", "toml", "py", "sh", "txt", "js", "cjs", "mjs", "ts",
+        ]
+        .contains(&e)
+    })
 }
 #[derive(Serialize)]
 struct Description<'a> {
@@ -137,25 +151,22 @@ pub fn analyze_observations(
         hashes.insert(resource.id.clone(), content_hash(resource)?);
         let mut files = BTreeMap::new();
         let mut omitted = Vec::new();
-        let mut seen = BTreeSet::new();
-        for payload in resource.paths() {
-            for (path, _) in payload_files(&contained(&resource.root, &payload)?)? {
-                if !seen.insert(path.clone()) || !editable_text(&path) {
-                    continue;
-                }
-                let name = path
-                    .strip_prefix(&resource.root)?
-                    .to_string_lossy()
-                    .into_owned();
-                let text = fs::read_to_string(path)?;
-                let size = text.chars().count();
-                if size > 12000.min(remaining) || redact_text(&text, None) != text {
-                    omitted.push(name);
-                } else {
-                    supplied.insert(name.clone());
-                    files.insert(name, text);
-                    remaining -= size;
-                }
+        for path in resource_files(resource)? {
+            if !editable_text(&path) {
+                continue;
+            }
+            let name = path
+                .strip_prefix(&resource.root)?
+                .to_string_lossy()
+                .into_owned();
+            let text = fs::read_to_string(path)?;
+            let size = text.chars().count();
+            if size > 12000.min(remaining) || redact_text(&text, None) != text {
+                omitted.push(name);
+            } else {
+                supplied.insert(name.clone());
+                files.insert(name, text);
+                remaining -= size;
             }
         }
         descriptions.push(Description {

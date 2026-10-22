@@ -193,6 +193,7 @@ fn skill_is_client_independent_and_installed_once() {
     assert_eq!(entry.targets().len(), 2);
     let catalog = Catalog {
         projects: BTreeMap::new(),
+        upstreams: BTreeMap::new(),
         resources: vec![entry],
     };
     let plan = plan_apply(
@@ -215,6 +216,7 @@ fn invalid_metadata_cannot_enter_the_domain() {
         ("scope", json!("system")),
         ("id", json!("../escape")),
         ("kind", json!("plugin")),
+        ("kind", json!("bundle")),
         ("payload", json!("../outside")),
         ("payload", json!("/absolute")),
         ("agents", json!(["codex"])),
@@ -235,6 +237,7 @@ fn project_directory_expands_under_each_home() {
     );
     let catalog = Catalog {
         projects: BTreeMap::from([("app".into(), "~/repo/app".into())]),
+        upstreams: BTreeMap::new(),
         resources: vec![entry.clone()],
     };
     for home in [Path::new("/tmp/one"), Path::new("/tmp/two")] {
@@ -589,4 +592,30 @@ fn kimi_hook_update_retains_other_handler_comments() {
     let text = fs::read_to_string(path).unwrap();
     assert!(text.contains("handler comment"));
     assert!(!text.contains("managed"));
+}
+
+#[test]
+fn native_mcp_payloads_contain_one_server_identity() {
+    for (client, filename, text) in [
+        (
+            "codex",
+            "config.toml",
+            "[mcp_servers.one]\ncommand='a'\n[mcp_servers.two]\ncommand='b'\n",
+        ),
+        (
+            "kimi",
+            "mcp.json",
+            "{\"mcpServers\":{\"one\":{\"command\":\"a\"},\"two\":{\"command\":\"b\"}}}",
+        ),
+    ] {
+        let temp = tempdir().unwrap();
+        fs::write(temp.path().join(filename), text).unwrap();
+        let entry = resource(
+            json!({"id":"review","kind":"mcp","origin":"self","scope":"user","agents":[client],"payloads":{client:"resources/review"}}),
+        );
+        let client = serde_json::from_value(json!(client)).unwrap();
+        assert!(
+            sm::providers::render(&entry, client, temp.path(), &temp.path().join("home")).is_err()
+        );
+    }
 }

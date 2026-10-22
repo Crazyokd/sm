@@ -3,12 +3,13 @@ use common::{FakeMrApi, Repo, git};
 use serde_json::{Value, json};
 use sm::{
     gitlab::{project_location, submit_mr_with},
-    model::{Source, UpstreamSource},
+    model::UpstreamSource,
     process::run_command,
     proposals::{ChangeSet, NoChanges, Proposal, create_proposal},
     repository::{fetch_approved, fetch_upstream},
 };
 use std::{
+    collections::BTreeMap,
     fs,
     process::Command,
     time::{Duration, Instant},
@@ -16,6 +17,110 @@ use std::{
 
 fn change() -> ChangeSet {
     serde_json::from_value(json!({"resource_ids":["review"],"reason":"Remove duplicate steps","evidence":["event-1"],"writes":{"resources/review/SKILL.md":"Improved"},"deletions":[],"validation":{"status":"partial","unverified":["behavior pending"]}})).unwrap()
+}
+
+#[test]
+fn shared_source_files_cannot_be_claimed_as_an_individual_resource() {
+    let repo = Repo::new();
+    let mut catalog = json!({"projects":{},"upstreams":{"shared":{"argv":["node","resources/source-providers/generate.js","resources/source-providers/shared.json"]}},"resources":[{"id":"upstream-item","kind":"skill","origin":"upstream","scope":"user","project":null,"payload":"upstream-item","upstream":"shared"}]});
+    repo.catalog(catalog.clone());
+    fs::create_dir_all(repo.work.join("resources/source-providers")).unwrap();
+    fs::write(
+        repo.work.join("resources/source-providers/shared.json"),
+        "{}",
+    )
+    .unwrap();
+    repo.publish("Shared generator");
+    let mut input = change();
+    input.resource_ids = vec!["source-providers".into()];
+    input.writes = BTreeMap::from([(
+        "resources/source-providers/shared.json".into(),
+        "{\"changed\":true}".into(),
+    )]);
+    let error = create_proposal(&repo.work, &input, &repo.state())
+        .unwrap_err()
+        .to_string();
+    assert!(error.contains("selected resource is missing"), "{error}");
+    catalog["resources"].as_array_mut().unwrap().push(json!({"id":"source-providers","kind":"skill","origin":"self","scope":"user","project":null,"payload":"resources/source-providers"}));
+    input
+        .writes
+        .insert("catalog.json".into(), catalog.to_string());
+    let error = format!(
+        "{:#}",
+        create_proposal(&repo.work, &input, &repo.state()).unwrap_err()
+    );
+    assert!(
+        error.contains("reserved for shared source infrastructure"),
+        "{error}"
+    );
+    assert_eq!(
+        fs::read_to_string(repo.work.join("resources/source-providers/shared.json")).unwrap(),
+        "{}"
+    );
+    assert!(
+        repo.state()
+            .get::<BTreeMap<String, Proposal>>("proposals")
+            .unwrap()
+            .is_empty()
+    );
+}
+
+#[test]
+fn shared_source_definition_requires_every_affected_resource_to_be_selected() {
+    let repo = Repo::new();
+    let original = json!({"projects":{},"upstreams":{"shared":{"git":"https://example.invalid/original"}},"resources":[{"id":"alpha","kind":"skill","origin":"upstream","scope":"user","project":null,"payload":"alpha","upstream":"shared"},{"id":"beta","kind":"skill","origin":"upstream","scope":"user","project":null,"payload":"beta","upstream":"shared"}]});
+    repo.catalog(original.clone());
+    repo.publish("Shared source");
+    let mut updated = original.clone();
+    updated["upstreams"]["shared"]["git"] = json!("https://example.invalid/changed");
+    let mut input = change();
+    input.resource_ids = vec!["alpha".into()];
+    input.writes = BTreeMap::from([(
+        "catalog.json".into(),
+        serde_json::to_string_pretty(&updated).unwrap(),
+    )]);
+    let error = create_proposal(&repo.work, &input, &repo.state())
+        .unwrap_err()
+        .to_string();
+    assert!(error.contains("outside selected ids"), "{error}");
+    let mut updated = original.clone();
+    updated["upstreams"]["alpha-source"] = json!({"git":"https://example.invalid/changed"});
+    updated["resources"][0]["upstream"] = json!("alpha-source");
+    input.writes.insert(
+        "catalog.json".into(),
+        serde_json::to_string_pretty(&updated).unwrap(),
+    );
+    let proposal = create_proposal(&repo.work, &input, &repo.state()).unwrap();
+    let actual: Value =
+        serde_json::from_slice(&fs::read(proposal.directory.join("catalog.json")).unwrap())
+            .unwrap();
+    assert_eq!(actual["resources"][1], original["resources"][1]);
+    assert_eq!(
+        actual["upstreams"]["shared"],
+        original["upstreams"]["shared"]
+    );
+}
+
+#[test]
+fn catalog_only_installation_policy_can_be_renamed_without_a_payload_directory() {
+    let repo = Repo::new();
+    let original = json!({"projects":{},"resources":[{"id":"native","kind":"policy","origin":"self","scope":"user","project":null,"installation":{"agent":"codex","source":"https://example.invalid/market","selector":"example@market","enabled":false,"paths":["~/.codex/plugins/cache/example"],"update":[["true"]]}}]});
+    repo.catalog(original.clone());
+    repo.publish("Native policy");
+    assert!(!repo.work.join("resources/native").exists());
+    let mut updated = original;
+    updated["resources"][0]["id"] = json!("native-renamed");
+    let mut input = change();
+    input.resource_ids = vec!["native".into(), "native-renamed".into()];
+    input.renames = BTreeMap::from([("native".into(), "native-renamed".into())]);
+    input.writes = BTreeMap::from([(
+        "catalog.json".into(),
+        serde_json::to_string_pretty(&updated).unwrap(),
+    )]);
+    let proposal = create_proposal(&repo.work, &input, &repo.state()).unwrap();
+    let catalog = sm::model::Catalog::load(&proposal.directory).unwrap();
+    assert_eq!(catalog.resources[0].id, "native-renamed");
+    assert!(!proposal.directory.join("resources/native-renamed").exists());
 }
 
 #[test]
@@ -243,20 +348,11 @@ fn failed_mr_submission_leaves_retriable_local_proposal() {
 #[test]
 fn upstream_git_follows_new_content_and_ignores_its_git_directory() {
     let repo = Repo::new();
-    let entry = sm::model::Resource {
-        id: "external".into(),
-        source: Source::Upstream {
-            upstream: UpstreamSource::Git {
-                git: repo.remote.to_string_lossy().into(),
-            },
-        },
-        ..sm::model::Catalog::load(&repo.work)
-            .unwrap()
-            .resources
-            .remove(0)
+    let entry = UpstreamSource::Git {
+        git: repo.remote.to_string_lossy().into(),
     };
     let output = repo.temp.path().join("upstream");
-    fetch_upstream(&entry, &output).unwrap();
+    fetch_upstream(&entry, &repo.work, &output).unwrap();
     assert_eq!(
         fs::read_to_string(output.join("resources/review/SKILL.md")).unwrap(),
         "Approved"

@@ -1,0 +1,9 @@
+{
+  "hooks": [
+    {
+      "command": "/home/standard/.kimi-code/hooks/hindsight_kimi.py recall",
+      "event": "UserPromptSubmit",
+      "timeout": 12
+    }
+  ]
+}

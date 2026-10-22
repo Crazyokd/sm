@@ -18,7 +18,7 @@ impl Fixture {
         let temp = tempfile::tempdir().unwrap();
         let source = temp.path().join("source");
         let home = temp.path().join("home");
-        fs::create_dir_all(source.join("resources/native-installations")).unwrap();
+        fs::create_dir_all(&source).unwrap();
         fs::create_dir_all(home.join(".codex/cache/sample")).unwrap();
         fs::write(home.join(".codex/config.toml"), "# keep this comment\nlocal_secret = 'private-key-value'\n[marketplaces.market]\nsource_type = 'git'\nsource = 'https://example.invalid/plugins'\n[plugins.'sample@market']\nenabled = true\n[plugins.'unregistered@market']\nenabled = false\n").unwrap();
         let state = State::open(temp.path().join("state/state.sqlite3")).unwrap();
@@ -39,10 +39,14 @@ impl Fixture {
         json!({"id":"codex-sample","agent":"codex","source":"https://example.invalid/plugins","selector":"sample@market","enabled":false,"paths":["~/.codex/cache/sample"],"update":[[executable]]})
     }
     fn manifest(&self, declarations: Value) {
+        let resources: Vec<_> = declarations.as_array().unwrap().iter().cloned().map(|mut installation| {
+            let id = installation.as_object_mut().unwrap().remove("id").unwrap();
+            json!({"id":id,"kind":"policy","origin":"self","scope":"user","project":null,"installation":installation})
+        }).collect();
         fs::write(
-            self.source
-                .join("resources/native-installations/installations.json"),
-            serde_json::to_vec(&declarations).unwrap(),
+            self.source.join("catalog.json"),
+            serde_json::to_vec(&json!({"projects":{},"upstreams":{},"resources":resources}))
+                .unwrap(),
         )
         .unwrap();
     }
@@ -244,8 +248,9 @@ fn kimi_native_registry_is_verified_and_failed_update_restores_only_selected_ena
     let fixture = Fixture::new();
     let root = fixture.home.join(".kimi-code/plugins/managed/sample");
     fs::create_dir_all(&root).unwrap();
+    fs::write(root.join("kimi.plugin.json"), r#"{"name":"sample"}"#).unwrap();
     let path = fixture.home.join(".kimi-code/plugins/installed.json");
-    let registry = json!({"version":1,"local_secret":"private-key-value","plugins":[{"id":"sample","root":root,"enabled":false,"state":"ok","originalSource":"https://example.invalid/plugin","other":"preserved"},{"id":"unregistered","enabled":true}]});
+    let registry = json!({"version":1,"local_secret":"private-key-value","plugins":[{"id":"sample","root":root,"enabled":false,"originalSource":"https://example.invalid/plugin","other":"preserved"},{"id":"unregistered","enabled":true}]});
     fs::write(&path, serde_json::to_vec(&registry).unwrap()).unwrap();
     let executable = fixture.executable("exit 0");
     let declaration = json!({"id":"kimi-sample","agent":"kimi","source":"https://example.invalid/plugin","selector":"sample","enabled":false,"paths":["~/.kimi-code/plugins/managed/sample"],"update":[[executable]]});
@@ -274,6 +279,69 @@ fn kimi_native_registry_is_verified_and_failed_update_restores_only_selected_ena
 }
 
 #[test]
+fn existing_kimi_registration_checks_persistent_metadata_and_manifest_without_runtime_state() {
+    let fixture = Fixture::new();
+    let root = fixture.home.join(".kimi-code/plugins/managed/sample");
+    fs::create_dir_all(root.join(".kimi-plugin")).unwrap();
+    fs::write(
+        root.join(".kimi-plugin/plugin.json"),
+        r#"{"name":"Sample"}"#,
+    )
+    .unwrap();
+    let path = fixture.home.join(".kimi-code/plugins/installed.json");
+    let registry = json!({"version":1,"plugins":[{"id":"sample","root":root,"source":"github","enabled":false,"originalSource":"https://example.invalid/plugin"}]});
+    let bytes = serde_json::to_vec(&registry).unwrap();
+    fs::write(&path, &bytes).unwrap();
+    let executable = fixture.executable("touch invoked\nexit 1");
+    fixture.manifest(json!([{"id":"kimi-sample","agent":"kimi","source":"https://example.invalid/plugin","selector":"sample","enabled":false,"paths":["~/.kimi-code/plugins/managed/sample"],"update":[[executable]]}]));
+    installations::register_existing(&fixture.source, &fixture.home, &fixture.state).unwrap();
+    assert_eq!(fixture.receipts().len(), 1);
+    assert_eq!(fs::read(&path).unwrap(), bytes);
+    assert!(!fixture.source.join("invoked").exists());
+
+    // Native root manifests take precedence over a manifest in .kimi-plugin/.
+    fs::write(
+        root.join("kimi.plugin.json"),
+        r#"{"name":"another-plugin"}"#,
+    )
+    .unwrap();
+    installations::register_existing(&fixture.source, &fixture.home, &fixture.state).unwrap();
+    assert!(fixture.receipts().is_empty());
+    fs::remove_file(root.join("kimi.plugin.json")).unwrap();
+    fs::remove_file(root.join(".kimi-plugin/plugin.json")).unwrap();
+    installations::register_existing(&fixture.source, &fixture.home, &fixture.state).unwrap();
+    assert!(fixture.receipts().is_empty());
+}
+
+#[test]
+fn kimi_immutable_install_is_recognized_only_with_matching_native_github_provenance() {
+    let fixture = Fixture::new();
+    let root = fixture.home.join(".kimi-code/plugins/managed/sample");
+    fs::create_dir_all(&root).unwrap();
+    fs::write(root.join("kimi.plugin.json"), r#"{"name":"sample"}"#).unwrap();
+    let path = fixture.home.join(".kimi-code/plugins/installed.json");
+    let sha = "a".repeat(40);
+    let registered = json!({"version":1,"plugins":[{"id":"sample","root":root,"source":"github","enabled":false,"originalSource":format!("https://github.com/example/sample/commit/{sha}"),"github":{"owner":"example","repo":"sample","installedSha":sha,"ref":{"kind":"sha","value":sha}}}]});
+    let executable = fixture.executable("exit 1");
+    fixture.manifest(json!([{"id":"kimi-sample","agent":"kimi","source":"https://github.com/example/sample.git","selector":"sample","enabled":false,"paths":["~/.kimi-code/plugins/managed/sample"],"update":[[executable]]}]));
+    fs::write(&path, serde_json::to_vec(&registered).unwrap()).unwrap();
+    installations::register_existing(&fixture.source, &fixture.home, &fixture.state).unwrap();
+    assert_eq!(fixture.receipts().len(), 1);
+    for (key, value) in [
+        ("owner", json!("another-owner")),
+        ("repo", json!("another-repository")),
+        ("installedSha", json!("b".repeat(40))),
+        ("ref", json!({"kind":"sha","value":"b".repeat(40)})),
+    ] {
+        let mut invalid = registered.clone();
+        invalid["plugins"][0]["github"][key] = value;
+        fs::write(&path, serde_json::to_vec(&invalid).unwrap()).unwrap();
+        installations::register_existing(&fixture.source, &fixture.home, &fixture.state).unwrap();
+        assert!(fixture.receipts().is_empty(), "{key}");
+    }
+}
+
+#[test]
 fn kimi_adapter_uses_native_api_restores_disabled_and_keeps_server_tokens_private() {
     let fixture = Fixture::new();
     let bin = fixture.temp.path().join("bin");
@@ -294,13 +362,15 @@ const server = http.createServer((req, res) => {
     fs.appendFileSync(process.env.SM_NATIVE_TEST_RECORD, JSON.stringify({method:req.method,path:req.url,body}) + '\n');
     res.setHeader('Content-Type', 'application/json');
     if (req.method === 'POST' && req.url === '/api/v1/plugins') {
-      enabled = true;
+      if (process.env.SM_NATIVE_TEST_FAIL) enabled = true;
+      fs.writeFileSync(process.env.SM_NATIVE_TEST_CONTENT, 'native installer updated content');
       res.end(JSON.stringify({code:process.env.SM_NATIVE_TEST_FAIL ? 1 : 0,data:{id:'sample'}}));
-    } else if (req.method === 'POST' && req.url === '/api/v1/plugins/sample:disable') {
-      enabled = false;
+    } else if (req.method === 'POST' && ['/api/v1/plugins/sample:disable','/api/v1/plugins/sample:enable'].includes(req.url)) {
+      enabled = req.url.endsWith(':enable');
+      fs.writeFileSync(process.env.SM_NATIVE_TEST_ENABLED, String(enabled));
       res.end(JSON.stringify({code:0,data:{ok:true}}));
     } else if (req.method === 'GET' && req.url === '/api/v1/plugins') {
-      res.end(JSON.stringify({code:0,data:{plugins:[{id:'sample',enabled,state:'ok'}]}}));
+      res.end(JSON.stringify({code:0,data:{plugins:[{id:'sample',enabled,state:'ok',source:'local-path',originalSource:'https://github.com/example/sample'}]}}));
     } else process.exit(3);
   });
 });
@@ -311,29 +381,62 @@ server.listen(0,'127.0.0.1', () => {
 });
 "##).unwrap();
     fs::set_permissions(&fake, fs::Permissions::from_mode(0o700)).unwrap();
-    for failed in [false, true] {
-        let record = fixture.temp.path().join(format!("requests-{failed}"));
-        let pid = fixture.temp.path().join(format!("pid-{failed}"));
+    let preload = fixture.temp.path().join("upstream.cjs");
+    fs::write(&preload, r##"
+const nativeFetch = globalThis.fetch;
+globalThis.fetch = async (input, options) => {
+  const url = String(input);
+  if (url.startsWith('http://127.0.0.1:')) return nativeFetch(input, options);
+  if (process.env.SM_NATIVE_TEST_UPSTREAM === 'unreachable') throw new Error('private upstream failure');
+  if (url.endsWith('/releases/latest')) return new Response('', {status:process.env.SM_NATIVE_TEST_UPSTREAM === 'head' ? 404 : 302,headers:{location:'https://github.com/example/sample/releases/tag/v1'}});
+  if (url.endsWith('/commits/v1.atom') || url.endsWith('/commits/HEAD.atom')) return new Response('Grit::Commit/' + 'a'.repeat(40));
+  if (url.endsWith('/kimi.plugin.json') && !url.endsWith('/.kimi-plugin/plugin.json')) return new Response('', {status:404});
+  if (url.endsWith('/.kimi-plugin/plugin.json')) return new Response(JSON.stringify({name:process.env.SM_NATIVE_TEST_UPSTREAM === 'renamed' ? 'renamed-plugin' : 'Sample'}));
+  throw new Error('unexpected upstream request');
+};
+"##).unwrap();
+    for (case, upstream, failed, enabled) in [
+        ("updated-disabled", "release", false, false),
+        ("updated-enabled", "head", false, true),
+        ("native-failed", "release", true, false),
+        ("renamed", "renamed", true, false),
+        ("unreachable", "unreachable", true, false),
+    ] {
+        let record = fixture.temp.path().join(format!("requests-{case}"));
+        let pid = fixture.temp.path().join(format!("pid-{case}"));
+        let content = fixture.temp.path().join(format!("content-{case}"));
+        let selected_enabled = fixture.temp.path().join(format!("enabled-{case}"));
+        fs::write(&content, "original customized local plugin content").unwrap();
         let mut command = std::process::Command::new("node");
         command
+            .arg("--require")
+            .arg(&preload)
             .arg(
                 Path::new(env!("CARGO_MANIFEST_DIR"))
                     .join("resources/source-providers/native-plugins.js"),
             )
-            .args(["kimi", "https://example.invalid/sample", "sample", "false"])
+            .args([
+                "kimi",
+                "https://github.com/example/sample",
+                "sample",
+                if enabled { "true" } else { "false" },
+            ])
             .env(
                 "PATH",
                 format!("{}:{}", bin.display(), std::env::var("PATH").unwrap()),
             )
             .env("KIMI_CODE_HOME", &kimi_home)
             .env_remove("SM_INSTALL_HOME")
+            .env("SM_NATIVE_TEST_UPSTREAM", upstream)
+            .env("SM_NATIVE_TEST_CONTENT", &content)
+            .env("SM_NATIVE_TEST_ENABLED", &selected_enabled)
             .env("SM_NATIVE_TEST_RECORD", &record)
             .env("SM_NATIVE_TEST_PID", &pid);
-        if failed {
+        if case == "native-failed" {
             command.env("SM_NATIVE_TEST_FAIL", "1");
         }
         let output = sm::process::run_command(command, None, std::time::Duration::from_secs(10));
-        assert_eq!(output.is_err(), failed);
+        assert_eq!(output.is_err(), failed, "{case}: {output:?}");
         let exported = match output {
             Ok(output) => {
                 assert!(output.stdout.is_empty());
@@ -350,8 +453,41 @@ server.listen(0,'127.0.0.1', () => {
             .map(|line| serde_json::from_str(line).unwrap())
             .collect();
         assert_eq!(requests[0]["path"], "/api/v1/plugins");
-        assert_eq!(requests[1]["path"], "/api/v1/plugins/sample:disable");
-        assert_eq!(requests.len(), if failed { 2 } else { 3 });
+        assert_eq!(requests[0]["method"], "GET");
+        let action = if enabled {
+            "/api/v1/plugins/sample:enable"
+        } else {
+            "/api/v1/plugins/sample:disable"
+        };
+        assert_eq!(requests[1]["path"], action);
+        assert_eq!(
+            fs::read_to_string(selected_enabled).unwrap(),
+            enabled.to_string()
+        );
+        if upstream == "renamed" || upstream == "unreachable" {
+            assert_eq!(
+                requests.len(),
+                2,
+                "remote failure must not send an installation POST"
+            );
+            assert_eq!(
+                fs::read_to_string(content).unwrap(),
+                "original customized local plugin content"
+            );
+        } else {
+            assert_eq!(requests[2]["path"], "/api/v1/plugins");
+            assert_eq!(requests[2]["method"], "POST");
+            let body: Value = serde_json::from_str(requests[2]["body"].as_str().unwrap()).unwrap();
+            assert_eq!(
+                body["source"],
+                format!(
+                    "https://github.com/example/sample/commit/{}",
+                    "a".repeat(40)
+                )
+            );
+            assert_eq!(requests[3]["path"], action);
+            assert_eq!(requests.len(), if failed { 4 } else { 5 });
+        }
         let pid = fs::read_to_string(pid).unwrap();
         assert!(
             !Path::new("/proc").join(pid).exists(),
@@ -455,5 +591,32 @@ if (args.slice(2).join(' ') === 'remote get-url origin') console.log('https://ex
             _ => json!([{ "program":"codex","args":["plugin","marketplace","list","--json"]}]),
         };
         assert_eq!(serde_json::to_value(calls).unwrap(), expected, "{case}");
+    }
+}
+
+#[test]
+fn installation_policies_are_individual_strict_catalog_resources_with_flat_runtime_wire() {
+    let fixture = Fixture::new();
+    let executable = fixture.executable("exit 0");
+    let declaration = fixture.declaration(&executable);
+    fixture.manifest(json!([declaration.clone()]));
+    let loaded = installations::load(&fixture.source).unwrap();
+    assert_eq!(loaded.len(), 1);
+    assert_eq!(loaded[0].id, "codex-sample");
+    assert!(!loaded[0].policy.enabled);
+    assert_eq!(serde_json::to_value(&loaded[0]).unwrap(), declaration);
+    let roundtrip: installations::Installation = serde_json::from_value(declaration).unwrap();
+    assert_eq!(roundtrip.policy.selector, loaded[0].policy.selector);
+    let catalog_path = fixture.source.join("catalog.json");
+    let original: Value = serde_json::from_slice(&fs::read(&catalog_path).unwrap()).unwrap();
+    for (key, value) in [
+        ("kind", json!("hook")),
+        ("origin", json!("upstream")),
+        ("scope", json!("project")),
+    ] {
+        let mut invalid = original.clone();
+        invalid["resources"][0][key] = value;
+        fs::write(&catalog_path, serde_json::to_vec(&invalid).unwrap()).unwrap();
+        assert!(installations::load(&fixture.source).is_err(), "{key}");
     }
 }

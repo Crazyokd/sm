@@ -443,12 +443,16 @@ pub fn record_event(agent: Client, payload: &Value, directory: &Path) -> Result<
             .and_then(|id| index.hashes.get(id))
             .cloned();
         if envelope.resource_id.is_none() {
-            for owned in index.owned {
-                if input.contains(owned.path.to_string_lossy().as_ref()) {
-                    envelope.resource_id = Some(owned.resource_id.clone());
-                    envelope.resource_content_hash = index.hashes.get(&owned.resource_id).cloned();
-                    break;
-                }
+            let matches: std::collections::BTreeSet<_> = index
+                .owned
+                .iter()
+                .filter(|owned| input.contains(owned.path.to_string_lossy().as_ref()))
+                .map(|owned| &owned.resource_id)
+                .collect();
+            if matches.len() == 1 {
+                let id = matches.into_iter().next().expect("one matched resource");
+                envelope.resource_id = Some(id.clone());
+                envelope.resource_content_hash = index.hashes.get(id).cloned();
             }
         }
     }

@@ -1,0 +1,10 @@
+{
+  "source": "https://github.com/antfu/skills.git",
+  "skills": [
+    "pnpm",
+    "vite",
+    "vue",
+    "vue-best-practices",
+    "vueuse-functions"
+  ]
+}

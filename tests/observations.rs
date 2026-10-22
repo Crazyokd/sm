@@ -95,7 +95,7 @@ fn complete_bad_records_are_skipped_and_partial_record_is_retained() {
 fn upstream_events_never_enter_optimization_records() {
     let root = tempdir().unwrap();
     let state = state(root.path());
-    let upstream:Resource=serde_json::from_value(json!({"id":"external","kind":"skill","origin":"upstream","scope":"user","project":null,"payload":".","upstream":{"git":"https://example.invalid/skill"}})).unwrap();
+    let upstream:Resource=serde_json::from_value(json!({"id":"external","kind":"skill","origin":"upstream","scope":"user","project":null,"payload":".","upstream":"external"})).unwrap();
     state
         .set(
             "catalog",
@@ -163,6 +163,46 @@ fn active_projection_paths_attach_content_hash_without_claiming_hidden_behavior(
     assert_eq!(serde_json::to_value(row.coverage).unwrap(), "observed");
     let offsets: BTreeMap<String, u64> = state.get("event_offsets").unwrap();
     assert!(offsets.values().all(|n| *n > 0));
+}
+
+#[test]
+fn independent_resources_receive_separate_usage_and_shared_paths_stay_unattributed() {
+    let root = tempdir().unwrap();
+    let state = state(root.path());
+    let mut catalog: Catalog = state.get("catalog").unwrap();
+    let mut other = catalog.resources[0].clone();
+    other.id = "other".into();
+    catalog.resources.push(other);
+    state.set("catalog", &catalog).unwrap();
+    fs::write(root.path().join("active.json"),json!({"owned":[{"resource_id":"review","path":"/skills/review/SKILL.md"},{"resource_id":"other","path":"/skills/other/SKILL.md"},{"resource_id":"review","path":"/config/native.toml"},{"resource_id":"other","path":"/config/native.toml"}],"hashes":{"review":"review-hash","other":"other-hash"}}).to_string()).unwrap();
+    for path in [
+        "/skills/review/SKILL.md",
+        "/skills/other/SKILL.md",
+        "/config/native.toml",
+    ] {
+        record_event(
+            Client::Codex,
+            &json!({"event":"FileRead","tool_input":{"path":path}}),
+            root.path(),
+        )
+        .unwrap();
+    }
+    let rows = ingest_events(root.path(), &state).unwrap();
+    assert_eq!(rows.len(), 3);
+    assert_eq!(
+        rows.iter()
+            .filter(|r| r.resource_id.as_deref() == Some("review"))
+            .count(),
+        1
+    );
+    assert_eq!(
+        rows.iter()
+            .filter(|r| r.resource_id.as_deref() == Some("other"))
+            .count(),
+        1
+    );
+    let shared = rows.iter().find(|r| r.resource_id.is_none()).unwrap();
+    assert!(shared.resource_content_hash.is_none());
 }
 
 #[test]
@@ -292,7 +332,7 @@ fn upstream_explicit_id_cannot_be_overridden_by_a_self_resource_path() {
     let root = tempdir().unwrap();
     let state = state(root.path());
     let mut catalog: Catalog = state.get("catalog").unwrap();
-    catalog.resources.push(serde_json::from_value(json!({"id":"external", "kind":"skill", "origin":"upstream", "scope":"user", "project":null, "payload":".", "upstream":{"git":"https://example.invalid/external"}})).unwrap());
+    catalog.resources.push(serde_json::from_value(json!({"id":"external", "kind":"skill", "origin":"upstream", "scope":"user", "project":null, "payload":".", "upstream":"external"})).unwrap());
     state.set("catalog", &catalog).unwrap();
     fs::write(
         root.path().join("active.json"),

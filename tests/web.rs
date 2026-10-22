@@ -61,20 +61,22 @@ async fn inventory_page_detects_resources_added_since_last_sync_without_exposing
 #[tokio::test]
 async fn plugin_toggle_proposes_reviewed_declaration_without_mutating_native_installation() {
     let f = Fixture::new();
-    let path = f.repo.work.join("resources/native-installations");
-    fs::create_dir_all(&path).unwrap();
-    fs::write(path.join("bundle.json"), "{\"entries\":[]}").unwrap();
-    let declaration = json!([{"id":"kimi-example","agent":"kimi","source":"https://example.invalid/plugin","selector":"example","enabled":true,"paths":["~/.kimi-code/plugins/managed/example"],"update":[["node","resources/source-providers/native-plugins.js","kimi","https://example.invalid/plugin","example","${SM_ENABLED}"]]}]);
-    fs::write(path.join("installations.json"), declaration.to_string()).unwrap();
+    let installation = json!({"agent":"kimi","source":"https://example.invalid/plugin","selector":"example","enabled":true,"paths":["~/.kimi-code/plugins/managed/example"],"update":[["node","resources/source-providers/native-plugins.js","kimi","https://example.invalid/plugin","example","${SM_ENABLED}"]]});
     let mut catalog: Value =
         serde_json::from_slice(&fs::read(f.repo.work.join("catalog.json")).unwrap()).unwrap();
-    catalog["resources"].as_array_mut().unwrap().push(json!({"id":"native-installations","kind":"bundle","origin":"self","scope":"user","project":null,"payload":"resources/native-installations"}));
-    f.repo.catalog(catalog);
-    f.repo.publish("Register native installation declaration");
+    let mut other = installation.clone();
+    other["selector"] = "other".into();
+    other["paths"] = json!(["~/.kimi-code/plugins/managed/other"]);
+    other["update"][0][4] = "other".into();
+    for (id, policy) in [("kimi-example", &installation), ("kimi-other", &other)] {
+        catalog["resources"].as_array_mut().unwrap().push(json!({"id":id,"kind":"policy","origin":"self","scope":"user","project":null,"installation":policy}));
+    }
+    f.repo.catalog(catalog.clone());
+    f.repo
+        .publish("Register individual native installation policies");
     f.state
         .set("catalog", &sm::model::Catalog::load(&f.repo.work).unwrap())
         .unwrap();
-    f.state.set("installation_manifest", &declaration).unwrap();
     let token = f.token().await;
     let (status, body) = f
         .request(
@@ -91,32 +93,47 @@ async fn plugin_toggle_proposes_reviewed_declaration_without_mutating_native_ins
     assert_eq!(status, StatusCode::OK, "{body}");
     assert!(body.contains("审核合并后"));
     assert_eq!(
-        serde_json::from_slice::<Value>(&fs::read(path.join("installations.json")).unwrap())
-            .unwrap()[0]["enabled"],
-        true
-    );
-    assert_eq!(
-        f.state.get::<Value>("installation_manifest").unwrap()[0]["enabled"],
-        true
+        serde_json::from_slice::<Value>(&fs::read(f.repo.work.join("catalog.json")).unwrap())
+            .unwrap(),
+        catalog
     );
     let proposals = f
         .state
         .get::<BTreeMap<String, Proposal>>("proposals")
         .unwrap();
-    let proposed: Value = serde_json::from_slice(
-        &fs::read(
-            proposals
-                .values()
-                .next()
-                .unwrap()
-                .directory
-                .join("resources/native-installations/installations.json"),
-        )
-        .unwrap(),
-    )
-    .unwrap();
-    assert_eq!(proposed[0]["enabled"], false);
-    assert_eq!(proposed[0]["update"][0][5], "${SM_ENABLED}");
+    let proposal = proposals.values().next().unwrap();
+    assert_eq!(proposal.change.resource_ids, ["kimi-example"]);
+    assert_eq!(
+        proposal
+            .change
+            .writes
+            .keys()
+            .map(String::as_str)
+            .collect::<Vec<_>>(),
+        ["catalog.json"]
+    );
+    let proposed: Value =
+        serde_json::from_slice(&fs::read(proposal.directory.join("catalog.json")).unwrap())
+            .unwrap();
+    let resources = proposed["resources"].as_array().unwrap();
+    assert_eq!(
+        resources
+            .iter()
+            .find(|r| r["id"] == "kimi-example")
+            .unwrap()["installation"]["enabled"],
+        false
+    );
+    assert_eq!(
+        resources.iter().find(|r| r["id"] == "kimi-other").unwrap()["installation"],
+        other
+    );
+    assert_eq!(
+        resources
+            .iter()
+            .find(|r| r["id"] == "kimi-example")
+            .unwrap()["installation"]["update"][0][5],
+        "${SM_ENABLED}"
+    );
 }
 impl Fixture {
     fn new() -> Self {
@@ -415,7 +432,7 @@ async fn editing_only_creates_mr_and_keeps_live_content() {
     assert!(page.contains("打开 MR"));
 }
 #[tokio::test]
-async fn five_types_statuses_and_project_groups_use_same_catalog() {
+async fn resource_types_statuses_and_project_groups_use_same_catalog() {
     let f = Fixture::new();
     let mut catalog: sm::model::Catalog = f.state.get("catalog").unwrap();
     let kinds = ["hook", "rule", "agent", "mcp"];
@@ -440,6 +457,8 @@ async fn five_types_statuses_and_project_groups_use_same_catalog() {
         "规则",
         "Agent 定义",
         "MCP 配置",
+        "提示词",
+        "执行策略",
         "暂不支持",
         "存在冲突",
         "应用失败",
@@ -447,6 +466,7 @@ async fn five_types_statuses_and_project_groups_use_same_catalog() {
     ] {
         assert!(page.contains(label), "{label}");
     }
+    assert!(!page.contains("value=\"bundle\"") && !page.contains("资源集合"));
     let page = f.get("/projects").await.1;
     assert!(page.contains("用户级") && page.contains("app"));
 }
@@ -517,4 +537,235 @@ async fn findings_link_actual_evidence_and_related_mr() {
             && page.contains("打开 MR")
     );
     assert!(page.contains("原有") && page.contains("修改后"));
+}
+
+#[tokio::test]
+async fn former_members_have_independent_filter_details_edit_and_retirement_proposals() {
+    let f = Fixture::new();
+    let mut catalog: Value =
+        serde_json::from_slice(&fs::read(f.repo.work.join("catalog.json")).unwrap()).unwrap();
+    let first = json!({"id":"first-rule","kind":"rule","origin":"self","scope":"user","project":null,"files":{"root":"resources/first-rule/files","entries":[{"target":".codex/AGENTS.md","source":"AGENTS.md"}]}});
+    let second = json!({"id":"second-mcp","kind":"mcp","origin":"self","scope":"user","project":null,"files":{"root":"resources/second-mcp/files","entries":[{"target":".codex/config.toml","fragment":"config.json"}]}});
+    catalog["resources"]
+        .as_array_mut()
+        .unwrap()
+        .extend([first.clone(), second.clone()]);
+    fs::create_dir_all(f.repo.work.join("resources/first-rule/files")).unwrap();
+    fs::write(
+        f.repo.work.join("resources/first-rule/files/AGENTS.md"),
+        "# Independent rule",
+    )
+    .unwrap();
+    fs::create_dir_all(f.repo.work.join("resources/second-mcp/files")).unwrap();
+    let fragment = "{\"mcp_servers\":{\"example\":{\"command\":\"example-server\"}}}";
+    fs::write(
+        f.repo.work.join("resources/second-mcp/files/config.json"),
+        fragment,
+    )
+    .unwrap();
+    f.repo.catalog(catalog.clone());
+    f.repo
+        .publish("Register independently managed rules and MCP");
+    f.state
+        .set("catalog", &sm::model::Catalog::load(&f.repo.work).unwrap())
+        .unwrap();
+    f.state
+        .set(
+            "resource_contents",
+            &BTreeMap::from([
+                (
+                    "first-rule",
+                    BTreeMap::from([(
+                        "resources/first-rule/files/AGENTS.md",
+                        "# Independent rule",
+                    )]),
+                ),
+                (
+                    "second-mcp",
+                    BTreeMap::from([("resources/second-mcp/files/config.json", fragment)]),
+                ),
+            ]),
+        )
+        .unwrap();
+    let page = f.get("/resources?kind=rule").await.1;
+    let table = page
+        .split("<tbody>")
+        .nth(1)
+        .unwrap()
+        .split("</tbody>")
+        .next()
+        .unwrap();
+    assert!(table.contains("first-rule") && !table.contains("second-mcp"));
+    assert!(!page.contains("value=\"bundle\"") && !page.contains("资源集合"));
+    let kimi = f.get("/resources?agent=kimi&q=first-rule").await.1;
+    let kimi_table = kimi
+        .split("<tbody>")
+        .nth(1)
+        .unwrap()
+        .split("</tbody>")
+        .next()
+        .unwrap();
+    assert!(!kimi_table.contains("first-rule"));
+    assert!(
+        f.get("/resources/first-rule")
+            .await
+            .1
+            .contains("Independent rule")
+    );
+    let mcp = f.get("/resources/second-mcp").await.1;
+    assert!(mcp.contains(".codex/config.toml") && mcp.contains("example-server"));
+    let token = f.token().await;
+    let headers = [
+        ("Content-Type", "application/json"),
+        ("X-SM-CSRF", token.as_str()),
+        ("Origin", "http://127.0.0.1:8765"),
+    ];
+    let change = json!({"resource_ids":["first-rule"],"reason":"Edit only this rule","writes":{"resources/first-rule/files/AGENTS.md":"# Reviewed rule"},"validation":{"status":"partial"}});
+    let (status, body) = f
+        .request("POST", "/proposals", change.to_string(), &headers)
+        .await;
+    assert_eq!(status, StatusCode::OK, "{body}");
+    let config_change = json!({"resource_ids":["second-mcp"],"reason":"Edit only this MCP fragment","writes":{"resources/second-mcp/files/config.json":"{\"mcp_servers\":{\"example\":{\"command\":\"reviewed-server\"}}}"},"validation":{"status":"partial"}});
+    let (status, body) = f
+        .request("POST", "/proposals", config_change.to_string(), &headers)
+        .await;
+    assert_eq!(status, StatusCode::OK, "{body}");
+    assert_eq!(
+        fs::read_to_string(f.repo.work.join("resources/second-mcp/files/config.json")).unwrap(),
+        fragment
+    );
+    catalog["resources"]
+        .as_array_mut()
+        .unwrap()
+        .retain(|resource| resource["id"] != "second-mcp");
+    let change = json!({"resource_ids":["second-mcp"],"reason":"Retire only this MCP","writes":{"catalog.json":serde_json::to_string_pretty(&catalog).unwrap()+"\n"},"validation":{"status":"partial"}});
+    let (status, body) = f
+        .request("POST", "/proposals", change.to_string(), &headers)
+        .await;
+    assert_eq!(status, StatusCode::OK, "{body}");
+    let proposals: BTreeMap<String, Proposal> = f.state.get("proposals").unwrap();
+    assert_eq!(proposals.len(), 3);
+    assert!(proposals.values().any(|p| {
+        p.change.resource_ids == ["second-mcp"]
+            && p.change
+                .writes
+                .keys()
+                .map(String::as_str)
+                .collect::<Vec<_>>()
+                == ["resources/second-mcp/files/config.json"]
+    }));
+    assert!(
+        proposals
+            .values()
+            .any(|p| p.change.resource_ids == ["first-rule"])
+    );
+    assert!(
+        proposals
+            .values()
+            .any(|p| p.change.resource_ids == ["second-mcp"])
+    );
+    let unchanged: Value =
+        serde_json::from_slice(&fs::read(f.repo.work.join("catalog.json")).unwrap()).unwrap();
+    assert!(unchanged["resources"].as_array().unwrap().contains(&second));
+    assert_eq!(
+        fs::read_to_string(f.repo.work.join("resources/first-rule/files/AGENTS.md")).unwrap(),
+        "# Independent rule"
+    );
+}
+
+#[tokio::test]
+async fn project_instruction_and_mcp_filters_follow_native_scope_semantics() {
+    let f = Fixture::new();
+    let mut catalog: sm::model::Catalog = f.state.get("catalog").unwrap();
+    catalog.projects.insert("app".into(), "~/repo/app".into());
+    for (id, target) in [
+        ("project-root-rule", "AGENTS.md"),
+        ("project-nested-rule", "src/AGENTS.md"),
+        ("claude-private-rule", ".claude/AGENTS.md"),
+    ] {
+        catalog.resources.push(serde_json::from_value(json!({
+            "id":id,"kind":"rule","origin":"self","scope":"project","project":"app",
+            "files":{"root":format!("resources/{id}/files"),"entries":[{"target":target,"source":"AGENTS.md"}]}
+        })).unwrap());
+    }
+    catalog.resources.push(serde_json::from_value(json!({
+        "id":"project-mcp","kind":"mcp","origin":"self","scope":"project","project":"app",
+        "files":{"root":"resources/project-mcp/files","entries":[{"target":".mcp.json","json":{"mcpServers":{"example":{"command":"example"}}}}]}
+    })).unwrap());
+    f.state.set("catalog", &catalog).unwrap();
+    for client in ["codex", "kimi"] {
+        let (status, page) = f
+            .get(&format!(
+                "/resources?kind=rule&scope=project&agent={client}"
+            ))
+            .await;
+        assert_eq!(status, StatusCode::OK);
+        let table = page
+            .split("<tbody>")
+            .nth(1)
+            .unwrap()
+            .split("</tbody>")
+            .next()
+            .unwrap();
+        assert!(table.contains("project-root-rule") && table.contains("project-nested-rule"));
+        assert!(!table.contains("claude-private-rule"));
+        assert!(table.contains("Codex") && table.contains("Kimi"));
+    }
+    for (client, visible) in [("kimi", true), ("codex", false)] {
+        let page = f
+            .get(&format!("/resources?kind=mcp&scope=project&agent={client}"))
+            .await
+            .1;
+        let table = page
+            .split("<tbody>")
+            .nth(1)
+            .unwrap()
+            .split("</tbody>")
+            .next()
+            .unwrap();
+        assert_eq!(table.contains("project-mcp"), visible);
+    }
+}
+
+#[tokio::test]
+async fn skill_tree_details_show_nested_helpers_under_their_target_paths() {
+    let f = Fixture::new();
+    let mut catalog: sm::model::Catalog = f.state.get("catalog").unwrap();
+    catalog.resources.push(serde_json::from_value(json!({
+        "id":"tree-skill","kind":"skill","origin":"self","scope":"user","project":null,
+        "files":{"root":"resources/tree-skill/files","entries":[{"target":".agents/skills/tree-skill","tree":"skill"}]}
+    })).unwrap());
+    f.state.set("catalog", &catalog).unwrap();
+    f.state
+        .set(
+            "resource_contents",
+            &BTreeMap::from([(
+                "tree-skill",
+                BTreeMap::from([
+                    ("resources/tree-skill/files/skill/SKILL.md", "# One Skill"),
+                    (
+                        "resources/tree-skill/files/skill/references/helper.md",
+                        "# Nested helper body",
+                    ),
+                ]),
+            )]),
+        )
+        .unwrap();
+    let (status, page) = f.get("/resources/tree-skill").await;
+    assert_eq!(status, StatusCode::OK);
+    assert!(page.contains("Nested helper body") && page.contains("helper.md"));
+    for client in ["codex", "kimi"] {
+        let page = f
+            .get(&format!("/resources?kind=skill&agent={client}"))
+            .await
+            .1;
+        let table = page
+            .split("<tbody>")
+            .nth(1)
+            .unwrap()
+            .split("</tbody>")
+            .next()
+            .unwrap();
+        assert!(table.contains("tree-skill") && table.contains("通用 Skill"));
+    }
 }

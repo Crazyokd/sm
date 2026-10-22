@@ -1,0 +1,8 @@
+{
+  "source": "https://github.com/addyosmani/agent-skills.git",
+  "skills": [
+    "code-review-and-quality",
+    "code-simplification",
+    "performance-optimization"
+  ]
+}

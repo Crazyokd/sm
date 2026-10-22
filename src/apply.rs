@@ -32,6 +32,16 @@ pub fn plan_apply(
 ) -> ApplyPlan {
     let mut plan = ApplyPlan::default();
     for resource in &catalog.resources {
+        if matches!(
+            resource.content,
+            crate::model::ResourceContent::Installation { .. }
+        ) {
+            plan.results.insert(
+                resource.id.clone(),
+                ResourceResult::new(ApplyStatus::Pending, "原生安装状态待核验"),
+            );
+            continue;
+        }
         let build = || -> Result<Vec<OwnedWrite>> {
             let scope = catalog.scope_root(resource, home)?;
             ensure!(

@@ -5,7 +5,6 @@ use crate::{
 };
 use anyhow::{Context, Result, ensure};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use std::{
     collections::{BTreeMap, BTreeSet},
     fs,
@@ -16,7 +15,7 @@ use std::{
     time::Duration,
 };
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Selection {
     skills: Vec<String>,
@@ -28,7 +27,7 @@ struct Selection {
     files: Vec<SelectedFile>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct SelectedFile {
     source: PathBuf,
@@ -174,19 +173,35 @@ pub fn render_agent(text: &str) -> Result<String> {
     })?)
 }
 
-fn skill_source(upstream: &Path, name: &str) -> Result<PathBuf> {
-    ["skills", ".agents/skills"]
-        .into_iter()
-        .map(|base| upstream.join(base).join(name))
-        .find(|path| path.join("SKILL.md").is_file())
-        .with_context(|| format!("selected ECC skill is missing upstream: {name}"))
+fn skill_source(upstream: &Path, name: &str) -> Result<Option<PathBuf>> {
+    for base in ["skills", ".agents/skills"] {
+        let source = upstream.join(base).join(name);
+        reject_symlink_path(&source)?;
+        if source.exists() {
+            ensure!(
+                source.is_dir(),
+                "selected ECC Skill source is not a directory"
+            );
+            payload_files(&source)?;
+            let marker = source.join("SKILL.md");
+            if marker.exists() {
+                ensure!(
+                    marker.is_file(),
+                    "selected ECC Skill marker is not a regular file"
+                );
+                return Ok(Some(source));
+            }
+        }
+    }
+    Ok(None)
 }
 
-fn validate_sources(selection: &Selection, upstream: &Path) -> Result<()> {
+fn available_sources(selection: &Selection, upstream: &Path) -> Result<Selection> {
+    let mut missing = BTreeSet::new();
     for name in &selection.skills {
-        let source = skill_source(upstream, name)?;
-        reject_symlink_path(&source)?;
-        payload_files(&source)?;
+        if skill_source(upstream, name)?.is_none() {
+            missing.insert(format!("skills:{name}"));
+        }
     }
     for (kind, names) in [
         ("commands", &selection.commands),
@@ -195,32 +210,80 @@ fn validate_sources(selection: &Selection, upstream: &Path) -> Result<()> {
         for name in names {
             let path = upstream.join(kind).join(format!("{name}.md"));
             reject_symlink_path(&path)?;
-            ensure!(
-                path.is_file(),
-                "selected ECC {kind} source is missing: {name}"
-            );
+            if path.exists() {
+                ensure!(
+                    path.is_file(),
+                    "selected ECC {kind} source is not a regular file: {name}"
+                );
+            } else {
+                missing.insert(format!("{kind}:{name}"));
+            }
         }
     }
     for file in &selection.files {
         let path = contained(upstream, &file.source)?;
         reject_symlink_path(&path)?;
-        ensure!(
-            path.is_file(),
-            "selected ECC file source is missing or not a regular file: {}",
-            file.source.display()
+        if path.exists() {
+            ensure!(
+                path.is_file(),
+                "selected ECC file source is not a regular file: {}",
+                file.source.display()
+            );
+        } else {
+            missing.insert(format!("files:{}", file.target.display()));
+        }
+    }
+    if !missing.is_empty() {
+        eprintln!(
+            "ECC source omitted {} selected members: {}",
+            missing.len(),
+            missing
+                .iter()
+                .take(8)
+                .cloned()
+                .collect::<Vec<_>>()
+                .join(", ")
         );
     }
-    Ok(())
+    let mut available = selection.clone();
+    available
+        .skills
+        .retain(|name| !missing.contains(&format!("skills:{name}")));
+    available
+        .commands
+        .retain(|name| !missing.contains(&format!("commands:{name}")));
+    available
+        .agents
+        .retain(|name| !missing.contains(&format!("agents:{name}")));
+    available
+        .files
+        .retain(|file| !missing.contains(&format!("files:{}", file.target.display())));
+    available.claude_skills.retain(|name| {
+        available.skills.contains(name)
+            || available
+                .commands
+                .iter()
+                .any(|command| name == &format!("source-command-{command}"))
+    });
+    Ok(available)
 }
 
-pub fn build_bundle(
+pub fn build_output(
     selection_path: &Path,
     upstream: &Path,
     installed: &Path,
     output: &Path,
 ) -> Result<()> {
-    let selection = selection(selection_path)?;
-    validate_sources(&selection, upstream)?;
+    let selection = available_sources(&selection(selection_path)?, upstream)?;
+    build_selected(&selection, upstream, installed, output)
+}
+
+fn build_selected(
+    selection: &Selection,
+    upstream: &Path,
+    installed: &Path,
+    output: &Path,
+) -> Result<()> {
     let mut files = Vec::new();
     for name in &selection.skills {
         let root = installed.join(".agents/skills").join(name);
@@ -263,42 +326,44 @@ pub fn build_bundle(
             false,
         ));
     }
-    let mut entries = Vec::new();
-    let mut targets = BTreeSet::new();
-    for (relative, _, _) in &files {
-        targets.insert(relative.clone());
-        entries.push(json!({"target":relative,"source":relative}));
-        if let Ok(skill) = relative.strip_prefix(".agents/skills")
-            && skill
-                .components()
-                .next()
-                .and_then(|name| name.as_os_str().to_str())
-                .is_some_and(|name| {
-                    selection
-                        .claude_skills
-                        .iter()
-                        .any(|selected| selected == name)
+    let mut targets: BTreeSet<_> = files.iter().map(|(target, _, _)| target.clone()).collect();
+    let mirrors: Vec<_> = files
+        .iter()
+        .filter_map(|(relative, bytes, executable)| {
+            let skill = relative.strip_prefix(".agents/skills").ok()?;
+            let name = skill.components().next()?.as_os_str().to_str()?;
+            selection
+                .claude_skills
+                .iter()
+                .any(|selected| selected == name)
+                .then(|| {
+                    (
+                        PathBuf::from(".claude/skills").join(skill),
+                        bytes.clone(),
+                        *executable,
+                    )
                 })
-        {
-            let target = PathBuf::from(".claude/skills").join(skill);
-            targets.insert(target.clone());
-            entries.push(json!({"target":target,"source":relative}));
-        }
+        })
+        .collect();
+    for (target, _, _) in &mirrors {
+        ensure!(
+            targets.insert(target.clone()),
+            "ECC mirror target overlaps another selected resource"
+        );
     }
-    for (index, file) in selection.files.iter().enumerate() {
+    files.extend(mirrors);
+    for file in &selection.files {
         ensure!(
             targets.insert(file.target.clone()),
             "ECC file target overlaps another selected resource: {}",
             file.target.display()
         );
         let path = contained(upstream, &file.source)?;
-        let relative = PathBuf::from("extra").join(index.to_string());
         files.push((
-            relative.clone(),
+            file.target.clone(),
             fs::read(&path)?,
             fs::metadata(&path)?.permissions().mode() & 0o111 != 0,
         ));
-        entries.push(json!({"target":file.target,"source":relative}));
     }
     reject_symlink_path(output)?;
     ensure!(
@@ -309,11 +374,6 @@ pub fn build_bundle(
     for (relative, bytes, executable) in files {
         atomic_write(&output.join(relative), &bytes, Some(executable))?;
     }
-    atomic_write(
-        &output.join("bundle.json"),
-        &serde_json::to_vec_pretty(&json!({"entries":entries}))?,
-        Some(false),
-    )?;
     Ok(())
 }
 
@@ -379,7 +439,7 @@ pub fn generate(selection_path: &Path, output: &Path) -> Result<()> {
     let unpacked = run_command(gzip, None, Duration::from_secs(120))?;
     let upstream = temporary.path().join("upstream");
     unpack_package(&unpacked.stdout, &upstream)?;
-    validate_sources(&selection, &upstream)?;
+    let selection = available_sources(&selection, &upstream)?;
     let installed = temporary.path().join("installed");
     fs::create_dir(&installed)?;
     if !selection.skills.is_empty() {
@@ -394,5 +454,5 @@ pub fn generate(selection_path: &Path, output: &Path) -> Result<()> {
             .env("DISABLE_TELEMETRY", "1");
         run_command(native, None, Duration::from_secs(240))?;
     }
-    build_bundle(selection_path, &upstream, &installed, output)
+    build_selected(&selection, &upstream, &installed, output)
 }

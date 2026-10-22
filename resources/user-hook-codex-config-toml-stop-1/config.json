@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "/home/standard/.codex/hooks/hindsight_codex.py retain",
+            "statusMessage": "Retaining Hindsight memory",
+            "timeout": 30,
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  }
+}

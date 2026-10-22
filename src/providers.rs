@@ -1,6 +1,6 @@
 use crate::{
     files::{payload_files, shell_join},
-    model::{Client, OwnedWrite, Resource, ResourceKind, Scope, WriteBody},
+    model::{Client, OwnedWrite, Resource, ResourceContent, ResourceKind, Scope, WriteBody},
 };
 use anyhow::{Context, Result, ensure};
 use serde_json::{Map, Value, json};
@@ -101,6 +101,9 @@ pub fn render(
     payload: &Path,
     scope: &Path,
 ) -> Result<Vec<OwnedWrite>> {
+    if matches!(resource.content, ResourceContent::Files { .. }) {
+        return crate::projections::render(resource, payload, scope);
+    }
     let kind = resource.content.kind();
     if kind == ResourceKind::Hook && client == Client::Kimi && resource.scope == Scope::Project {
         return Err(UnsupportedResource.into());
@@ -111,7 +114,9 @@ pub fn render(
         Client::Kimi => ".kimi-code",
     });
     match kind {
-        ResourceKind::Bundle => crate::bundles::render(resource, payload, scope),
+        ResourceKind::Prompt | ResourceKind::Policy | ResourceKind::Script => {
+            anyhow::bail!("resource has no native payload adapter")
+        }
         ResourceKind::Skill => {
             fs::read_to_string(payload.join("SKILL.md"))?;
             copy_payload(
@@ -158,8 +163,11 @@ pub fn render(
             };
             let content = native_config(payload, filename, toml, section)?;
             ensure!(
-                content[section].is_object(),
-                "MCP services must be an object"
+                content[section]
+                    .as_object()
+                    .is_some_and(|servers| servers.len() == 1
+                        && servers.keys().all(|name| !name.trim().is_empty())),
+                "MCP payload must contain one server identity"
             );
             Ok(vec![OwnedWrite::new(
                 &resource.id,

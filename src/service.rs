@@ -8,7 +8,7 @@ use crate::{
     files::{atomic_write, contained, copy_tree, payload_files, reject_symlink_path},
     gitlab,
     model::{
-        ApplyReport, ApplyStatus, Catalog, Client, ResourceResult, ValidationReport,
+        ApplyReport, ApplyStatus, Catalog, Client, ResourceResult, Source, ValidationReport,
         ValidationStatus,
     },
     observe::{
@@ -336,6 +336,7 @@ fn apply_source_tracked(
     let temporary = tempfile::tempdir()?;
     let mut sources = BTreeMap::new();
     let mut errors = BTreeMap::new();
+    let mut fetched: BTreeMap<String, std::result::Result<PathBuf, String>> = BTreeMap::new();
     for (index, resource) in catalog.resources.iter().enumerate() {
         if let Some(run) = &mut run {
             run.stage(
@@ -345,10 +346,19 @@ fn apply_source_tracked(
                 catalog.resources.len(),
             )?;
         }
-        let result = if resource.source.is_self() {
-            Ok(source.to_path_buf())
-        } else {
-            fetch_upstream(resource, &temporary.path().join(&resource.id))
+        let result = match &resource.source {
+            Source::SelfOwned => Ok(source.to_path_buf()),
+            Source::Upstream { upstream } => fetched
+                .entry(upstream.clone())
+                .or_insert_with(|| {
+                    fetch_upstream(
+                        &catalog.upstreams[upstream],
+                        source,
+                        &temporary.path().join(upstream),
+                    )
+                    .map_err(|error| redact_text(&format!("{error:#}"), Some(1200)))
+                })
+                .clone(),
         };
         match result {
             Ok(path) => {
@@ -449,26 +459,36 @@ fn cache_resources(
     state: &State,
 ) -> Result<()> {
     let mut previous_contents: BTreeMap<String, BTreeMap<String, String>> =
-        if sources.len() < catalog.resources.len() {
-            state.get("resource_contents")?
-        } else {
-            BTreeMap::new()
-        };
+        state.get("resource_contents")?;
     let mut contents: BTreeMap<String, BTreeMap<String, String>> = BTreeMap::new();
     let mut hashes = BTreeMap::new();
     for resource in &catalog.resources {
         let mut files = BTreeMap::new();
-        if let Some(root) = sources.get(&resource.id) {
+        let readable = !report.results.get(&resource.id).is_some_and(|result| {
+            matches!(
+                result.status,
+                ApplyStatus::Failed | ApplyStatus::Unsupported
+            )
+        });
+        if let Some(root) = sources.get(&resource.id).filter(|_| readable) {
             for payload in resource.paths() {
                 let payload = contained(root, &payload)?;
-                if payload.is_dir() {
-                    for (path, _) in payload_files(&payload)? {
-                        if editable_text(&path) {
-                            files.insert(
-                                path.strip_prefix(root)?.to_string_lossy().into_owned(),
-                                redact_text(&fs::read_to_string(path)?, None),
-                            );
-                        }
+                let paths = if payload.is_file() {
+                    vec![payload]
+                } else if payload.is_dir() {
+                    payload_files(&payload)?
+                        .into_iter()
+                        .map(|(path, _)| path)
+                        .collect()
+                } else {
+                    Vec::new()
+                };
+                for path in paths {
+                    if editable_text(&path) {
+                        files.insert(
+                            path.strip_prefix(root)?.to_string_lossy().into_owned(),
+                            redact_text(&fs::read_to_string(path)?, None),
+                        );
                     }
                 }
             }

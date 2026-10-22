@@ -62,7 +62,7 @@ fn local_apply_and_capture_are_ready_before_upstream_fetch_and_old_retirement_wa
     let script = repo.temp.path().join("check-local");
     fs::write(&script,"#!/bin/sh\nset -eu\ntest -f \"$1\"\ntest -f \"$2\"\ngrep -q new \"$3\"\nmkdir -p \"$4\"\nprintf 'Upstream ready' > \"$4/SKILL.md\"\n").unwrap();
     fs::set_permissions(&script, fs::Permissions::from_mode(0o700)).unwrap();
-    repo.catalog(json!({"projects":{},"resources":[{"id":"new","kind":"skill","origin":"self","scope":"user","project":null,"payload":"resources/new"},{"id":"external","kind":"skill","origin":"upstream","scope":"user","project":null,"payload":".","upstream":{"argv":[script,runtime.home.join(".agents/skills/new/SKILL.md"),runtime.home.join(".agents/skills/review/SKILL.md"),state.directory().unwrap().join("active.json")]}}]}));
+    repo.catalog(json!({"projects":{},"upstreams":{"external":{"argv":[script,runtime.home.join(".agents/skills/new/SKILL.md"),runtime.home.join(".agents/skills/review/SKILL.md"),state.directory().unwrap().join("active.json")]}},"resources":[{"id":"new","kind":"skill","origin":"self","scope":"user","project":null,"payload":"resources/new"},{"id":"external","kind":"skill","origin":"upstream","scope":"user","project":null,"payload":".","upstream":"external"}]}));
     repo.publish("Replace local skill and fetch upstream");
     let report = synchronize(&runtime, &state).unwrap();
     assert!(report.ok(), "{report:?}");
@@ -192,10 +192,11 @@ fn failed_upstream_refresh_preserves_files_and_cached_content_until_retirement()
     let repo = Repo::new();
     let mut catalog: serde_json::Value =
         serde_json::from_slice(&fs::read(repo.work.join("catalog.json")).unwrap()).unwrap();
+    catalog["upstreams"] = json!({"upstream":{"argv":["cp","-R","resources"]}});
     catalog["resources"].as_array_mut().unwrap().push(json!({
         "id": "upstream", "kind": "skill", "origin": "upstream", "scope": "user",
         "project": null, "payload": "resources/review",
-        "upstream": {"argv": ["cp", "-R", "resources"]}
+        "upstream": "upstream"
     }));
     repo.catalog(catalog.clone());
     repo.publish("Add upstream generator");
@@ -210,7 +211,7 @@ fn failed_upstream_refresh_preserves_files_and_cached_content_until_retirement()
         "Approved"
     );
 
-    catalog["resources"][1]["upstream"]["argv"] = json!(["false"]);
+    catalog["upstreams"]["upstream"]["argv"] = json!(["false"]);
     repo.catalog(catalog.clone());
     fs::write(
         repo.work.join("resources/review/SKILL.md"),
@@ -454,4 +455,118 @@ fn native_service_units_pass_systemd_syntax_validation() {
         let warnings = String::from_utf8_lossy(&output.stderr);
         assert!(!warnings.contains("EnvironmentFile="), "{warnings}");
     }
+}
+
+#[test]
+fn shared_upstream_is_fetched_once_and_missing_payload_fails_only_its_resource() {
+    let repo = Repo::new();
+    let counter = repo.temp.path().join("fetches");
+    fs::write(repo.work.join("resources/generate.sh"), "set -eu\nprintf 'fetch\\n' >> \"$1\"\nmkdir -p \"$2/.agents/skills/one\" \"$2/.agents/skills/two\"\nprintf 'One' > \"$2/.agents/skills/one/SKILL.md\"\nprintf 'Two' > \"$2/.agents/skills/two/SKILL.md\"\nprintf 'private unrelated' > \"$2/unselected.txt\"\n").unwrap();
+    let mut catalog: serde_json::Value =
+        serde_json::from_slice(&fs::read(repo.work.join("catalog.json")).unwrap()).unwrap();
+    catalog["upstreams"] = json!({"shared":{"argv":["sh","resources/generate.sh",counter]}});
+    for id in ["one", "two", "missing"] {
+        catalog["resources"].as_array_mut().unwrap().push(json!({
+            "id":id,"kind":"skill","origin":"upstream","upstream":"shared","scope":"user","project":null,
+            "files":{"root":".","entries":[{"target":format!(".agents/skills/{id}/SKILL.md"),"source":format!(".agents/skills/{id}/SKILL.md")}]}
+        }));
+    }
+    repo.catalog(catalog.clone());
+    repo.publish("Independent resources from one shared upstream");
+    let runtime = runtime(&repo);
+    let state = runtime.state().unwrap();
+    let report = synchronize(&runtime, &state).unwrap();
+    assert_eq!(fs::read_to_string(&counter).unwrap(), "fetch\n");
+    assert_eq!(report.results["review"].status, ApplyStatus::Applied);
+    assert_eq!(report.results["one"].status, ApplyStatus::Applied);
+    assert_eq!(report.results["two"].status, ApplyStatus::Applied);
+    assert_eq!(report.results["missing"].status, ApplyStatus::Failed);
+    let contents: serde_json::Value = state.get("resource_contents").unwrap();
+    assert_eq!(contents["one"][".agents/skills/one/SKILL.md"], "One");
+    assert_eq!(contents["one"].as_object().unwrap().len(), 1);
+    assert_eq!(contents["two"].as_object().unwrap().len(), 1);
+    assert!(contents["missing"].as_object().unwrap().is_empty());
+    assert!(!contents.to_string().contains("private unrelated"));
+
+    catalog["upstreams"]["shared"]["argv"] = json!([
+        "sh",
+        "-c",
+        "printf 'failed\\n' >> \"$1\"; exit 1",
+        "source",
+        counter
+    ]);
+    repo.catalog(catalog);
+    repo.publish("Failed shared upstream remains one attempt");
+    let report = synchronize(&runtime, &state).unwrap();
+    assert_eq!(fs::read_to_string(counter).unwrap(), "fetch\nfailed\n");
+    for id in ["one", "two", "missing"] {
+        assert_eq!(report.results[id].status, ApplyStatus::Failed);
+    }
+    assert_eq!(report.results["review"].status, ApplyStatus::Applied);
+    assert_eq!(
+        fs::read_to_string(runtime.home.join(".agents/skills/one/SKILL.md")).unwrap(),
+        "One"
+    );
+    let retained: serde_json::Value = state.get("resource_contents").unwrap();
+    assert_eq!(retained["one"], contents["one"]);
+}
+
+#[test]
+fn upstream_skill_tree_follows_added_removed_helpers_and_isolates_unsafe_members() {
+    let repo = Repo::new();
+    let runtime = runtime(&repo);
+    let state = runtime.state().unwrap();
+    let mut catalog: serde_json::Value =
+        serde_json::from_slice(&fs::read(repo.work.join("catalog.json")).unwrap()).unwrap();
+    catalog["upstreams"] = json!({"shared":{"argv":["sh","resources/skill-tree.sh"]}});
+    catalog["resources"].as_array_mut().unwrap().push(json!({
+        "id":"selected","kind":"skill","origin":"upstream","upstream":"shared","scope":"user",
+        "files":{"root":".","entries":[{"target":".agents/skills/selected","tree":".agents/skills/selected"}]}
+    }));
+    repo.catalog(catalog);
+    for (revision, helpers) in [
+        ("initial", vec!["old.sh"]),
+        ("added", vec!["old.sh", "new.sh"]),
+        ("removed", vec!["new.sh"]),
+    ] {
+        let mut generator = String::from(
+            "set -eu\nmkdir -p \"$1/.agents/skills/selected\" \"$1/.agents/skills/other\"\nprintf 'Selected Skill' > \"$1/.agents/skills/selected/SKILL.md\"\nprintf 'Other Skill' > \"$1/.agents/skills/other/SKILL.md\"\n",
+        );
+        for helper in &helpers {
+            generator.push_str(&format!("printf 'helper' > \"$1/.agents/skills/selected/{helper}\"\nchmod +x \"$1/.agents/skills/selected/{helper}\"\n"));
+        }
+        fs::write(repo.work.join("resources/skill-tree.sh"), generator).unwrap();
+        repo.publish(revision);
+        let report = synchronize(&runtime, &state).unwrap();
+        assert!(report.ok(), "{report:?}");
+        let installed = runtime.home.join(".agents/skills/selected");
+        assert_eq!(
+            installed.join("old.sh").exists(),
+            helpers.contains(&"old.sh")
+        );
+        assert_eq!(
+            installed.join("new.sh").exists(),
+            helpers.contains(&"new.sh")
+        );
+        assert!(!runtime.home.join(".agents/skills/other").exists());
+        let contents: serde_json::Value = state.get("resource_contents").unwrap();
+        assert_eq!(
+            contents["selected"].as_object().unwrap().len(),
+            helpers.len() + 1
+        );
+        assert!(contents["selected"][".agents/skills/selected/SKILL.md"].is_string());
+    }
+    let previous: serde_json::Value = state.get("resource_contents").unwrap();
+    fs::write(repo.work.join("resources/skill-tree.sh"),"set -eu\nmkdir -p \"$1/.agents/skills/selected\"\nprintf 'Changed Skill' > \"$1/.agents/skills/selected/SKILL.md\"\nln -s /etc/passwd \"$1/.agents/skills/selected/unsafe\"\n").unwrap();
+    repo.publish("unsafe selected tree");
+    let report = synchronize(&runtime, &state).unwrap();
+    assert_eq!(report.results["selected"].status, ApplyStatus::Failed);
+    assert_eq!(report.results["review"].status, ApplyStatus::Applied);
+    assert_eq!(
+        fs::read_to_string(runtime.home.join(".agents/skills/selected/SKILL.md")).unwrap(),
+        "Selected Skill"
+    );
+    assert!(runtime.home.join(".agents/skills/selected/new.sh").exists());
+    let contents: serde_json::Value = state.get("resource_contents").unwrap();
+    assert_eq!(contents["selected"], previous["selected"]);
 }

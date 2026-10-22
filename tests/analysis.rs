@@ -43,6 +43,86 @@ impl AgentRunner for Runner {
 const BEFORE: &str = "---\nname: review\ndescription: Review code\n---\nRead config\nRead config again\nResolve entry\nResolve entry again\nVerify result\n";
 const AFTER: &str =
     "---\nname: review\ndescription: Review code\n---\nRead config\nResolve entry\nVerify result\n";
+
+#[test]
+fn individual_configuration_scope_and_source_file_modes_change_the_evidence_hash() {
+    use std::os::unix::fs::PermissionsExt;
+    let root = tempdir().unwrap();
+    let definition = json!({"id":"config","kind":"mcp","origin":"self","scope":"user","project":null,"files":{"root":"resources/config","entries":[{"target":".mcp.json","fragment":"config.json"}]}});
+    let mut resource: sm::model::Resource = serde_json::from_value(definition).unwrap();
+    resource.root = root.path().to_path_buf();
+    fs::create_dir_all(root.path().join("resources/config")).unwrap();
+    let config = root.path().join("resources/config/config.json");
+    fs::write(
+        &config,
+        json!({"mcpServers":{"demo":{"command":"before"}}}).to_string(),
+    )
+    .unwrap();
+    let before = content_hash(&resource).unwrap();
+    fs::write(
+        &config,
+        json!({"mcpServers":{"demo":{"command":"after"}}}).to_string(),
+    )
+    .unwrap();
+    assert_ne!(content_hash(&resource).unwrap(), before);
+    let before = content_hash(&resource).unwrap();
+    resource.scope = sm::model::Scope::Project;
+    resource.project = Some("app".into());
+    assert_ne!(content_hash(&resource).unwrap(), before);
+    let before = content_hash(&resource).unwrap();
+    fs::set_permissions(&config, fs::Permissions::from_mode(0o700)).unwrap();
+    assert_ne!(content_hash(&resource).unwrap(), before);
+}
+
+#[test]
+fn configuration_fragment_can_be_optimized_without_changing_another_resource() {
+    let (root, _, mut observation, mut reply) = fixture();
+    for id in ["config", "other"] {
+        fs::create_dir_all(root.path().join("resources").join(id)).unwrap();
+        fs::write(
+            root.path().join("resources").join(id).join("config.json"),
+            json!({"mcpServers":{id:{"command":"before"}}}).to_string(),
+        )
+        .unwrap();
+    }
+    let resources:Vec<_>=["config","other"].into_iter().map(|id|json!({"id":id,"kind":"mcp","origin":"self","scope":"user","project":null,"files":{"root":format!("resources/{id}"),"entries":[{"target":".mcp.json","fragment":"config.json"}]}})).collect();
+    fs::write(
+        root.path().join("catalog.json"),
+        json!({"projects":{},"resources":resources}).to_string(),
+    )
+    .unwrap();
+    let catalog = Catalog::load(root.path()).unwrap();
+    observation.resource_id = Some("config".into());
+    reply["candidates"][0]["resource_id"] = json!("config");
+    let after = json!({"mcpServers":{"config":{"command":"after"}}}).to_string();
+    reply["candidates"][0]["changes"] =
+        json!([{"path":"resources/config/config.json","content":after}]);
+    let runner = Runner::new(reply);
+    let candidate = analyze_observations(&catalog, &[observation], &runner)
+        .unwrap()
+        .remove(0);
+    assert!(
+        runner
+            .prompt
+            .lock()
+            .unwrap()
+            .contains("resources/config/config.json")
+    );
+    let proposed = stage(&root, &candidate);
+    let report = evaluate_candidate(&candidate, root.path(), &proposed).unwrap();
+    assert_eq!(report.status, ValidationStatus::Partial);
+    let change = to_changeset(&candidate, &report).unwrap();
+    assert_eq!(change.resource_ids, vec!["config"]);
+    assert!(change.writes.contains_key("resources/config/config.json"));
+    assert_eq!(
+        fs::read(proposed.join("resources/other/config.json")).unwrap(),
+        fs::read(root.path().join("resources/other/config.json")).unwrap()
+    );
+    assert_ne!(
+        fs::read(proposed.join("resources/config/config.json")).unwrap(),
+        fs::read(root.path().join("resources/config/config.json")).unwrap()
+    );
+}
 fn fixture() -> (TempDir, Catalog, Observation, Value) {
     let root = tempdir().unwrap();
     fs::create_dir_all(root.path().join("resources/review")).unwrap();
@@ -158,9 +238,7 @@ fn no_records_or_only_upstream_never_calls_the_model() {
             .is_empty()
     );
     catalog.resources[0].source = sm::model::Source::Upstream {
-        upstream: sm::model::UpstreamSource::Git {
-            git: "https://example.invalid/upstream".into(),
-        },
+        upstream: "external".into(),
     };
     assert!(
         analyze_observations(&catalog, &[observation], &runner)

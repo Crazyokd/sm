@@ -1,0 +1,18 @@
+{
+  "mcp_servers": {
+    "hindsight": {
+      "args": [
+        "/home/standard/.codex/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/run_mcp.sh"
+      ],
+      "command": "bash",
+      "env": {
+        "CLAUDE_PLUGIN_DATA": "/home/standard/.codex/plugins/data/hindsight-memory",
+        "CLAUDE_PLUGIN_ROOT": "/home/standard/.codex/plugins/cache/hindsight/hindsight-memory/0.7.4",
+        "HINDSIGHT_AGENT_NAME": "codex",
+        "HINDSIGHT_API_URL": "http://127.0.0.1:8888",
+        "HINDSIGHT_BANK_ID": "hermes-unified",
+        "HINDSIGHT_REQUEST_TIMEOUT_SECONDS": "120"
+      }
+    }
+  }
+}

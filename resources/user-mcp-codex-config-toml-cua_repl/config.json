@@ -1,0 +1,8 @@
+{
+  "mcp_servers": {
+    "cua_repl": {
+      "command": "/usr/lib/chatgpt/ChatGPT",
+      "enabled": false
+    }
+  }
+}

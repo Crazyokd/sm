@@ -1,7 +1,7 @@
 use crate::{
-    bundles::excluded_rule_tree,
     model::{Catalog, Scope, StoredBody, StoredWrite},
     privacy::redact_text,
+    projections::excluded_rule_tree,
     state::State,
 };
 use anyhow::Result;
@@ -188,6 +188,30 @@ pub fn scan(catalog: &Catalog, state: &State, home: &Path) -> Result<Inventory> 
             .expect("existing inventory entry");
         entry.enabled = Some(enabled);
         entry.enabled_source = source;
+    }
+    for entry in scanner
+        .entries
+        .values_mut()
+        .filter(|entry| entry.status != "native")
+    {
+        if let Some(resource) = entry.owner.as_ref().and_then(|owner| {
+            catalog
+                .resources
+                .iter()
+                .find(|resource| &resource.id == owner)
+        }) {
+            entry.kind = match resource.content.kind() {
+                crate::model::ResourceKind::Skill => "skill",
+                crate::model::ResourceKind::Hook => "hook",
+                crate::model::ResourceKind::Rule => "rule",
+                crate::model::ResourceKind::Agent => "agent",
+                crate::model::ResourceKind::Mcp => "mcp",
+                crate::model::ResourceKind::Prompt => "prompt",
+                crate::model::ResourceKind::Policy => "policy",
+                crate::model::ResourceKind::Script => "script",
+            }
+            .into();
+        }
     }
     Ok(Inventory {
         generated_at: chrono::Utc::now().to_rfc3339(),
@@ -397,7 +421,7 @@ impl Scanner {
                 if scope == Scope::User {
                     self.directory(
                         &base.join("scripts"),
-                        "hook-support",
+                        "script",
                         scope,
                         project,
                         0,
@@ -413,7 +437,7 @@ impl Scanner {
                 ("prompts", "prompt"),
                 ("commands", "prompt"),
                 ("rules", "rule"),
-                ("hooks", "hook"),
+                ("hooks", "script"),
             ] {
                 self.directory(
                     &base.join(folder),
@@ -907,7 +931,7 @@ impl Scanner {
             let kind = match child.file_name().and_then(|name| name.to_str()) {
                 Some("skills") => Some("skill"),
                 Some("agents" | "agent-defs" | "role") => Some("agent"),
-                Some("hooks") => Some("hook"),
+                Some("hooks" | "scripts") => Some("script"),
                 Some("rules") => Some("rule"),
                 Some("prompts" | "commands") => Some("prompt"),
                 _ => None,

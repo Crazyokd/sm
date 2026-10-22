@@ -1,0 +1,19 @@
+{
+  "mcp_servers": {
+    "hermes-tools": {
+      "args": [
+        "-m",
+        "agent.transports.hermes_tools_mcp_server"
+      ],
+      "command": "/home/standard/.hermes/hermes-agent/venv/bin/python3",
+      "enabled": false,
+      "env": {
+        "HERMES_HOME": "/home/standard/.hermes",
+        "HERMES_QUIET": "1",
+        "HERMES_REDACT_SECRETS": "true"
+      },
+      "startup_timeout_sec": 30.0,
+      "tool_timeout_sec": 600.0
+    }
+  }
+}

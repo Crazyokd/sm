@@ -3,6 +3,7 @@ use regex::Regex;
 use serde::{
     Deserialize, Serialize,
     de::{self, Deserializer},
+    ser::SerializeMap,
 };
 use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
@@ -46,36 +47,91 @@ pub enum Scope {
 #[serde(rename_all = "lowercase")]
 pub enum ResourceKind {
     Skill,
-    Bundle,
     Hook,
     Rule,
     Agent,
     Mcp,
+    Prompt,
+    Policy,
+    Script,
 }
 impl ResourceKind {
     pub fn label(self) -> &'static str {
         match self {
             Self::Skill => "Skill",
-            Self::Bundle => "资源包",
             Self::Hook => "Hook",
             Self::Rule => "规则",
             Self::Agent => "Agent 定义",
             Self::Mcp => "MCP 配置",
+            Self::Prompt => "提示词",
+            Self::Policy => "执行策略",
+            Self::Script => "脚本",
         }
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct NativePayload {
     pub agents: Vec<Client>,
     pub payloads: BTreeMap<Client, PathBuf>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-#[serde(tag = "kind", rename_all = "lowercase")]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct FileProjection {
+    pub root: PathBuf,
+    pub entries: Vec<ProjectionEntry>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub enum ProjectionEntry {
+    File {
+        target: PathBuf,
+        source: PathBuf,
+    },
+    Fragment {
+        target: PathBuf,
+        fragment: PathBuf,
+    },
+    Tree {
+        target: PathBuf,
+        tree: PathBuf,
+    },
+    Json {
+        target: PathBuf,
+        json: Map<String, Value>,
+    },
+    Toml {
+        target: PathBuf,
+        toml: Map<String, Value>,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct InstallationPolicy {
+    pub agent: Client,
+    pub source: String,
+    pub selector: String,
+    pub enabled: bool,
+    pub paths: Vec<PathBuf>,
+    pub update: Vec<Vec<String>>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ResourceContent {
-    Skill { payload: PathBuf },
-    Bundle { payload: PathBuf },
+    Skill {
+        payload: PathBuf,
+    },
+    Files {
+        kind: ResourceKind,
+        files: FileProjection,
+    },
+    Installation {
+        installation: InstallationPolicy,
+    },
     Hook(NativePayload),
     Rule(NativePayload),
     Agent(NativePayload),
@@ -85,12 +141,34 @@ impl ResourceContent {
     pub fn kind(&self) -> ResourceKind {
         match self {
             Self::Skill { .. } => ResourceKind::Skill,
-            Self::Bundle { .. } => ResourceKind::Bundle,
+            Self::Files { kind, .. } => *kind,
+            Self::Installation { .. } => ResourceKind::Policy,
             Self::Hook(_) => ResourceKind::Hook,
             Self::Rule(_) => ResourceKind::Rule,
             Self::Agent(_) => ResourceKind::Agent,
             Self::Mcp(_) => ResourceKind::Mcp,
         }
+    }
+}
+impl Serialize for ResourceContent {
+    fn serialize<S: serde::Serializer>(
+        &self,
+        serializer: S,
+    ) -> std::result::Result<S::Ok, S::Error> {
+        let mut fields = serializer.serialize_map(None)?;
+        fields.serialize_entry("kind", &self.kind())?;
+        match self {
+            Self::Skill { payload } => fields.serialize_entry("payload", payload)?,
+            Self::Files { files, .. } => fields.serialize_entry("files", files)?,
+            Self::Installation { installation } => {
+                fields.serialize_entry("installation", installation)?
+            }
+            Self::Hook(native) | Self::Rule(native) | Self::Agent(native) | Self::Mcp(native) => {
+                fields.serialize_entry("agents", &native.agents)?;
+                fields.serialize_entry("payloads", &native.payloads)?;
+            }
+        }
+        fields.end()
     }
 }
 
@@ -107,7 +185,7 @@ pub enum Source {
     #[serde(rename = "self")]
     SelfOwned,
     #[serde(rename = "upstream")]
-    Upstream { upstream: UpstreamSource },
+    Upstream { upstream: String },
 }
 impl Source {
     pub fn is_self(&self) -> bool {
@@ -129,6 +207,7 @@ pub struct Resource {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 struct RawResource {
     id: String,
     kind: ResourceKind,
@@ -136,11 +215,13 @@ struct RawResource {
     scope: Scope,
     project: Option<String>,
     payload: Option<PathBuf>,
+    files: Option<FileProjection>,
+    installation: Option<InstallationPolicy>,
     #[serde(default)]
     agents: Vec<Client>,
     #[serde(default)]
     payloads: BTreeMap<Client, PathBuf>,
-    upstream: Option<UpstreamSource>,
+    upstream: Option<String>,
 }
 impl<'de> Deserialize<'de> for Resource {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> std::result::Result<Self, D::Error> {
@@ -159,51 +240,98 @@ impl TryFrom<RawResource> for Resource {
     fn try_from(raw: RawResource) -> Result<Self> {
         ensure!(valid_id(&raw.id), "invalid resource id");
         ensure!(
+            raw.id != "source-providers",
+            "source-providers is reserved for shared source infrastructure"
+        );
+        ensure!(
             match raw.scope {
                 Scope::User => raw.project.is_none(),
                 Scope::Project => raw.project.as_deref().is_some_and(|p| !p.is_empty()),
             },
             "scope and project do not match"
         );
-        let content = match raw.kind {
-            kind @ (ResourceKind::Skill | ResourceKind::Bundle) => {
+        let content = if let Some(files) = raw.files {
+            ensure!(
+                raw.payload.is_none()
+                    && raw.installation.is_none()
+                    && raw.agents.is_empty()
+                    && raw.payloads.is_empty(),
+                "file projection cannot declare native payloads or installation"
+            );
+            crate::projections::validate(raw.kind, &files, raw.scope)?;
+            if raw.origin == "self" {
+                let directory = Path::new("resources").join(&raw.id);
                 ensure!(
-                    raw.agents.is_empty() && raw.payloads.is_empty(),
-                    "{} cannot have client classification",
-                    kind.label()
+                    files.root.starts_with(&directory),
+                    "self projection root must be resource specific"
                 );
-                let payload = raw
-                    .payload
-                    .context("shared resource requires one payload")?;
-                if kind == ResourceKind::Skill {
-                    ResourceContent::Skill { payload }
-                } else {
-                    ResourceContent::Bundle { payload }
+                let payloads = directory.join("files");
+                for entry in &files.entries {
+                    match entry {
+                        ProjectionEntry::File { source, .. } => {
+                            let path = files.root.join(source);
+                            ensure!(
+                                path.starts_with(&payloads) && path != payloads,
+                                "self projection files must be under resources/<id>/files"
+                            );
+                        }
+                        ProjectionEntry::Tree { tree, .. } => ensure!(
+                            files.root.join(tree).starts_with(&payloads),
+                            "self Skill tree must be under resources/<id>/files"
+                        ),
+                        _ => {}
+                    }
                 }
             }
-            kind => {
-                ensure!(
-                    raw.payload.is_none(),
-                    "native resource cannot have a shared payload field"
-                );
-                let agents: BTreeSet<_> = raw.agents.iter().copied().collect();
-                ensure!(
-                    !agents.is_empty()
-                        && agents.len() == raw.agents.len()
-                        && agents == raw.payloads.keys().copied().collect(),
-                    "payloads must match unique clients"
-                );
-                let native = NativePayload {
-                    agents: raw.agents,
-                    payloads: raw.payloads,
-                };
-                match kind {
-                    ResourceKind::Hook => ResourceContent::Hook(native),
-                    ResourceKind::Rule => ResourceContent::Rule(native),
-                    ResourceKind::Agent => ResourceContent::Agent(native),
-                    ResourceKind::Mcp => ResourceContent::Mcp(native),
-                    ResourceKind::Skill | ResourceKind::Bundle => unreachable!("handled above"),
+            ResourceContent::Files {
+                kind: raw.kind,
+                files,
+            }
+        } else if let Some(installation) = raw.installation {
+            ensure!(
+                raw.kind == ResourceKind::Policy
+                    && raw.origin == "self"
+                    && raw.scope == Scope::User,
+                "installation must be a self-owned user policy"
+            );
+            ensure!(
+                raw.payload.is_none() && raw.agents.is_empty() && raw.payloads.is_empty(),
+                "installation cannot declare payloads"
+            );
+            ResourceContent::Installation { installation }
+        } else if raw.kind == ResourceKind::Skill {
+            ensure!(
+                raw.agents.is_empty() && raw.payloads.is_empty(),
+                "Skill cannot have client classification"
+            );
+            ResourceContent::Skill {
+                payload: raw.payload.context("Skill requires one payload")?,
+            }
+        } else {
+            ensure!(
+                raw.payload.is_none(),
+                "native resource cannot have a shared payload field"
+            );
+            let agents: BTreeSet<_> = raw.agents.iter().copied().collect();
+            ensure!(
+                !agents.is_empty()
+                    && agents.len() == raw.agents.len()
+                    && agents == raw.payloads.keys().copied().collect(),
+                "payloads must match unique clients"
+            );
+            let native = NativePayload {
+                agents: raw.agents,
+                payloads: raw.payloads,
+            };
+            match raw.kind {
+                ResourceKind::Hook => ResourceContent::Hook(native),
+                ResourceKind::Rule => ResourceContent::Rule(native),
+                ResourceKind::Agent => ResourceContent::Agent(native),
+                ResourceKind::Mcp => ResourceContent::Mcp(native),
+                ResourceKind::Prompt | ResourceKind::Policy | ResourceKind::Script => {
+                    bail!("resource requires a file projection or installation policy")
                 }
+                ResourceKind::Skill => unreachable!("handled above"),
             }
         };
         let source = match raw.origin.as_str() {
@@ -216,15 +344,7 @@ impl TryFrom<RawResource> for Resource {
             }
             "upstream" => {
                 let upstream = raw.upstream.context("upstream source required")?;
-                match &upstream {
-                    UpstreamSource::Git { git } => {
-                        ensure!(!git.is_empty(), "empty upstream Git source")
-                    }
-                    UpstreamSource::Generator { argv } => ensure!(
-                        !argv.is_empty() && !argv[0].is_empty(),
-                        "empty upstream generator"
-                    ),
-                }
+                ensure!(valid_id(&upstream), "invalid upstream source id");
                 Source::Upstream { upstream }
             }
             _ => bail!("invalid resource origin"),
@@ -252,10 +372,15 @@ impl TryFrom<RawResource> for Resource {
 impl Resource {
     pub fn targets(&self) -> BTreeMap<Client, PathBuf> {
         match &self.content {
-            ResourceContent::Skill { payload } | ResourceContent::Bundle { payload } => Client::ALL
+            ResourceContent::Skill { payload } => Client::ALL
                 .into_iter()
                 .map(|c| (c, payload.clone()))
                 .collect(),
+            ResourceContent::Files { files, .. } => Client::ALL
+                .into_iter()
+                .map(|c| (c, files.root.clone()))
+                .collect(),
+            ResourceContent::Installation { .. } => BTreeMap::new(),
             ResourceContent::Hook(p)
             | ResourceContent::Rule(p)
             | ResourceContent::Agent(p)
@@ -263,7 +388,21 @@ impl Resource {
         }
     }
     pub fn paths(&self) -> BTreeSet<PathBuf> {
-        self.targets().into_values().collect()
+        match &self.content {
+            ResourceContent::Files { files, .. } => files
+                .entries
+                .iter()
+                .filter_map(|entry| match entry {
+                    ProjectionEntry::File { source, .. }
+                    | ProjectionEntry::Tree { tree: source, .. }
+                    | ProjectionEntry::Fragment {
+                        fragment: source, ..
+                    } => Some(files.root.join(source)),
+                    _ => None,
+                })
+                .collect(),
+            _ => self.targets().into_values().collect(),
+        }
     }
 }
 
@@ -271,12 +410,29 @@ impl Resource {
 #[serde(deny_unknown_fields)]
 pub struct Catalog {
     pub projects: BTreeMap<String, String>,
+    #[serde(default)]
+    pub upstreams: BTreeMap<String, UpstreamSource>,
     pub resources: Vec<Resource>,
 }
 impl Catalog {
     pub fn load(root: &Path) -> Result<Self> {
         let mut catalog: Self = serde_json::from_slice(&fs::read(root.join("catalog.json"))?)?;
         let mut ids = BTreeSet::new();
+        for (name, upstream) in &catalog.upstreams {
+            ensure!(valid_id(name), "invalid upstream source id");
+            match upstream {
+                UpstreamSource::Git { git } => ensure!(
+                    !git.is_empty() && !git.contains('\0'),
+                    "empty upstream Git source"
+                ),
+                UpstreamSource::Generator { argv } => ensure!(
+                    !argv.is_empty()
+                        && !argv[0].is_empty()
+                        && argv.iter().all(|arg| !arg.contains('\0')),
+                    "empty upstream generator"
+                ),
+            }
+        }
         for (name, path) in &catalog.projects {
             ensure!(
                 !name.is_empty()
@@ -299,16 +455,31 @@ impl Catalog {
                     "unknown project"
                 );
             }
+            if let Source::Upstream { upstream } = &resource.source {
+                ensure!(
+                    catalog.upstreams.contains_key(upstream),
+                    "unknown upstream source: {upstream}"
+                );
+            }
             if resource.source.is_self() {
                 for path in resource.paths() {
-                    ensure!(
-                        contained(root, &path)?.is_dir(),
-                        "missing resource payload: {}",
-                        path.display()
-                    );
+                    let payload = contained(root, &path)?;
+                    let exists = match &resource.content {
+                        ResourceContent::Files { files, .. } => {
+                            crate::files::reject_symlink_path(&payload)?;
+                            if files.entries.iter().any(|entry| matches!(entry, ProjectionEntry::Tree { tree, .. } if files.root.join(tree) == path)) {
+                                payload.is_dir()
+                            } else {
+                                payload.is_file()
+                            }
+                        }
+                        _ => payload.is_dir(),
+                    };
+                    ensure!(exists, "missing resource payload: {}", path.display());
                 }
             }
         }
+        crate::installations::load(root)?;
         Ok(catalog)
     }
     pub fn scope_root(&self, resource: &Resource, home: &Path) -> Result<PathBuf> {

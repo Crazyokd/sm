@@ -1,5 +1,8 @@
 use crate::{
-    model::{ApplyStatus, Catalog, Client, Resource, ResourceKind, ResourceResult, Scope},
+    model::{
+        ApplyStatus, Catalog, Client, Resource, ResourceContent, ResourceKind, ResourceResult,
+        Scope, Source, UpstreamSource,
+    },
     observe::{Coverage, Observation, RecordingError},
     privacy::redact_text,
     proposals::{ChangeSet, Proposal},
@@ -125,8 +128,9 @@ fn templates() -> Result<Environment<'static>> {
     env.add_function("inventory_kind", |kind: String| match kind.as_str() {
         "skill" => "Skill",
         "hook" => "Hook",
-        "hook-support" => "Hook 依赖",
-        "rule" => "规则／策略",
+        "script" => "脚本",
+        "policy" => "执行策略",
+        "rule" => "规则",
         "agent" => "Agent",
         "prompt" => "提示词／命令",
         "mcp" => "MCP",
@@ -356,13 +360,16 @@ struct ResourceView {
     resource: Resource,
     kind_label: &'static str,
     upstream_path: String,
+    source_definition: Option<UpstreamSource>,
     client_label: String,
+    supported_clients: BTreeSet<Client>,
     status: ApplyStatus,
     status_label: &'static str,
     status_message: String,
 }
 fn resource_rows(state: &State) -> Result<Vec<ResourceView>> {
-    let resources = state.get::<Catalog>("catalog")?.resources;
+    let catalog = state.get::<Catalog>("catalog")?;
+    let resources = catalog.resources;
     let results: BTreeMap<String, ResourceResult> = state.get("resource_results")?;
     Ok(resources
         .into_iter()
@@ -370,8 +377,82 @@ fn resource_rows(state: &State) -> Result<Vec<ResourceView>> {
             let result = results.get(&resource.id);
             let status = result.map_or(ApplyStatus::Unknown, |r| r.status);
             let kind = resource.content.kind();
+            let targets = match &resource.content {
+                ResourceContent::Files { files, .. } => files
+                    .entries
+                    .iter()
+                    .map(|entry| match entry {
+                        crate::model::ProjectionEntry::File { target, .. }
+                        | crate::model::ProjectionEntry::Tree { target, .. }
+                        | crate::model::ProjectionEntry::Fragment { target, .. }
+                        | crate::model::ProjectionEntry::Json { target, .. }
+                        | crate::model::ProjectionEntry::Toml { target, .. } => target.as_path(),
+                    })
+                    .collect::<Vec<_>>(),
+                _ => Vec::new(),
+            };
+            let shared_instruction = |target: &Path| {
+                resource.scope == Scope::Project
+                    && kind == ResourceKind::Rule
+                    && target.file_name().is_some_and(|name| name == "AGENTS.md")
+                    && ![".codex", ".kimi-code", ".claude", ".cursor"]
+                        .into_iter()
+                        .any(|prefix| target.starts_with(prefix))
+            };
+            let project_mcp = |target: &Path| {
+                resource.scope == Scope::Project
+                    && kind == ResourceKind::Mcp
+                    && target == Path::new(".mcp.json")
+            };
+            let supported_clients = if kind == ResourceKind::Skill {
+                Client::ALL.into_iter().collect()
+            } else if let ResourceContent::Installation { installation } = &resource.content {
+                BTreeSet::from([installation.agent])
+            } else if matches!(resource.content, ResourceContent::Files { .. }) {
+                Client::ALL
+                    .into_iter()
+                    .filter(|client| {
+                        targets.iter().any(|target| {
+                            target.starts_with(match client {
+                                Client::Codex => ".codex",
+                                Client::Kimi => ".kimi-code",
+                            }) || target.starts_with(".agents")
+                                || shared_instruction(target)
+                                || (*client == Client::Kimi && project_mcp(target))
+                        })
+                    })
+                    .collect()
+            } else {
+                resource.targets().into_keys().collect()
+            };
             let client_label = if kind == ResourceKind::Skill {
                 "通用 Skill".into()
+            } else if let ResourceContent::Installation { installation } = &resource.content {
+                installation.agent.to_string()
+            } else if matches!(resource.content, ResourceContent::Files { .. }) {
+                targets
+                    .iter()
+                    .map(|target| {
+                        if shared_instruction(target) {
+                            return "Codex / Kimi";
+                        }
+                        if project_mcp(target) {
+                            return "Kimi";
+                        }
+                        [
+                            (".codex", "Codex"),
+                            (".kimi-code", "Kimi"),
+                            (".claude", "Claude"),
+                            (".cursor", "Cursor"),
+                        ]
+                        .into_iter()
+                        .find_map(|(prefix, label)| target.starts_with(prefix).then_some(label))
+                        .unwrap_or("通用")
+                    })
+                    .collect::<BTreeSet<_>>()
+                    .into_iter()
+                    .collect::<Vec<_>>()
+                    .join(" / ")
             } else {
                 resource
                     .targets()
@@ -385,11 +466,17 @@ fn resource_rows(state: &State) -> Result<Vec<ResourceView>> {
                 .into_values()
                 .next()
                 .map_or_else(|| ".".to_owned(), |p| p.to_string_lossy().into_owned());
+            let source_definition = match &resource.source {
+                Source::Upstream { upstream } => catalog.upstreams.get(upstream).cloned(),
+                Source::SelfOwned => None,
+            };
             ResourceView {
                 resource,
+                source_definition,
                 upstream_path,
                 kind_label: kind.label(),
                 client_label,
+                supported_clients,
                 status,
                 status_label: status.label(),
                 status_message: result.map_or_else(|| "尚未应用".into(), |r| r.message.clone()),
@@ -418,7 +505,9 @@ fn base(context: &WebContext, nav: &'static str, rows: &[ResourceView]) -> Resul
             ("rule", "规则"),
             ("agent", "Agent 定义"),
             ("mcp", "MCP 配置"),
-            ("bundle", "资源集合"),
+            ("prompt", "提示词"),
+            ("policy", "执行策略"),
+            ("script", "脚本"),
         ],
         total: rows.len(),
         self_count: rows.iter().filter(|r| r.resource.source.is_self()).count(),
@@ -597,7 +686,7 @@ async fn resources(
                     && filters.scope.is_none_or(|scope| r.resource.scope == scope)
                     && filters
                         .agent
-                        .is_none_or(|client| r.resource.targets().contains_key(&client))
+                        .is_none_or(|client| r.supported_clients.contains(&client))
                     && r.resource
                         .id
                         .to_lowercase()
@@ -724,10 +813,38 @@ async fn resource(
             } else {
                 text
             };
+            let target = if let ResourceContent::Files { files, .. } = &resource.resource.content {
+                files.entries.iter().find_map(|entry| match entry {
+                    crate::model::ProjectionEntry::File { target, source }
+                    | crate::model::ProjectionEntry::Fragment {
+                        target,
+                        fragment: source,
+                    } if {
+                        let path = files.root.join(source);
+                        path.strip_prefix(".").unwrap_or(&path) == Path::new(name)
+                    } =>
+                    {
+                        Some(target.to_string_lossy().into_owned())
+                    }
+                    crate::model::ProjectionEntry::Tree { target, tree } => {
+                        let root = files.root.join(tree);
+                        let root = root.strip_prefix(".").unwrap_or(&root);
+                        Path::new(name)
+                            .strip_prefix(root)
+                            .ok()
+                            .map(|relative| target.join(relative).to_string_lossy().into_owned())
+                    }
+                    _ => None,
+                })
+            } else {
+                None
+            };
             articles.push(Article {
-                title: Path::new(name)
-                    .file_name()
-                    .map_or_else(|| name.clone(), |n| n.to_string_lossy().into_owned()),
+                title: target.unwrap_or_else(|| {
+                    Path::new(name)
+                        .file_name()
+                        .map_or_else(|| name.clone(), |n| n.to_string_lossy().into_owned())
+                }),
                 html: if name.ends_with(".md") {
                     Some(markdown(body))
                 } else {
@@ -735,6 +852,32 @@ async fn resource(
                 },
                 text: text.clone(),
             });
+        }
+        match &resource.resource.content {
+            ResourceContent::Files {
+                files: projection, ..
+            } => {
+                for entry in &projection.entries {
+                    let (title, fragment) = match entry {
+                        crate::model::ProjectionEntry::File { .. }
+                        | crate::model::ProjectionEntry::Tree { .. }
+                        | crate::model::ProjectionEntry::Fragment { .. } => continue,
+                        crate::model::ProjectionEntry::Json { target, json } => (target, json),
+                        crate::model::ProjectionEntry::Toml { target, toml } => (target, toml),
+                    };
+                    articles.push(Article {
+                        title: title.to_string_lossy().into_owned(),
+                        html: None,
+                        text: serde_json::to_string_pretty(fragment)?,
+                    });
+                }
+            }
+            ResourceContent::Installation { installation } => articles.push(Article {
+                title: "原生安装策略".into(),
+                html: None,
+                text: serde_json::to_string_pretty(installation)?,
+            }),
+            _ => {}
         }
         let proposals = proposals_for(&context.state, &id)?;
         render(
@@ -986,20 +1129,23 @@ async fn propose_installation(
 ) -> WebResult<Response> {
     let Json(request) = body.map_err(WebError::bad)?;
     blocking(move || {
-        let mut declarations: Vec<crate::installations::Installation> =
-            context.state.get("installation_manifest")?;
-        let declaration = declarations
+        let mut catalog: Catalog = context.state.get("catalog")?;
+        let resource = catalog
+            .resources
             .iter_mut()
-            .find(|item| item.id == id)
+            .find(|resource| resource.id == id)
             .ok_or_else(|| WebError::bad("未知的原生安装"))?;
-        declaration.enabled = request.enabled;
+        let ResourceContent::Installation { installation } = &mut resource.content else {
+            return Err(WebError::bad("该资源不是原生安装策略"));
+        };
+        installation.enabled = request.enabled;
         let change = ChangeSet {
-            resource_ids: vec!["native-installations".into()],
+            resource_ids: vec![id],
             reason: request.reason,
             evidence: Vec::new(),
             writes: BTreeMap::from([(
-                "resources/native-installations/installations.json".into(),
-                serde_json::to_string_pretty(&declarations)? + "\n",
+                "catalog.json".into(),
+                serde_json::to_string_pretty(&catalog)? + "\n",
             )]),
             deletions: Vec::new(),
             renames: BTreeMap::new(),

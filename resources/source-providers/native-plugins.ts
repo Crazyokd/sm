@@ -17,6 +17,70 @@ function sameSource(left: string, right: string): boolean {
   return left.replace(/\.git\/?$/, '').replace(/\/$/, '') === right.replace(/\.git\/?$/, '').replace(/\/$/, '');
 }
 
+async function responseText(response: Response): Promise<string> {
+  if (!response.body) throw new Error('native plugin response body missing');
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for await (const chunk of response.body) {
+    size += chunk.length;
+    if (size > 1_048_576) throw new Error('native plugin response limit exceeded');
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks).toString('utf8');
+}
+
+async function kimiInstallSource(source: string, selector: string): Promise<string> {
+  let manifest: unknown;
+  let installSource = source;
+  if (isAbsolute(source)) {
+    let text: string;
+    try {
+      text = await readFile(join(source, 'kimi.plugin.json'), 'utf8');
+    } catch (error) {
+      if (!(error instanceof Error) || !('code' in error) || error.code !== 'ENOENT') throw error;
+      text = await readFile(join(source, '.kimi-plugin/plugin.json'), 'utf8');
+    }
+    manifest = JSON.parse(text);
+  } else {
+    const url = new URL(source);
+    const parts = url.pathname.split('/').filter(Boolean);
+    if (url.protocol !== 'https:' || !['github.com', 'www.github.com'].includes(url.hostname) || url.username || url.password || url.port || url.search || url.hash || parts.length !== 2) {
+      throw new Error('native plugin source cannot be checked before installation');
+    }
+    const owner = parts[0];
+    const repo = parts[1]?.replace(/\.git$/, '');
+    if (!owner || !repo || !/^[\w.-]+$/.test(owner) || !/^[\w.-]+$/.test(repo)) throw new Error('invalid native GitHub source');
+    const base = `https://github.com/${owner}/${repo}`;
+    const latest = await fetch(`${base}/releases/latest`, { redirect: 'manual', signal: AbortSignal.timeout(10_000) });
+    let ref = 'HEAD';
+    if (latest.status === 301 || latest.status === 302) {
+      const tag = latest.headers.get('location')?.match(/\/releases\/tag\/([^/?#]+)/)?.[1];
+      if (tag) ref = decodeURIComponent(tag);
+    } else if (latest.status !== 404) throw new Error('native plugin upstream release lookup failed');
+    await latest.body?.cancel();
+    const feed = await fetch(`${base}/commits/${ref.split('/').map(encodeURIComponent).join('/')}.atom`, {
+      headers: { accept: 'application/atom+xml', range: 'bytes=0-4095' }, signal: AbortSignal.timeout(10_000),
+    });
+    if (!feed.ok) throw new Error('native plugin upstream commit lookup failed');
+    const sha = (await responseText(feed)).match(/Grit::Commit\/([0-9a-f]{40})/i)?.[1]?.toLowerCase();
+    if (!sha) throw new Error('native plugin upstream commit unavailable');
+    const raw = `https://raw.githubusercontent.com/${owner}/${repo}/${sha}`;
+    let response = await fetch(`${raw}/kimi.plugin.json`, { signal: AbortSignal.timeout(10_000) });
+    if (response.status === 404) {
+      await response.body?.cancel();
+      response = await fetch(`${raw}/.kimi-plugin/plugin.json`, { signal: AbortSignal.timeout(10_000) });
+    }
+    if (!response.ok) throw new Error('native plugin upstream manifest unavailable');
+    manifest = JSON.parse(await responseText(response));
+    // Install the checked commit so an upstream rename cannot race manifest validation.
+    installSource = `${base}/commit/${sha}`;
+  }
+  if (!manifest || typeof manifest !== 'object' || !('name' in manifest) || typeof manifest.name !== 'string' || manifest.name.trim().toLowerCase() !== selector) {
+    throw new Error('native plugin upstream identity differs from declaration');
+  }
+  return installSource;
+}
+
 async function synchronizeCodex(source: string, selector: string): Promise<void> {
   if (!/^[\w.-]+@[\w.-]+$/.test(selector)) throw new Error('invalid native plugin selector');
   if (process.env.SM_INSTALL_HOME && process.env.CODEX_HOME && process.env.CODEX_HOME !== join(homedir(), '.codex')) {
@@ -112,22 +176,21 @@ async function synchronize(): Promise<void> {
         body: body === undefined ? null : JSON.stringify(body),
         signal: AbortSignal.timeout(90_000),
       });
-      if (!response.ok || !response.body) throw new Error('native plugin API request failed');
-      const chunks: Uint8Array[] = [];
-      let size = 0;
-      for await (const chunk of response.body) {
-        size += chunk.length;
-        if (size > 1_048_576) throw new Error('native plugin API response limit exceeded');
-        chunks.push(chunk);
-      }
-      const result: unknown = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+      if (!response.ok) throw new Error('native plugin API request failed');
+      const result: unknown = JSON.parse(await responseText(response));
       if (!result || typeof result !== 'object' || !('code' in result) || result.code !== 0 || !('data' in result)) {
         throw new Error('native plugin API operation failed');
       }
       return result.data;
     };
+    const current = await request('/plugins');
+    if (!current || typeof current !== 'object' || !('plugins' in current) || !Array.isArray(current.plugins)) throw new Error('invalid native plugin list');
+    const existing = current.plugins.some((plugin: unknown) => plugin && typeof plugin === 'object' && 'id' in plugin && plugin.id === selector);
+    // An approved toggle must work even when upstream is unreachable or has renamed the plugin.
+    if (existing) await request(`/plugins/${encodeURIComponent(selector)}:${enabled ? 'enable' : 'disable'}`, {});
+    const installSource = await kimiInstallSource(source, selector);
     try {
-      const installed = await request('/plugins', { source });
+      const installed = await request('/plugins', { source: installSource });
       if (!installed || typeof installed !== 'object' || !('id' in installed) || installed.id !== selector) {
         throw new Error('native installer returned another plugin');
       }

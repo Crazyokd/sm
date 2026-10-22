@@ -72,6 +72,7 @@ for (const form of document.querySelectorAll(".resource-editor")) {
     const buttons = form.querySelectorAll(".form-actions button");
     let currentFile = null;
     let textarea = null;
+    let installationEnabled = original && "installation" in original ? original.installation.enabled : false;
     const control = (name) => {
         const input = form.elements.namedItem(name);
         if (input instanceof HTMLInputElement || input instanceof HTMLSelectElement || input instanceof HTMLTextAreaElement)
@@ -83,25 +84,34 @@ for (const form of document.querySelectorAll(".resource-editor")) {
         const kind = value("kind");
         switch (kind) {
             case "skill":
-            case "bundle":
             case "hook":
             case "rule":
             case "agent":
-            case "mcp": return kind;
+            case "mcp":
+            case "prompt":
+            case "policy":
+            case "script": return kind;
             default: throw new Error("无效的资源类型。");
         }
     };
-    const clients = () => (currentKind() === "skill" || currentKind() === "bundle") ? ["codex", "kimi"] : [...form.querySelectorAll("input[name=agents]:checked")].map(input => {
+    const clients = () => currentKind() === "prompt" || currentKind() === "policy" ? ["codex"] : (currentKind() === "skill" || original && ("files" in original || "installation" in original)) ? ["codex", "kimi"] : [...form.querySelectorAll("input[name=agents]:checked")].map(input => {
         if (input.value === "codex" || input.value === "kimi")
             return input.value;
         throw new Error("无效的客户端。");
     });
-    const save = () => { if (textarea && currentFile)
-        drafts[currentFile] = textarea.value; };
+    const save = () => {
+        if (textarea && currentFile)
+            drafts[currentFile] = textarea.value;
+        const enabled = fields.querySelector("[name=installation_enabled]");
+        if (enabled)
+            installationEnabled = enabled.checked;
+    };
     const templates = (kind, client, id) => {
         switch (kind) {
             case "skill": return ["SKILL.md", `---\nname: ${id}\ndescription: 说明何时应使用这项技能\n---\n\n# ${id}\n\n写下工作流程和完成标准。\n`];
-            case "bundle": return ["bundle.json", JSON.stringify({ entries: [] }, null, 2) + "\n"];
+            case "script": throw new Error("请从已有脚本发起修改。");
+            case "prompt": return ["prompt.md", "# 提示词\n\n写下提示词内容。\n"];
+            case "policy": throw new Error("执行策略使用配置片段编辑器。");
             case "rule": return ["AGENTS.md", "# 工作约定\n\n在这里写下需要持续遵循的约定。\n"];
             case "agent": return client === "codex" ? ["agent.toml", `name = "${id}"\ndescription = "说明角色用途"\ndeveloper_instructions = "描述角色的工作方法"\n`] : ["agent.md", `---\nname: ${id}\ndescription: 说明角色用途\n---\n\n描述角色的工作方法。\n`];
             case "mcp": return client === "codex" ? ["config.toml", `[mcp_servers.${id}]\ncommand = "your-mcp-command"\n`] : ["mcp.json", JSON.stringify({ mcpServers: { [id]: { command: "your-mcp-command" } } }, null, 2)];
@@ -110,15 +120,16 @@ for (const form of document.querySelectorAll(".resource-editor")) {
     };
     const renamedPath = (path, id) => original && id !== original.id ? path.replace(`resources/${original.id}/`, `resources/${id}/`) : path;
     const sourcePath = (path, id) => original && id !== original.id ? path.replace(`resources/${id}/`, `resources/${original.id}/`) : path;
+    const projectionPath = (root, source) => `${root}/${source}`.split("/").filter(part => part && part !== ".").join("/");
     const payloadPath = (client, id, kind) => {
-        const path = (original?.kind === "skill" || original?.kind === "bundle") ? original.payload : original?.payloads[client];
-        return renamedPath(path || `resources/${id}/${kind === "skill" || kind === "bundle" || kind === "rule" ? "shared" : client}`, id);
+        const path = original && "payload" in original ? original.payload : original && "payloads" in original ? original.payloads[client] : undefined;
+        return renamedPath(path || `resources/${id}/${kind === "prompt" || kind === "policy" ? "files" : kind === "skill" || kind === "rule" ? "shared" : client}`, id);
     };
     const render = () => {
         save();
         const upstream = value("origin") === "upstream";
         required(form, ".upstream-fields").hidden = !upstream;
-        required(form, ".agent-options").hidden = (currentKind() === "skill" || currentKind() === "bundle");
+        required(form, ".agent-options").hidden = currentKind() === "skill" || currentKind() === "prompt" || currentKind() === "policy" || !!original && "files" in original;
         for (const name of ["project", "project_path"]) {
             const label = control(name).closest("label");
             if (label)
@@ -127,43 +138,93 @@ for (const form of document.querySelectorAll(".resource-editor")) {
         fields.replaceChildren();
         currentFile = null;
         textarea = null;
-        if (upstream)
+        if (original && "installation" in original) {
+            const label = document.createElement("label");
+            label.textContent = "启用原生安装";
+            const enabled = document.createElement("input");
+            enabled.type = "checkbox";
+            enabled.name = "installation_enabled";
+            enabled.checked = installationEnabled;
+            label.append(enabled);
+            fields.append(label);
+            return;
+        }
+        if (upstream && !(original && "files" in original))
             return;
         const id = value("resource_id") || "new-resource";
         const kind = currentKind();
-        const names = new Set();
-        for (const client of clients()) {
-            const root = payloadPath(client, id, kind);
-            const existing = Object.keys(originalFiles).map(path => renamedPath(path, id)).filter(path => path.startsWith(root + "/"));
-            if (existing.length) {
-                for (const path of existing) {
-                    names.add(path);
-                    if (!(path in drafts))
-                        drafts[path] = originalFiles[sourcePath(path, id)] ?? "";
+        const names = new Map();
+        if (!original && kind === "policy") {
+            const key = `resources/${id}/files/config.json`;
+            names.set(key, ".codex/config.toml · Skill 启停策略（JSON）");
+            const content = JSON.stringify({ skills: { config: [{ name: id, enabled: true }] } }, null, 2) + "\n";
+            if (!(key in drafts) || drafts[key] === defaults[key])
+                drafts[key] = content;
+            defaults[key] = content;
+        }
+        else if (original && "files" in original) {
+            original.files.entries.forEach((entry, index) => {
+                if ("tree" in entry) {
+                    const root = projectionPath(original.files.root, entry.tree);
+                    const prefix = root ? root + "/" : "";
+                    for (const [path, content] of Object.entries(originalFiles))
+                        if (path.startsWith(prefix)) {
+                            const key = renamedPath(path, id);
+                            names.set(key, projectionPath(entry.target, path.slice(prefix.length)));
+                            if (!(key in drafts))
+                                drafts[key] = content;
+                        }
+                    return;
                 }
-                continue;
+                const source = "source" in entry ? entry.source : "fragment" in entry ? entry.fragment : null;
+                const key = source === null ? `fragment:${index}` : renamedPath(projectionPath(original.files.root, source), id);
+                if (source !== null && !(sourcePath(key, id) in originalFiles))
+                    return;
+                names.set(key, entry.target + ("source" in entry ? "" : " · 配置片段（JSON）"));
+                if (!(key in drafts))
+                    drafts[key] = source !== null ? originalFiles[sourcePath(key, id)] ?? "" : JSON.stringify("json" in entry ? entry.json : "toml" in entry ? entry.toml : {}, null, 2) + "\n";
+            });
+        }
+        else
+            for (const client of clients()) {
+                const root = payloadPath(client, id, kind);
+                const existing = Object.keys(originalFiles).map(path => renamedPath(path, id)).filter(path => path.startsWith(root + "/"));
+                if (existing.length) {
+                    for (const path of existing) {
+                        names.set(path, path.split("/").slice(2).join("/"));
+                        if (!(path in drafts))
+                            drafts[path] = originalFiles[sourcePath(path, id)] ?? "";
+                    }
+                    continue;
+                }
+                const [filename, content] = templates(kind, client, id);
+                const path = `${root}/${filename}`;
+                names.set(path, path.split("/").slice(2).join("/"));
+                defaults[path] = content;
+                if (!(path in drafts))
+                    drafts[path] = content;
             }
-            const [filename, content] = templates(kind, client, id);
-            const path = `${root}/${filename}`;
-            names.add(path);
-            defaults[path] = content;
-            if (!(path in drafts))
-                drafts[path] = content;
+        if (!names.size) {
+            const notice = document.createElement("p");
+            notice.textContent = "尚无可编辑的文本内容，请先查看同步结果。";
+            fields.append(notice);
+            return;
         }
         const label = document.createElement("label");
         label.textContent = "修改内容";
         const select = document.createElement("select");
-        for (const path of names) {
+        for (const [path, target] of names) {
             const option = document.createElement("option");
             option.value = path;
-            option.textContent = path.split("/").slice(2).join("/");
+            option.textContent = target;
             select.append(option);
         }
         label.append(select);
         const textLabel = document.createElement("label");
-        textLabel.textContent = "资源内容";
+        textLabel.textContent = `${{ skill: "Skill", hook: "Hook", rule: "规则", agent: "Agent", mcp: "MCP", prompt: "提示词", policy: "执行策略", script: "脚本" }[kind]}内容`;
         textarea = document.createElement("textarea");
         textarea.rows = 10;
+        textarea.readOnly = upstream;
         currentFile = select.value;
         textarea.value = drafts[currentFile] || "";
         textLabel.append(textarea);
@@ -211,7 +272,7 @@ for (const form of document.querySelectorAll(".resource-editor")) {
                     throw new Error("无效的作用域。");
                 if (scope === "project" && !project)
                     throw new Error("项目级资源需要项目归属。");
-                if (kind === "hook" && scope === "project" && selected.includes("kimi"))
+                if (kind === "hook" && scope === "project" && selected.includes("kimi") && !(original && "files" in original))
                     throw new Error("Kimi 当前不支持原生项目级 Hook，请调整适用客户端或作用域。");
                 if (scope === "project" && !(project in catalog.projects)) {
                     if (!value("project_path"))
@@ -224,26 +285,78 @@ for (const form of document.querySelectorAll(".resource-editor")) {
                     throw new Error("无效的资源来源。");
                 let source;
                 if (origin === "upstream") {
-                    const upstream = value("upstream_git") ? { git: value("upstream_git") } : original?.origin === "upstream" ? original.upstream : undefined;
+                    const previous = original?.origin === "upstream" ? catalog.upstreams[original.upstream] : undefined;
+                    if (value("upstream_git") && value("upstream_argv"))
+                        throw new Error("上游 Git 地址与生成命令只填写一项。");
+                    let upstream = value("upstream_git") ? { git: value("upstream_git") } : previous;
+                    if (value("upstream_argv")) {
+                        const argv = JSON.parse(value("upstream_argv"));
+                        if (!Array.isArray(argv) || !argv.length || !argv.every((arg) => typeof arg === "string") || !argv[0])
+                            throw new Error("生成命令必须是非空字符串 argv 数组。");
+                        upstream = { argv: argv };
+                    }
                     if (!upstream)
-                        throw new Error("请填写上游 Git 地址。");
-                    source = { origin, upstream };
+                        throw new Error("请填写上游 Git 地址或生成命令。");
+                    let reference = original?.origin === "upstream" ? original.upstream : id;
+                    if (JSON.stringify(upstream) !== JSON.stringify(catalog.upstreams[reference])) {
+                        const shared = catalog.resources.some(resource => resource.id !== original?.id && resource.origin === "upstream" && resource.upstream === reference);
+                        if (shared || !original) {
+                            reference = `${id}-source`;
+                            let suffix = 2;
+                            while (reference in catalog.upstreams)
+                                reference = `${id}-source-${suffix++}`;
+                        }
+                        catalog.upstreams[reference] = upstream;
+                    }
+                    source = { origin, upstream: reference };
                 }
                 else
                     source = { origin };
                 let definition;
-                if (kind === "skill" || kind === "bundle")
+                if (original && "installation" in original) {
+                    const enabled = required(fields, "[name=installation_enabled]").checked;
+                    definition = { kind: "policy", installation: { ...original.installation, enabled } };
+                }
+                else if (original && "files" in original) {
+                    const entries = original.files.entries.map((entry, index) => {
+                        if ("source" in entry || "tree" in entry)
+                            return entry;
+                        const key = "fragment" in entry ? renamedPath(projectionPath(original.files.root, entry.fragment), id) : `fragment:${index}`;
+                        const fragment = JSON.parse(drafts[key] ?? "{}");
+                        if (typeof fragment !== "object" || fragment === null || Array.isArray(fragment))
+                            throw new Error("配置片段必须是 JSON 对象。");
+                        if ("fragment" in entry)
+                            return entry;
+                        return "json" in entry ? { target: entry.target, json: fragment } : { target: entry.target, toml: fragment };
+                    });
+                    definition = { kind, files: { root: origin === "upstream" ? value("upstream_path") || "." : renamedPath(original.files.root, id), entries } };
+                }
+                else if (kind === "skill")
                     definition = { kind, payload: origin === "upstream" ? value("upstream_path") || "." : payloadPath("codex", id, kind) };
+                else if (kind === "policy") {
+                    const fragment = JSON.parse(drafts[`resources/${id}/files/config.json`] ?? "{}");
+                    if (typeof fragment !== "object" || fragment === null || Array.isArray(fragment))
+                        throw new Error("配置片段必须是 JSON 对象。");
+                    definition = { kind, files: { root: origin === "self" ? `resources/${id}/files` : value("upstream_path") || ".", entries: [{ target: ".codex/config.toml", fragment: "config.json" }] } };
+                }
+                else if (kind === "prompt") {
+                    const root = payloadPath("codex", id, kind), filename = templates(kind, "codex", id)[0];
+                    definition = { kind, files: { root: origin === "self" ? root : value("upstream_path") || ".", entries: [{ target: `.codex/prompts/${id}.md`, source: filename }] } };
+                }
+                else if (kind === "script")
+                    throw new Error("请从已有脚本发起修改。");
                 else {
                     const payloads = {};
-                    const oldPath = (original?.kind === "skill" || original?.kind === "bundle") ? original.payload : Object.values(original?.payloads || {})[0];
+                    const oldPath = original && "payload" in original ? original.payload : original && "payloads" in original ? Object.values(original.payloads)[0] : undefined;
                     const changedPath = value("upstream_path") !== oldPath;
                     for (const client of selected)
-                        payloads[client] = origin === "self" ? payloadPath(client, id, kind) : original && original.kind !== "skill" && original.kind !== "bundle" && original.payloads[client] && !changedPath ? original.payloads[client] : value("upstream_path") || ".";
+                        payloads[client] = origin === "self" ? payloadPath(client, id, kind) : original && "payloads" in original && original.payloads[client] && !changedPath ? original.payloads[client] : value("upstream_path") || ".";
                     definition = { kind, agents: selected, payloads };
                 }
                 if (origin === "self")
                     for (const option of fields.querySelectorAll("option")) {
+                        if (option.value.startsWith("fragment:"))
+                            continue;
                         const content = drafts[option.value];
                         if (content !== undefined && content !== originalFiles[sourcePath(option.value, id)])
                             writes[option.value] = content;
@@ -253,6 +366,10 @@ for (const form of document.querySelectorAll(".resource-editor")) {
             }
             else
                 catalog.resources = catalog.resources.filter(resource => resource.id !== id);
+            const usedSources = new Set(catalog.resources.flatMap(resource => resource.origin === "upstream" ? [resource.upstream] : []));
+            for (const reference of Object.keys(catalog.upstreams))
+                if (!usedSources.has(reference))
+                    delete catalog.upstreams[reference];
             writes["catalog.json"] = JSON.stringify(catalog, null, 2) + "\n";
             const renames = !retire && original && id !== original.id ? { [original.id]: id } : {};
             const change = { resource_ids: [...new Set([original?.id || id, id])], reason: value("reason"), evidence: [], writes, deletions: [], renames,

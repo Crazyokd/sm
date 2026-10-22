@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "hindsight": {
+      "args": [
+        "/home/standard/.claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/run_mcp.sh"
+      ],
+      "command": "bash",
+      "env": {
+        "CLAUDE_PLUGIN_DATA": "/home/standard/.claude/plugins/data/hindsight-memory",
+        "CLAUDE_PLUGIN_ROOT": "/home/standard/.claude/plugins/cache/hindsight/hindsight-memory/0.7.4",
+        "HINDSIGHT_AGENT_NAME": "claude"
+      }
+    }
+  }
+}

@@ -1,8 +1,5 @@
 use serde_json::{Value, json};
-use sm::{
-    ecc::{build_bundle, render_agent, render_command, unpack_package},
-    model::{Resource, WriteBody},
-};
+use sm::ecc::{build_output, render_agent, render_command, unpack_package};
 use std::{
     fs,
     os::unix::fs::{PermissionsExt, symlink},
@@ -51,7 +48,7 @@ fn command_conversion_keeps_the_command_body_as_a_skill_template() {
 }
 
 #[test]
-fn local_bundle_includes_only_selected_native_skills_commands_agents_and_mirrors() {
+fn local_output_includes_only_selected_native_skills_commands_agents_and_mirrors() {
     let temp = tempdir().unwrap();
     let upstream = temp.path().join("upstream");
     let installed = temp.path().join("installed");
@@ -96,7 +93,7 @@ fn local_bundle_includes_only_selected_native_skills_commands_agents_and_mirrors
         &selected,
         json!({"skills":["api"], "commands":["plan"], "agents":["reviewer"], "claude_skills":["api", "source-command-plan"]}),
     );
-    build_bundle(&selected, &upstream, &installed, &output).unwrap();
+    build_output(&selected, &upstream, &installed, &output).unwrap();
     assert_eq!(
         fs::read(output.join(".agents/skills/api/SKILL.md")).unwrap(),
         b"Native installed copy\n"
@@ -104,56 +101,70 @@ fn local_bundle_includes_only_selected_native_skills_commands_agents_and_mirrors
     assert!(!output.join(".agents/skills/unselected").exists());
     assert!(!output.join(".codex/config.toml").exists());
     assert!(!output.join("hooks/run.sh").exists());
-    let resource: Resource = serde_json::from_value(json!({"id":"ecc", "kind":"bundle", "origin":"upstream", "scope":"user", "payload":".", "upstream":{"argv":["@sm","source-ecc","selection.json"]}})).unwrap();
-    let writes = sm::bundles::render(&resource, &output, &temp.path().join("home")).unwrap();
-    assert_eq!(writes.len(), 7);
-    let script = writes
-        .iter()
-        .find(|write| write.path.ends_with(".claude/skills/api/scripts/run.sh"))
-        .unwrap();
-    assert!(matches!(
-        &script.body,
-        WriteBody::File {
-            executable: true,
-            ..
-        }
-    ));
-    assert!(
-        writes
-            .iter()
-            .any(|write| write.path.ends_with(".codex/agents/reviewer.toml"))
+    assert!(!output.join("bundle.json").exists());
+    assert_eq!(sm::files::payload_files(&output).unwrap().len(), 7);
+    let script = output.join(".claude/skills/api/scripts/run.sh");
+    assert_ne!(
+        fs::metadata(&script).unwrap().permissions().mode() & 0o111,
+        0
     );
-    assert!(writes.iter().any(|write| {
-        write
-            .path
-            .ends_with(".claude/skills/source-command-plan/SKILL.md")
-    }));
+    assert_eq!(fs::read(script).unwrap(), b"#!/bin/sh\nexit 0\n");
+    assert!(output.join(".codex/agents/reviewer.toml").is_file());
+    assert!(
+        output
+            .join(".claude/skills/source-command-plan/SKILL.md")
+            .is_file()
+    );
 }
 
 #[test]
-fn missing_selected_sources_fail_without_replacing_previous_output() {
-    for kind in ["skills", "commands", "agents"] {
-        let temp = tempdir().unwrap();
-        let upstream = temp.path().join("upstream");
-        fs::create_dir(&upstream).unwrap();
-        let output = temp.path().join("output");
-        write(&output.join("bundle.json"), "Previous approved bundle");
-        let selected = temp.path().join("selection.json");
-        let mut value = json!({"skills":[], "commands":[], "agents":[]});
-        value[kind] = json!(["removed"]);
-        selection(&selected, value);
-        let error = build_bundle(
-            &selected,
-            &upstream,
-            &temp.path().join("installed"),
-            &output,
-        )
-        .unwrap_err();
-        assert!(error.to_string().contains("missing"), "{error:#}");
-        assert_eq!(
-            fs::read(output.join("bundle.json")).unwrap(),
-            b"Previous approved bundle"
-        );
+fn removed_members_are_absent_while_existing_skills_commands_agents_and_files_generate() {
+    let temp = tempdir().unwrap();
+    let upstream = temp.path().join("upstream");
+    let installed = temp.path().join("installed");
+    let output = temp.path().join("output");
+    let selected = temp.path().join("selection.json");
+    write(&upstream.join("skills/api/SKILL.md"), "Skill");
+    write(
+        &installed.join(".agents/skills/api/SKILL.md"),
+        "Installed Skill",
+    );
+    write(
+        &upstream.join("commands/plan.md"),
+        "---\ndescription: Plan\n---\nBody\n",
+    );
+    write(
+        &upstream.join("agents/reviewer.md"),
+        "---\nname: reviewer\ndescription: Review\n---\nBody\n",
+    );
+    write(&upstream.join("rules/style.md"), "Style");
+    selection(
+        &selected,
+        json!({
+            "skills":["api","removed"], "commands":["plan","removed"], "agents":["reviewer","removed"],
+            "claude_skills":["api","removed","source-command-plan","source-command-removed"],
+            "files":[{"source":"rules/style.md","target":".claude/rules/style.md"},{"source":"rules/removed.md","target":".claude/rules/removed.md"}]
+        }),
+    );
+    build_output(&selected, &upstream, &installed, &output).unwrap();
+    for target in [
+        ".agents/skills/api/SKILL.md",
+        ".agents/skills/source-command-plan/SKILL.md",
+        ".codex/agents/reviewer.toml",
+        ".claude/rules/style.md",
+        ".claude/skills/api/SKILL.md",
+    ] {
+        assert!(output.join(target).is_file(), "{target}");
+    }
+    for target in [
+        ".agents/skills/removed",
+        ".agents/skills/source-command-removed",
+        ".codex/agents/removed.toml",
+        ".claude/rules/removed.md",
+        ".claude/skills/removed",
+        "bundle.json",
+    ] {
+        assert!(!output.join(target).exists(), "{target}");
     }
 }
 
@@ -172,7 +183,7 @@ fn invalid_selections_and_symlinks_are_rejected_before_output() {
         json!({"skills":[], "commands":[], "agents":[], "unknown":true}),
     ] {
         selection(&selected, value);
-        assert!(build_bundle(&selected, &upstream, &installed, &output).is_err());
+        assert!(build_output(&selected, &upstream, &installed, &output).is_err());
         assert!(!output.exists());
     }
     write(&upstream.join("skills/api/SKILL.md"), "Skill");
@@ -182,7 +193,7 @@ fn invalid_selections_and_symlinks_are_rejected_before_output() {
         &selected,
         json!({"skills":["api"], "commands":[], "agents":[]}),
     );
-    assert!(build_bundle(&selected, &upstream, &installed, &output).is_err());
+    assert!(build_output(&selected, &upstream, &installed, &output).is_err());
     assert!(!output.exists());
     selection(
         &selected,
@@ -194,7 +205,7 @@ fn invalid_selections_and_symlinks_are_rejected_before_output() {
         upstream.join("commands/plan.md"),
     )
     .unwrap();
-    assert!(build_bundle(&selected, &upstream, &installed, &output).is_err());
+    assert!(build_output(&selected, &upstream, &installed, &output).is_err());
     assert!(!output.exists());
 }
 
@@ -227,34 +238,28 @@ fn selected_raw_files_keep_exact_reviewed_targets_bytes_and_executable_bits() {
             ]
         }),
     );
-    build_bundle(
+    build_output(
         &selected,
         &upstream,
         &temp.path().join("installed"),
         &output,
     )
     .unwrap();
-    let manifest: Value =
-        serde_json::from_slice(&fs::read(output.join("bundle.json")).unwrap()).unwrap();
+    assert!(!output.join("bundle.json").exists());
     assert_eq!(
-        manifest["entries"],
-        json!([
-            {"source":"extra/0", "target":".claude/agents/reviewer.md"},
-            {"source":"extra/1", "target":".claude/rules/common/style.md"},
-            {"source":"extra/2", "target":".claude/hooks/check.sh"}
-        ])
-    );
-    assert_eq!(
-        fs::read(output.join("extra/0")).unwrap(),
+        fs::read(output.join(".claude/agents/reviewer.md")).unwrap(),
         b"Raw agent definition\n"
     );
-    assert_eq!(fs::read(output.join("extra/1")).unwrap(), b"Shared rule\n");
     assert_eq!(
-        fs::read(output.join("extra/2")).unwrap(),
+        fs::read(output.join(".claude/rules/common/style.md")).unwrap(),
+        b"Shared rule\n"
+    );
+    assert_eq!(
+        fs::read(output.join(".claude/hooks/check.sh")).unwrap(),
         b"#!/bin/sh\nexit 0\n"
     );
     assert_ne!(
-        fs::metadata(output.join("extra/2"))
+        fs::metadata(output.join(".claude/hooks/check.sh"))
             .unwrap()
             .permissions()
             .mode()
@@ -262,7 +267,7 @@ fn selected_raw_files_keep_exact_reviewed_targets_bytes_and_executable_bits() {
         0
     );
     assert_eq!(
-        fs::metadata(output.join("extra/1"))
+        fs::metadata(output.join(".claude/rules/common/style.md"))
             .unwrap()
             .permissions()
             .mode()
@@ -274,7 +279,7 @@ fn selected_raw_files_keep_exact_reviewed_targets_bytes_and_executable_bits() {
 }
 
 #[test]
-fn selected_raw_file_errors_preserve_the_previous_bundle() {
+fn selected_raw_file_errors_preserve_the_previous_output() {
     let temp = tempdir().unwrap();
     let upstream = temp.path().join("upstream");
     let output = temp.path().join("output");
@@ -289,7 +294,6 @@ fn selected_raw_file_errors_preserve_the_previous_bundle() {
     )
     .unwrap();
     for files in [
-        json!([{"source":"rules/missing.md", "target":".claude/rules/rule.md"}]),
         json!([{"source":"../outside", "target":".claude/rules/rule.md"}]),
         json!([{"source":"/etc/passwd", "target":".claude/rules/rule.md"}]),
         json!([{"source":"rules/valid.md", "target":"../outside"}]),
@@ -306,7 +310,7 @@ fn selected_raw_file_errors_preserve_the_previous_bundle() {
             json!({"skills":[], "commands":[], "agents":[], "files":files}),
         );
         assert!(
-            build_bundle(
+            build_output(
                 &selected,
                 &upstream,
                 &temp.path().join("installed"),
@@ -353,7 +357,7 @@ fn selected_raw_file_targets_cannot_replace_generated_skills_agents_or_mirrors()
             &selected,
             json!({"skills":["api"], "commands":["plan"], "agents":["reviewer"], "claude_skills":["api"], "files":[{"source":"rules/rule.md", "target":target}]}),
         );
-        let error = build_bundle(&selected, &upstream, &installed, &output).unwrap_err();
+        let error = build_output(&selected, &upstream, &installed, &output).unwrap_err();
         assert!(error.to_string().contains("target overlaps"), "{error:#}");
         assert!(!output.exists());
     }

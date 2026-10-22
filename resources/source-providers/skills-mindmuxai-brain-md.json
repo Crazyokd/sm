@@ -1,0 +1,9 @@
+{
+  "source": "https://github.com/mindmuxai/brain.md.git",
+  "skills": [
+    "brain-bootstrap",
+    "brain-ingest",
+    "brain-page",
+    "brain-setup"
+  ]
+}

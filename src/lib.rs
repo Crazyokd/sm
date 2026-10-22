@@ -3,9 +3,9 @@
 pub mod adoption;
 pub mod aliases;
 pub mod apply;
-pub mod bundles;
 pub mod files;
 pub mod model;
+pub mod projections;
 pub mod providers;
 pub mod state;
 

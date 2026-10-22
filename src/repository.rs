@@ -1,8 +1,4 @@
-use crate::{
-    files::contained,
-    model::{Resource, Source, UpstreamSource},
-    process::run_command,
-};
+use crate::{files::contained, model::UpstreamSource, process::run_command};
 use anyhow::{Context, Result, bail};
 use std::{
     fs,
@@ -58,10 +54,7 @@ pub fn fetch_approved(repo: &Path, output: &Path) -> Result<PathBuf> {
     }
     Ok(output.to_path_buf())
 }
-pub fn fetch_upstream(resource: &Resource, output: &Path) -> Result<PathBuf> {
-    let Source::Upstream { upstream } = &resource.source else {
-        bail!("upstream source required");
-    };
+pub fn fetch_upstream(upstream: &UpstreamSource, root: &Path, output: &Path) -> Result<PathBuf> {
     let mut command = match upstream {
         UpstreamSource::Git { git } => {
             let mut command = Command::new("git");
@@ -82,7 +75,7 @@ pub fn fetch_upstream(resource: &Resource, output: &Path) -> Result<PathBuf> {
             command
                 .args(args)
                 .arg(output.canonicalize()?)
-                .current_dir(&resource.root);
+                .current_dir(root);
             command
         }
     };

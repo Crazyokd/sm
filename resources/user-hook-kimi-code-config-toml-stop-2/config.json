@@ -1,0 +1,9 @@
+{
+  "hooks": [
+    {
+      "command": "/home/standard/.kimi-code/hooks/hindsight_kimi.py retain",
+      "event": "Stop",
+      "timeout": 30
+    }
+  ]
+}

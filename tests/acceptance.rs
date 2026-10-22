@@ -141,7 +141,7 @@ impl AgentRunner for NoModel {
 fn upstream_sync_follows_new_commits_without_analysis_or_mr() {
     let repo = Repo::new();
     let upstream = Repo::new();
-    repo.catalog(json!({"projects":{},"resources":[{"id":"external","kind":"skill","origin":"upstream","scope":"user","project":null,"payload":"resources/review","upstream":{"git":upstream.remote}}]}));
+    repo.catalog(json!({"projects":{},"upstreams":{"external":{"git":upstream.remote}},"resources":[{"id":"external","kind":"skill","origin":"upstream","scope":"user","project":null,"payload":"resources/review","upstream":"external"}]}));
     repo.publish("Follow upstream");
     let runtime = runtime(&repo, "home");
     let state = runtime.state().unwrap();

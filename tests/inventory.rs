@@ -343,6 +343,7 @@ fn scope_is_exact_and_missing_projects_and_unsafe_links_are_reported() {
         "not registered",
     );
     let catalog = Catalog {
+        upstreams: Default::default(),
         projects: [
             ("registered".into(), "~/projects/registered".into()),
             ("missing".into(), "~/projects/missing".into()),
@@ -501,6 +502,7 @@ fn discovers_nested_rules_once_in_the_longest_registered_project_scope() {
     put(outside.path(), "hidden/AGENTS.md", "outside home");
     symlink(outside.path(), home.path().join("projects/app/alias")).unwrap();
     let catalog = Catalog {
+        upstreams: Default::default(),
         projects: [
             ("app".into(), "~/projects/app".into()),
             ("component".into(), "~/projects/app/component".into()),
@@ -536,6 +538,7 @@ fn nested_rule_depth_limit_reports_incomplete_coverage() {
         "deep rule",
     );
     let catalog = Catalog {
+        upstreams: Default::default(),
         projects: [("app".into(), "~/project".into())].into(),
         resources: vec![],
     };
@@ -627,7 +630,7 @@ fn legacy_commands_and_claude_rules_and_global_mcp_are_inventoried_without_priva
     let inventory = scan(&Catalog::default(), &state, home.path()).unwrap();
     assert_eq!(at(&inventory, &command).kind, "prompt");
     assert_eq!(at(&inventory, &instructions).kind, "rule");
-    assert_eq!(at(&inventory, &runtime).kind, "hook-support");
+    assert_eq!(at(&inventory, &runtime).kind, "script");
     assert!(
         !inventory
             .entries

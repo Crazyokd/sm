@@ -1,6 +1,6 @@
 use crate::{
     files::{contained, relative_path},
-    model::{Catalog, Scope, ValidationReport, valid_id},
+    model::{Catalog, Scope, Source, ValidationReport, valid_id},
     privacy::redact_text,
     process::run_command,
     repository::git,
@@ -208,7 +208,7 @@ pub fn create_proposal(repo: &Path, change: &ChangeSet, state: &State) -> Result
         let old = prepared.join("resources").join(old);
         let new = prepared.join("resources").join(new);
         ensure!(!new.exists(), "rename destination already exists");
-        if source.source.is_self() {
+        if source.source.is_self() && !source.paths().is_empty() {
             fs::rename(old, new)?;
         }
     }
@@ -248,6 +248,13 @@ pub fn create_proposal(repo: &Path, change: &ChangeSet, state: &State) -> Result
         .iter()
         .map(|r| (r.id.clone(), r))
         .collect();
+    ensure!(
+        change
+            .resource_ids
+            .iter()
+            .all(|id| before.contains_key(id) || after.contains_key(id)),
+        "selected resource is missing from original and updated catalogs"
+    );
     let ids: BTreeSet<_> = before.keys().chain(after.keys()).collect();
     for id in ids {
         if !change.resource_ids.contains(id) {
@@ -255,6 +262,23 @@ pub fn create_proposal(repo: &Path, change: &ChangeSet, state: &State) -> Result
                 before.get(id) == after.get(id),
                 "catalog edits affect resources outside selected ids"
             );
+        }
+    }
+    for id in original
+        .upstreams
+        .keys()
+        .chain(updated.upstreams.keys())
+        .collect::<BTreeSet<_>>()
+    {
+        if original.upstreams.get(id) != updated.upstreams.get(id) {
+            for resource in original.resources.iter().chain(&updated.resources) {
+                if matches!(&resource.source, Source::Upstream { upstream } if upstream == id) {
+                    ensure!(
+                        change.resource_ids.contains(&resource.id),
+                        "upstream edits affect resources outside selected ids"
+                    );
+                }
+            }
         }
     }
     for resource in &original.resources {
