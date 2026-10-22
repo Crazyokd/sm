@@ -1,0 +1,13 @@
+{
+  "name": "sm-frontend",
+  "private": true,
+  "scripts": {
+    "check": "tsc --noEmit",
+    "build": "tsc",
+    "test:browser": "tsc -p tsconfig.browser.json && node .browser-tests/tests/browser_editor.js"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "5.9.3"
+  }
+}

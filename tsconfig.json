@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "rootDir": "frontend",
+    "outDir": "assets/static",
+    "newLine": "lf",
+    "moduleResolution": "Bundler",
+    "types": []
+  },
+  "include": [
+    "frontend/**/*.ts"
+  ]
+}

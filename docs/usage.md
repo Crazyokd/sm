@@ -4,7 +4,7 @@ SM 在每台 Linux 机器上本地运行，管理同一份已审核资源。Skil
 
 ## 初始化
 
-准备 Python 3.10+（含 venv、pip）、Git 和可用的 systemd 用户会话。复用本机 Codex／Kimi 登录、Git 提交身份、GitLab 认证。提交 MR 需要已认证的 `glab`，夜间分析需要 `codex` 或 `kimi`；缺项可在初始化结果中查看。
+构建需要 Rust 1.88+（Cargo）、C 编译器／链接器、Git 和可用的 systemd 用户会话。本程序的运行、记录与服务不依赖 Python；前端产物已随仓库提供，普通初始化不需要 Node。复用本机 Codex／Kimi 登录、Git 提交身份、GitLab 认证。提交 MR 需要已认证的 `glab`，夜间分析需要 `codex` 或 `kimi`；缺项可在初始化结果中查看。
 
 ```sh
 git clone http://git.standard-robots.com/yicao/sm
@@ -12,11 +12,17 @@ cd sm
 ./sm init
 ```
 
-初始化建立仓库内 `.venv`、当前用户的 SM 配置、Web 服务和每日 02:00 的 timer。重复执行用于补齐同名服务。打开 <http://127.0.0.1:8765>。
+初始化先通过锁定的 Cargo 依赖构建 `target/release/sm`，再生成当前用户的 SM 配置、Web 服务和每日 02:00 的 timer。重复执行用于补齐同名服务。打开 <http://127.0.0.1:8765>。
 
 Web 每次启动会进行首次同步。夜间任务依次同步已合并的自建资源、拉取上游、应用受管文件、消化记录、分析自建资源并尝试提交 MR。机器错过计划时间后，由 systemd 的持久 timer 补执行；需要运行中的用户会话。配置中的工具路径来自初始化时的 PATH，修改工具安装位置后重新初始化。
 
 本项目默认维护分支为 `main`。同步读取远端 `origin/main`，本地未提交或未合并的文件不会直接生效。首次在新远端使用前，应先提交并审核仓库内容。
+
+## 从初版升级
+
+更新到已审核的新代码后，再执行一次 `./sm init`。它会把同名用户服务和采集入口切换到 Rust 程序；已有清单、SQLite、JSONL、偏移、所有权和待审提案继续使用，不需要导出、清空或重新导入。构建完成之前不改写服务配置。
+
+回退时检出先前的代码提交并执行该提交的初始化入口；数据布局保持兼容。旧安装的 `.venv` 不再用于运行当前程序，SM 不会自动删除用户的旧环境或记录。
 
 ## 日常管理
 
@@ -41,7 +47,7 @@ Web 每次启动会进行首次同步。夜间任务依次同步已合并的自�
 
 夜间分析仅处理自建资源，优先复用 Codex，否则使用 Kimi。分析角色禁用业务工具和子 Agent，避免执行被分析资源。它把自建内容和脱敏后的可见记录交给该 CLI 配置的模型服务。候选须引用真实记录，不能修改上游、越界文件或未完整提供的内容。
 
-检查覆盖 JSON／TOML／Python／Shell 语法、Skill 基本元信息，以及资源根目录可选的 `evals.json` 文本约束：
+检查覆盖 JSON／TOML／Python／Shell 语法（Python 脚本使用原生 Tree-sitter 解析，不调用解释器）、Skill 基本元信息，以及资源根目录可选的 `evals.json` 文本约束：
 
 ```json
 {"required": ["Verify result"], "forbidden": ["Repeat unchanged read"]}
@@ -80,3 +86,20 @@ journalctl --user -u sm-web.service -u sm-cycle.service
 Skill 使用单一 `payload`，投放到用户或项目的 `.agents/skills/<id>/`，由支持该标准的客户端发现。其余类型使用 `agents` 和 `payloads`：如 `agents: ["codex"]`、`payloads: {"codex": "resources/example/codex"}`。不得把客户端原生配置差异扩散成多份 Skill。
 
 Codex Hook 使用 `hooks.json`，Kimi Hook 使用 `config.toml`；Hook 可通过 `SM_RESOURCE_DIR` 引用配套脚本。MCP 只接管自身服务条目，规则使用有边界的 SM 文本块。Kimi 原生项目级 Hook 暂无对应能力，SM 明确报告“不支持”，不会扩大为用户级。具体原生路径见[实施计划](superpowers/plans/2026-10-21-sm-phase-one.md)。
+
+
+## 开发检查
+
+```sh
+cargo test --locked
+cargo fmt --check
+cargo clippy --all-targets --locked -- -D warnings
+npm ci --ignore-scripts
+npm run check
+npm run build
+git diff --exit-code -- assets/static/app.js
+```
+
+核心和 CLI 为 Rust；浏览器逻辑为严格模式 TypeScript，类型声明位于 `frontend/types.d.ts`。页面、静态文件、分析提示和服务模板嵌入二进制。修改 TypeScript 后须同时更新已提交的 `assets/static/app.js`；不需要额外前端框架。
+
+隔离浏览器验收可运行 `cargo run --example preview -- <临时仓库> <临时home> <端口> [状态数据库]`，然后执行 `SM_BROWSER_URL=http://127.0.0.1:<端口> npm run test:browser`。需要预装 browser-harness；回归驱动为 TypeScript，外部 Browser Harness 负责浏览器连接。预览的 MR 页面明确标记为演示，不会提交真实远端。

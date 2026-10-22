@@ -1,8 +1,0 @@
-{% extends 'base.html' %}
-{% block title %}运行状态{% endblock %}
-{% block breadcrumb %}运行状态{% endblock %}
-{% block content %}
-<div class="page-heading"><div><p class="eyebrow">LOCAL OPERATIONS</p><h1>运行状态</h1><p class="subtitle">首次启动立即同步，夜间统一处理资源和本地记录。</p></div><span class="schedule">每日 02:00 · 本机时间</span></div>
-<section class="scope-section"><h2>本地采集</h2>{% for agent,status in collectors.items() %}<p><strong>{{ agent|capitalize }}</strong> · {{ status }}</p>{% else %}<p class="quiet">尚未配置采集。同步自建资源后会配置对应 Agent 的记录入口。</p>{% endfor %}</section>
-<section><h2>执行记录</h2>{% for run in runs %}<details class="run"><summary><span class="run-kind">{{ {'sync':'资源同步','cycle':'夜间处理','init':'初始化'}.get(run.operation,run.operation) }}</span><time>{{ run.time[:19].replace('T',' ') }} UTC</time><span class="status {{ 'failed' if run.result.error or run.result.ok is defined and not run.result.ok else 'applied' }}">{{ '需处理' if run.result.error or run.result.ok is defined and not run.result.ok else '查看结果' }}</span></summary><pre>{{ run.result|tojson(indent=2) }}</pre></details>{% else %}<p class="empty">尚无执行记录。</p>{% endfor %}</section>
-{% endblock %}

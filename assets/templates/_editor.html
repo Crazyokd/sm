@@ -1,0 +1,18 @@
+<form class="resource-editor" data-existing="{{ editing.id if editing else '' }}">
+  <div class="form-grid">
+    <label>资源名称<input name="resource_id" required pattern="[a-z0-9][a-z0-9_-]*" value="{{ editing.id if editing else '' }}" placeholder="例如 code-review"></label>
+    <label>类型<select name="kind" {% if editing %}disabled{% endif %}>{% for value,label in kind_labels %}<option value="{{ value }}" {% if editing and editing.kind==value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+    <label>来源<select name="origin" {% if editing %}disabled{% endif %}><option value="self">用户自建</option><option value="upstream" {% if editing and editing.origin=='upstream' %}selected{% endif %}>上游拉取</option></select></label>
+    <label>作用域<select name="scope"><option value="user">用户级</option><option value="project" {% if editing and editing.scope=='project' %}selected{% endif %}>项目级</option></select></label>
+    <label>项目名<input name="project" list="project-names" value="{{ editing.project if editing and editing.project else '' }}" placeholder="项目级资源需要填写"></label>
+    <label>约定项目目录<input name="project_path" placeholder="例如 ~/repo/easygo-app"></label>
+  </div>
+  <datalist id="project-names">{% for name in catalog.projects %}<option value="{{ name }}">{% endfor %}</datalist>
+  <fieldset class="agent-options"><legend>适用 Agent</legend>{% for name in ['codex','kimi'] %}<label><input type="checkbox" name="agents" value="{{ name }}" {% if not editing and name=='codex' or editing and name in editing.agents %}checked{% endif %}>{{ name|capitalize }}</label>{% endfor %}</fieldset>
+  <div class="upstream-fields"><label>上游 Git 地址<input name="upstream_git" value="{{ editing.upstream.git if editing and editing.upstream and editing.upstream.git else '' }}" placeholder="https://github.com/owner/repository"></label><label>上游内的资源目录<input name="upstream_path" value="{{ editing.upstream_path if editing else '.' }}"></label></div>
+  <div class="payload-fields"></div>
+  <label>修改原因<textarea name="reason" rows="2" required placeholder="说明这项资源或修改解决什么问题"></textarea></label>
+  <div class="form-actions"><button class="button primary" type="submit">提交资源 MR</button>{% if editing %}<button class="button danger retire" type="button">申请移除纳管</button>{% endif %}<span>合并后在下次同步生效</span></div>
+  <p class="form-result" role="status" aria-live="polite"></p>
+  <script type="application/json" class="editor-data">{{ {'catalog':catalog,'resource':editing,'files':files}|tojson }}</script>
+</form>
