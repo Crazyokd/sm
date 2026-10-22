@@ -3,17 +3,20 @@ use regex::{Captures, Regex};
 use serde_json::{Map, Value};
 use std::sync::LazyLock;
 static KEY: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)password|api.?key|authorization|access.token|client.secret")
-        .expect("fixed credential regex")
+    Regex::new(
+        r"(?i)password|passwd|api.?key|authorization|token$|secret|cookie|credential|private.?key",
+    )
+    .expect("fixed credential regex")
 });
 static TOKEN: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?:glpat-|sk-proj-)[A-Za-z0-9_-]{12,}").expect("fixed token regex")
+    Regex::new(r"\b(?:glpat-|sk-|gh[pousr]_|github_pat_)[A-Za-z0-9_-]{12,}")
+        .expect("fixed token regex")
 });
 static AUTH: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)(bearer|basic)\s+[A-Za-z0-9._~+/=-]+").expect("fixed authorization regex")
 });
 static ASSIGNMENT: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"(?i)(\b(?:[a-z0-9]+_)*(?:api[_-]?key|password|client_secret|access_token)\b["']?\s*[:=]\s*)("[^"\n]*"|'[^'\n]*'|[^\s,;}&]+)"#).expect("fixed assignment regex")
+    Regex::new(r#"(?i)(\b[a-z0-9_.-]*(?:api[_-]?key|password|passwd|token|secret|private[_-]?key|cookie|authorization)[a-z0-9_.-]*\b["']?\s*[:=]\s*)("[^"\n]*"|'[^'\n]*'|[^\s,;}&]+)"#).expect("fixed assignment regex")
 });
 static URL_AUTH: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(https?://)[^/\s@]+:[^/\s@]+@").expect("fixed URL credential regex")

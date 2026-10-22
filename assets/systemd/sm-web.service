@@ -5,6 +5,7 @@ After=network-online.target
 [Service]
 Type=simple
 Environment={path}
+Environment=SM_TRIGGER=startup
 EnvironmentFile=-%h/.config/sm/environment
 ExecStart={executable} serve --repo {repo}
 Restart=on-failure

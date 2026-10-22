@@ -21,12 +21,33 @@ fn nonblocking(pipe: &impl AsFd) -> Result<()> {
     Ok(())
 }
 
-fn read_pipe(pipe: &mut Option<impl Read>, bytes: &mut Vec<u8>) -> io::Result<()> {
+const STDOUT_LIMIT: usize = 64 * 1024 * 1024;
+const STDERR_LIMIT: usize = 64 * 1024;
+
+fn read_pipe(
+    pipe: &mut Option<impl Read>,
+    bytes: &mut Vec<u8>,
+    tail: bool,
+    truncated: &mut bool,
+) -> io::Result<()> {
     let Some(stream) = pipe else { return Ok(()) };
     let mut buffer = [0; 16384];
     match stream.read(&mut buffer) {
         Ok(0) => *pipe = None,
-        Ok(count) => bytes.extend_from_slice(&buffer[..count]),
+        Ok(count) => {
+            if tail {
+                let excess = (bytes.len() + count).saturating_sub(STDERR_LIMIT);
+                if excess > 0 {
+                    bytes.drain(..excess);
+                    *truncated = true;
+                }
+            } else if bytes.len() + count > STDOUT_LIMIT {
+                return Err(io::Error::other(format!(
+                    "stdout exceeds {STDOUT_LIMIT}-byte capture limit"
+                )));
+            }
+            bytes.extend_from_slice(&buffer[..count]);
+        }
         Err(error)
             if matches!(
                 error.kind(),
@@ -37,12 +58,31 @@ fn read_pipe(pipe: &mut Option<impl Read>, bytes: &mut Vec<u8>) -> io::Result<()
     Ok(())
 }
 
+fn stderr_tail(bytes: &[u8], truncated: bool) -> String {
+    // A clipped first line may start inside a credential; never export that fragment.
+    let bytes = if truncated {
+        bytes
+            .iter()
+            .position(|byte| *byte == b'\n')
+            .map_or(&[][..], |index| &bytes[index + 1..])
+    } else {
+        bytes
+    };
+    let text = redact_text(&String::from_utf8_lossy(bytes), None);
+    let start = text
+        .char_indices()
+        .rev()
+        .nth(1199)
+        .map_or(0, |(index, _)| index);
+    text[start..].to_owned()
+}
+
 pub fn run_command(
     mut command: Command,
     input: Option<&[u8]>,
     timeout: Duration,
 ) -> Result<Output> {
-    let program = command.get_program().to_string_lossy().into_owned();
+    let program = redact_text(&command.get_program().to_string_lossy(), Some(240));
     command
         .stdin(if input.is_some() {
             Stdio::piped()
@@ -70,13 +110,11 @@ pub fn run_command(
         let started = Instant::now();
         let mut status = None;
         let (mut out, mut err) = (Vec::new(), Vec::new());
+        let (mut out_truncated, mut err_truncated) = (false, false);
         let mut pending = input.unwrap_or_default();
         loop {
-            if started.elapsed() >= timeout {
-                bail!("{program} timed out");
-            }
-            read_pipe(&mut stdout, &mut out)?;
-            read_pipe(&mut stderr, &mut err)?;
+            read_pipe(&mut stdout, &mut out, false, &mut out_truncated)?;
+            read_pipe(&mut stderr, &mut err, true, &mut err_truncated)?;
             if let Some(pipe) = &mut stdin {
                 if !pending.is_empty() {
                     match pipe.write(pending) {
@@ -96,12 +134,24 @@ pub fn run_command(
             if status.is_none() {
                 status = child.try_wait()?;
             }
+            if started.elapsed() >= timeout {
+                bail!(
+                    "{program} timed out after {} ms (status: {}): {}",
+                    timeout.as_millis(),
+                    status.map_or_else(|| "still running".into(), |status| status.to_string()),
+                    stderr_tail(&err, err_truncated),
+                );
+            }
             if let Some(status) = status {
                 if stdout.is_none() && stderr.is_none() && stdin.is_none() {
                     return Ok(Output {
                         status,
                         stdout: out,
-                        stderr: err,
+                        stderr: if status.success() {
+                            err
+                        } else {
+                            stderr_tail(&err, err_truncated).into_bytes()
+                        },
                     });
                 }
             }
@@ -124,13 +174,26 @@ pub fn run_command(
         }
     })();
     if result.is_err() {
-        let pid = Pid::from_raw(i32::try_from(child.id()).context("invalid child process id")?);
-        if let Err(error) = killpg(pid, Signal::SIGKILL) {
-            if error != Errno::ESRCH {
-                return Err(error.into());
+        let mut cleanup = || -> Result<()> {
+            let pid = Pid::from_raw(i32::try_from(child.id()).context("invalid child process id")?);
+            if let Err(error) = killpg(pid, Signal::SIGKILL) {
+                if error != Errno::ESRCH {
+                    return Err(error.into());
+                }
             }
+            child.wait()?;
+            Ok(())
+        };
+        if let Err(error) = cleanup() {
+            let _ = writeln!(
+                io::stderr().lock(),
+                "{}",
+                serde_json::json!({
+                    "event":"subprocess_cleanup_failed", "program":program,
+                    "error":redact_text(&format!("{error:#}"),Some(1200)),
+                })
+            );
         }
-        child.wait()?;
     }
     let output = result?;
     if !output.status.success() {

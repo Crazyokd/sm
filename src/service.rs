@@ -19,6 +19,7 @@ use crate::{
     proposals::{NoChanges, Proposal},
     repository::{fetch_approved, fetch_upstream},
     state::State,
+    telemetry::RunTracker,
 };
 use anyhow::{Context, Result};
 use fs2::FileExt;
@@ -26,6 +27,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     collections::{BTreeMap, BTreeSet},
     fs::{self, File, OpenOptions},
+    io::Write,
     os::unix::fs::OpenOptionsExt,
     path::{Path, PathBuf},
     process::Command,
@@ -98,7 +100,11 @@ impl JobGuard {
 impl Drop for JobGuard {
     fn drop(&mut self) {
         if let Err(error) = FileExt::unlock(&self.0) {
-            eprintln!("SM lock release failed: {error}");
+            let _ = writeln!(
+                std::io::stderr().lock(),
+                "{}",
+                serde_json::json!({"event":"job_unlock_failed","error":redact_text(&error.to_string(),Some(1200))})
+            );
         }
     }
 }
@@ -136,6 +142,29 @@ pub fn initialize(runtime: &Runtime) -> Result<InitReport> {
 }
 pub fn initialize_with(runtime: &Runtime, systemd: &dyn Systemd) -> Result<InitReport> {
     let state = runtime.state()?;
+    let mut run = RunTracker::start(&state, "init")?;
+    match initialize_tracked(runtime, systemd, &mut run) {
+        Ok(report) => {
+            if let Err(error) = run.finish(&report, report.ok, report.details.error.as_deref()) {
+                return Err(match report.details.error {
+                    Some(summary) => error.context(summary),
+                    None => error,
+                });
+            }
+            Ok(report)
+        }
+        Err(error) => {
+            record_run_error(&mut run, &error);
+            Err(error)
+        }
+    }
+}
+fn initialize_tracked(
+    runtime: &Runtime,
+    systemd: &dyn Systemd,
+    run: &mut RunTracker,
+) -> Result<InitReport> {
+    run.stage("configure", None, 0, 1)?;
     let tools: BTreeMap<_, _> = ["git", "codex", "kimi", "glab"]
         .into_iter()
         .map(|name| (name.to_owned(), available(name)))
@@ -149,7 +178,6 @@ pub fn initialize_with(runtime: &Runtime, systemd: &dyn Systemd) -> Result<InitR
     if !details.tools.get("git").copied().unwrap_or(false) {
         details.error = Some("Git is required".into());
         let report = InitReport { ok: false, details };
-        state.add_run("init", &report)?;
         return Ok(report);
     }
     let config = Config {
@@ -198,6 +226,8 @@ pub fn initialize_with(runtime: &Runtime, systemd: &dyn Systemd) -> Result<InitR
             None,
         )?;
     }
+    run.stage("configure", None, 1, 1)?;
+    run.stage("register_services", None, 0, 1)?;
     let register = || -> Result<()> {
         systemd.run(&["daemon-reload"])?;
         systemd.run(&["enable", "sm-web.service", "sm-cycle.timer"])?;
@@ -207,6 +237,7 @@ pub fn initialize_with(runtime: &Runtime, systemd: &dyn Systemd) -> Result<InitR
     let ok = match register() {
         Ok(()) => {
             details.services = Some("registered".into());
+            run.stage("register_services", None, 1, 1)?;
             true
         }
         Err(error) => {
@@ -215,7 +246,6 @@ pub fn initialize_with(runtime: &Runtime, systemd: &dyn Systemd) -> Result<InitR
         }
     };
     let report = InitReport { ok, details };
-    state.add_run("init", &report)?;
     Ok(report)
 }
 pub fn apply_source(
@@ -223,11 +253,30 @@ pub fn apply_source(
     runtime: &Runtime,
     state: &State,
 ) -> Result<(Catalog, ApplyReport)> {
+    apply_source_tracked(source, runtime, state, None)
+}
+fn apply_source_tracked(
+    source: &Path,
+    runtime: &Runtime,
+    state: &State,
+    mut run: Option<&mut RunTracker>,
+) -> Result<(Catalog, ApplyReport)> {
+    if let Some(run) = &mut run {
+        run.stage("catalog", None, 0, 1)?;
+    }
     let catalog = Catalog::load(source)?;
     let temporary = tempfile::tempdir()?;
     let mut sources = BTreeMap::new();
     let mut errors = BTreeMap::new();
-    for resource in &catalog.resources {
+    for (index, resource) in catalog.resources.iter().enumerate() {
+        if let Some(run) = &mut run {
+            run.stage(
+                "fetch_resource",
+                Some(&resource.id),
+                index,
+                catalog.resources.len(),
+            )?;
+        }
         let result = if resource.source.is_self() {
             Ok(source.to_path_buf())
         } else {
@@ -235,9 +284,15 @@ pub fn apply_source(
         };
         match result {
             Ok(path) => {
+                if let Some(run) = &run {
+                    run.resource_result(&resource.id, "fetched", "Source ready");
+                }
                 sources.insert(resource.id.clone(), path);
             }
             Err(error) => {
+                if let Some(run) = &run {
+                    run.resource_result(&resource.id, "failed", &format!("{error:#}"));
+                }
                 errors.insert(
                     resource.id.clone(),
                     ResourceResult::new(
@@ -247,6 +302,17 @@ pub fn apply_source(
                 );
             }
         }
+        if let Some(run) = &mut run {
+            run.stage(
+                "fetch_resource",
+                Some(&resource.id),
+                index + 1,
+                catalog.resources.len(),
+            )?;
+        }
+    }
+    if let Some(run) = &mut run {
+        run.stage("apply", None, 0, catalog.resources.len())?;
     }
     let mut plan = plan_apply(&catalog, &sources, &runtime.home);
     plan.results.extend(errors);
@@ -265,6 +331,18 @@ pub fn apply_source(
         ));
     }
     let report = apply_writes(&plan, state)?;
+    if let Some(run) = &mut run {
+        for (index, (resource, result)) in report.results.iter().enumerate() {
+            let status = serde_json::to_value(result.status)?;
+            run.resource_result(
+                resource,
+                status.as_str().unwrap_or("unknown"),
+                &result.message,
+            );
+            run.stage("apply", Some(resource), index + 1, report.results.len())?;
+        }
+        run.stage("cache_metadata", None, 0, 1)?;
+    }
     let mut previous_contents: BTreeMap<String, BTreeMap<String, String>> =
         if sources.len() < catalog.resources.len() {
             state.get("resource_contents")?
@@ -335,32 +413,63 @@ pub fn apply_source(
         })
         .collect();
     state.set("collector_status", &collectors)?;
+    if let Some(run) = &mut run {
+        run.stage("cache_metadata", None, 1, 1)?;
+    }
     Ok((catalog, report))
 }
 #[derive(Serialize)]
 struct Failure {
     error: String,
 }
+fn record_run_error(run: &mut RunTracker, error: &anyhow::Error) {
+    let summary = redact_text(&format!("{error:#}"), Some(1600));
+    if let Err(error) = run.finish(
+        &Failure {
+            error: summary.clone(),
+        },
+        false,
+        Some(&summary),
+    ) {
+        let _ = writeln!(
+            std::io::stderr().lock(),
+            "{}",
+            serde_json::json!({"event":"run_persistence_failed","id":run.details().id,"error":redact_text(&format!("{error:#}"),Some(1600))})
+        );
+    }
+}
+fn application_error(results: &BTreeMap<String, ResourceResult>) -> Option<String> {
+    let failures: Vec<_> = results
+        .iter()
+        .filter(|(_, result)| matches!(result.status, ApplyStatus::Failed | ApplyStatus::Conflict))
+        .take(10)
+        .map(|(resource, result)| format!("{resource}: {}", result.message))
+        .collect();
+    (!failures.is_empty()).then(|| redact_text(&failures.join("; "), Some(1600)))
+}
 pub fn synchronize(runtime: &Runtime, state: &State) -> Result<ApplyReport> {
     let _guard = JobGuard::acquire(state.directory()?)?;
-    let result = || -> Result<ApplyReport> {
+    let mut run = RunTracker::start(state, "sync")?;
+    let mut result = || -> Result<ApplyReport> {
+        run.stage("fetch_approved", None, 0, 1)?;
         let temporary = tempfile::tempdir()?;
         let source = fetch_approved(&runtime.repo, temporary.path())?;
-        let (_, report) = apply_source(&source, runtime, state)?;
+        let (_, report) = apply_source_tracked(&source, runtime, state, Some(&mut run))?;
         Ok(report)
     };
     match result() {
         Ok(report) => {
-            state.add_run("sync", &report)?;
+            let summary = application_error(&report.results);
+            if let Err(error) = run.finish(&report, report.ok(), summary.as_deref()) {
+                return Err(match summary {
+                    Some(summary) => error.context(summary),
+                    None => error,
+                });
+            }
             Ok(report)
         }
         Err(error) => {
-            state.add_run(
-                "sync",
-                &Failure {
-                    error: redact_text(&format!("{error:#}"), Some(1600)),
-                },
-            )?;
+            record_run_error(&mut run, &error);
             Err(error)
         }
     }
@@ -381,6 +490,8 @@ pub struct SubmittedProposal {
 pub struct CycleDetails {
     pub application: BTreeMap<String, ResourceResult>,
     pub observations_processed: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub retention: Option<crate::retention::RetentionReport>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
 }
@@ -409,20 +520,24 @@ pub fn cycle_with(
     submitter: &dyn Submitter,
 ) -> Result<CycleReport> {
     let _guard = JobGuard::acquire(state.directory()?)?;
+    let mut run = RunTracker::start(state, "cycle")?;
     let mut result = CycleReport {
         ok: true,
         proposals: Vec::new(),
         details: CycleDetails::default(),
     };
-    let work = |result: &mut CycleReport| -> Result<()> {
+    let mut work = |result: &mut CycleReport| -> Result<()> {
+        run.stage("ingest", None, 0, 1)?;
         ingest_events(state.directory()?, state)?;
+        run.stage("fetch_approved", None, 0, 1)?;
         let temporary = tempfile::tempdir()?;
         let source = fetch_approved(&runtime.repo, &temporary.path().join("approved"))?;
-        let (catalog, applied) = apply_source(&source, runtime, state)?;
+        let (catalog, applied) = apply_source_tracked(&source, runtime, state, Some(&mut run))?;
         result.ok = applied.ok();
         result.details.application = applied.results;
         let observations = pending_observations(state, 1000)?;
         if !observations.is_empty() && catalog.resources.iter().any(|r| r.source.is_self()) {
+            run.stage("analysis", None, 0, observations.len())?;
             let fallback;
             let runner = match runner {
                 Some(runner) => runner,
@@ -432,8 +547,11 @@ pub fn cycle_with(
                 }
             };
             let candidates = analyze_observations(&catalog, &observations, runner)?;
+            run.stage("analysis", None, observations.len(), observations.len())?;
+            let total = candidates.len();
             let mut findings = Vec::new();
             for (index, candidate) in candidates.into_iter().enumerate() {
+                run.stage("validation", Some(&candidate.resource_id), index, total)?;
                 let proposed = temporary.path().join(format!("candidate-{index}"));
                 copy_tree(&source, &proposed)?;
                 for (path, text) in &candidate.changes {
@@ -448,9 +566,17 @@ pub fn cycle_with(
                     evidence: candidate.evidence.clone(),
                     validation: validation.clone(),
                 });
+                let validation_status = serde_json::to_value(validation.status)?;
+                run.resource_result(
+                    &candidate.resource_id,
+                    validation_status.as_str().unwrap_or("unknown"),
+                    "Candidate validation finished",
+                );
+                run.stage("validation", Some(&candidate.resource_id), index + 1, total)?;
                 if validation.status == ValidationStatus::Failed {
                     continue;
                 }
+                run.stage("proposal", Some(&candidate.resource_id), index, total)?;
                 let change = to_changeset(&candidate, &validation)?;
                 let mut proposal =
                     match crate::proposals::create_proposal(&runtime.repo, &change, state) {
@@ -458,7 +584,14 @@ pub fn cycle_with(
                         Err(error) if error.is::<NoChanges>() => continue,
                         Err(error) => return Err(error),
                     };
+                run.stage("submit_mr", Some(&candidate.resource_id), index, total)?;
                 let url = submitter.submit(&mut proposal, state)?;
+                run.resource_result(
+                    &candidate.resource_id,
+                    "submitted",
+                    "Merge request submitted for review",
+                );
+                run.stage("submit_mr", Some(&candidate.resource_id), index + 1, total)?;
                 result.proposals.push(SubmittedProposal {
                     key: proposal.key,
                     url,
@@ -466,6 +599,7 @@ pub fn cycle_with(
             }
             state.set("findings", &findings)?;
         }
+        run.stage("complete_observations", None, 0, observations.len())?;
         complete_observations(
             state,
             &observations
@@ -474,12 +608,62 @@ pub fn cycle_with(
                 .collect::<Vec<_>>(),
         )?;
         result.details.observations_processed = observations.len();
+        run.stage(
+            "complete_observations",
+            None,
+            observations.len(),
+            observations.len(),
+        )?;
         Ok(())
     };
-    if let Err(error) = work(&mut result) {
+    let failed_stage = if let Err(error) = work(&mut result) {
         result.ok = false;
         result.details.error = Some(redact_text(&format!("{error:#}"), Some(1600)));
+        Some(run.details().clone())
+    } else {
+        None
+    };
+    let maintenance = (|| -> Result<_> {
+        run.stage("retention", None, 0, 1)?;
+        let report = crate::retention::maintain(state)?;
+        run.stage("retention", None, 1, 1)?;
+        Ok(report)
+    })();
+    match maintenance {
+        Ok(report) => result.details.retention = Some(report),
+        Err(error) => {
+            let summary = redact_text(&format!("{error:#}"), Some(1600));
+            run.resource_result("retention", "failed", &summary);
+            result.ok = false;
+            if result.details.error.is_none() {
+                result.details.error = Some(summary);
+            }
+        }
     }
-    state.add_run("cycle", &result)?;
+    if let Some(failed) = failed_stage {
+        if let Err(error) = run.stage(
+            &failed.stage,
+            failed.resource.as_deref(),
+            failed.completed,
+            failed.total,
+        ) {
+            let _ = writeln!(
+                std::io::stderr().lock(),
+                "{}",
+                serde_json::json!({"event":"run_persistence_failed","id":run.details().id,"error":redact_text(&format!("{error:#}"),Some(1600))})
+            );
+        }
+    }
+    let error = result
+        .details
+        .error
+        .clone()
+        .or_else(|| application_error(&result.details.application));
+    if let Err(persistence) = run.finish(&result, result.ok, error.as_deref()) {
+        if let Some(error) = error {
+            return Err(persistence.context(error));
+        }
+        return Err(persistence);
+    }
     Ok(result)
 }

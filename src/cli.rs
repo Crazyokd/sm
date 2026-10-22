@@ -33,6 +33,10 @@ pub enum Commands {
     Sync,
     Cycle,
     Status,
+    Diagnose {
+        #[arg(long)]
+        output: PathBuf,
+    },
     Propose {
         change: PathBuf,
     },
@@ -57,17 +61,21 @@ pub fn record(agent: Client, directory: &std::path::Path) -> i32 {
         let mut raw = String::new();
         io::stdin().take(1048577).read_to_string(&mut raw)?;
         let payload = if raw.len() > 1048576 {
-            json!({"hook_event_name":"CaptureGap","reason":"payload exceeds recorder limit"})
+            json!({"hook_event_name":"CaptureGap","reason":"payload exceeds recorder limit","truncated":true})
         } else {
             serde_json::from_str(&raw)?
         };
         record_event(agent, &payload, directory)
     };
     if let Err(error) = result() {
-        eprintln!(
-            "SM recording unavailable: {}",
-            redact_text(&format!("{error:#}"), Some(400))
-        );
+        let message = redact_text(&format!("{error:#}"), Some(400));
+        if let Err(health_error) = crate::observe::record_failure(agent, directory, &message) {
+            eprintln!(
+                "SM capture health unavailable: {}",
+                redact_text(&health_error.to_string(), Some(400))
+            );
+        }
+        eprintln!("SM recording unavailable: {message}");
     }
     0
 }
@@ -101,6 +109,7 @@ pub fn run(args: Args, runtime: &Runtime) -> Result<CommandOutcome> {
                 resources: Vec<Resource>,
                 results: std::collections::BTreeMap<String, ResourceResult>,
                 runs: Vec<RunRecord>,
+                health: crate::diagnostics::Health,
             }
             let mut runs: Vec<RunRecord> = state.get("runs")?;
             if runs.len() > 5 {
@@ -110,7 +119,14 @@ pub fn run(args: Args, runtime: &Runtime) -> Result<CommandOutcome> {
                 resources: state.get::<Catalog>("catalog")?.resources,
                 results: state.get("resource_results")?,
                 runs,
+                health: crate::diagnostics::health(&state)?,
             })?;
+            0
+        }
+        Commands::Diagnose { output } => {
+            let report = crate::diagnostics::collect(runtime, &state)?;
+            crate::diagnostics::write(&output, &report)?;
+            print(&json!({"output":output,"generated_at":report.generated_at}))?;
             0
         }
         Commands::Propose { change } => {

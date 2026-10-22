@@ -1,13 +1,15 @@
 use crate::{
     files::{atomic_write, contained, reject_symlink_path},
     model::{
-        ApplyPlan, ApplyReport, ApplyStatus, Catalog, OwnedWrite, ResourceResult, Scope, WriteBody,
+        ApplyPlan, ApplyReport, ApplyStatus, Catalog, OwnedWrite, ResourceResult, Scope,
+        StoredBody, StoredWrite, WriteBody,
     },
     providers::{self, UnsupportedResource},
     state::State,
 };
 use anyhow::{Context, Result, ensure};
 use serde_json::{Map, Value};
+use sha2::{Digest, Sha256};
 use std::{
     collections::{BTreeMap, BTreeSet},
     fs,
@@ -71,12 +73,12 @@ pub fn plan_apply(
     }
     plan
 }
-fn block(write: &OwnedWrite, bytes: &[u8]) -> Result<String> {
+fn block(resource_id: &str, bytes: &[u8]) -> Result<String> {
     Ok(format!(
         "<!-- SM:{} -->\n{}\n<!-- /SM:{} -->\n",
-        write.resource_id,
+        resource_id,
         std::str::from_utf8(bytes)?.trim_end(),
-        write.resource_id
+        resource_id
     ))
 }
 
@@ -244,14 +246,15 @@ fn patch_item(item: &mut Item, before: &Value, after: &Value) -> Result<()> {
 }
 type ContentChange = (Option<Vec<u8>>, Option<Vec<u8>>);
 
-fn prepare(path: &Path, new: &[OwnedWrite], old: &[OwnedWrite]) -> Result<ContentChange> {
+fn prepare(path: &Path, new: &[OwnedWrite], old: &[StoredWrite]) -> Result<ContentChange> {
     reject_symlink_path(path).map_err(|e| conflict(e.to_string()))?;
-    let body = &new
+    let next: Vec<_> = new.iter().map(StoredWrite::from).collect();
+    let body = &next
         .first()
         .or_else(|| old.first())
         .context("target has no owner")?
         .body;
-    if new
+    if next
         .iter()
         .chain(old)
         .any(|w| std::mem::discriminant(&w.body) != std::mem::discriminant(body))
@@ -264,15 +267,20 @@ fn prepare(path: &Path, new: &[OwnedWrite], old: &[OwnedWrite]) -> Result<Conten
         None
     };
     let result = match body {
-        WriteBody::File { .. } => {
+        StoredBody::FileFingerprint { .. } => {
             if old.len() > 1 {
                 return Err(conflict("multiple file owners"));
             }
             if let Some(previous) = old.first() {
-                let WriteBody::File { bytes, .. } = &previous.body else {
+                let StoredBody::FileFingerprint { sha256, .. } = &previous.body else {
                     return Err(conflict("invalid file ownership"));
                 };
-                if content.as_ref() != Some(bytes) {
+                if content
+                    .as_ref()
+                    .map(|bytes| <[u8; 32]>::from(Sha256::digest(bytes)))
+                    .as_ref()
+                    != Some(sha256)
+                {
                     return Err(conflict("managed file was changed locally"));
                 }
             } else if content.is_some() {
@@ -287,13 +295,13 @@ fn prepare(path: &Path, new: &[OwnedWrite], old: &[OwnedWrite]) -> Result<Conten
                 _ => return Err(conflict("invalid file write")),
             }
         }
-        WriteBody::Markdown(_) => {
+        StoredBody::Markdown(_) => {
             let mut text = String::from_utf8(content.clone().unwrap_or_default())?;
             for write in old {
-                let WriteBody::Markdown(bytes) = &write.body else {
+                let StoredBody::Markdown(bytes) = &write.body else {
                     return Err(conflict("invalid rule ownership"));
                 };
-                let block = block(write, bytes)?;
+                let block = block(&write.resource_id, bytes)?;
                 if text.matches(&block).count() != 1 {
                     return Err(conflict("managed rules were changed locally"));
                 }
@@ -309,7 +317,7 @@ fn prepare(path: &Path, new: &[OwnedWrite], old: &[OwnedWrite]) -> Result<Conten
                 if !text.is_empty() && !text.ends_with('\n') {
                     text.push('\n');
                 }
-                text.push_str(&block(write, bytes)?);
+                text.push_str(&block(&write.resource_id, bytes)?);
             }
             if text.is_empty() {
                 None
@@ -317,9 +325,9 @@ fn prepare(path: &Path, new: &[OwnedWrite], old: &[OwnedWrite]) -> Result<Conten
                 Some(text.into_bytes())
             }
         }
-        WriteBody::Json(_) | WriteBody::Toml(_) => {
+        StoredBody::Json(_) | StoredBody::Toml(_) => {
             let text = std::str::from_utf8(content.as_deref().unwrap_or_default())?;
-            let original: Value = if matches!(body, WriteBody::Toml(_)) {
+            let original: Value = if matches!(body, StoredBody::Toml(_)) {
                 toml_edit::de::from_str(text)?
             } else if text.is_empty() {
                 Value::Object(Map::new())
@@ -327,16 +335,16 @@ fn prepare(path: &Path, new: &[OwnedWrite], old: &[OwnedWrite]) -> Result<Conten
                 serde_json::from_str(text)?
             };
             let mut document = original.clone();
-            for (writes, remove) in [(old, true), (new, false)] {
+            for (writes, remove) in [(old, true), (next.as_slice(), false)] {
                 for write in writes {
                     let fragment = match &write.body {
-                        WriteBody::Json(value) | WriteBody::Toml(value) => value,
+                        StoredBody::Json(value) | StoredBody::Toml(value) => value,
                         _ => return Err(conflict("invalid config write")),
                     };
                     merge_entries(&mut document, fragment, remove)?;
                 }
             }
-            if matches!(body, WriteBody::Toml(_)) {
+            if matches!(body, StoredBody::Toml(_)) {
                 let mut edited: DocumentMut = text.parse()?;
                 patch_table(
                     edited.as_table_mut(),
@@ -366,7 +374,7 @@ pub fn apply_writes(plan: &ApplyPlan, state: &State) -> Result<ApplyReport> {
         results: plan.results.clone(),
     };
     let mut desired: BTreeMap<PathBuf, Vec<OwnedWrite>> = BTreeMap::new();
-    let mut previous: BTreeMap<PathBuf, Vec<OwnedWrite>> = BTreeMap::new();
+    let mut previous: BTreeMap<PathBuf, Vec<StoredWrite>> = BTreeMap::new();
     for write in &plan.writes {
         let entries = desired.entry(write.path.clone()).or_default();
         if !entries.contains(write) {
@@ -384,8 +392,8 @@ pub fn apply_writes(plan: &ApplyPlan, state: &State) -> Result<ApplyReport> {
         let old = previous.remove(&path).unwrap_or_default();
         let owners: BTreeSet<_> = new
             .iter()
-            .chain(&old)
             .map(|w| w.resource_id.clone())
+            .chain(old.iter().map(|w| w.resource_id.clone()))
             .collect();
         match prepare(&path, &new, &old) {
             Ok((before, after)) => {

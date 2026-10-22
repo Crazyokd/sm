@@ -41,6 +41,147 @@ fn apply(writes: Vec<OwnedWrite>, state: &State) -> sm::model::ApplyReport {
     .unwrap()
 }
 
+fn migrated_state(path: &Path, writes: &[OwnedWrite]) -> State {
+    let db = rusqlite::Connection::open(path).unwrap();
+    db.execute_batch(
+        "CREATE TABLE ownership (resource TEXT,path TEXT,value TEXT,PRIMARY KEY(resource,path));",
+    )
+    .unwrap();
+    for write in writes {
+        db.execute(
+            "INSERT INTO ownership VALUES (?1,?2,?3)",
+            rusqlite::params![
+                write.resource_id,
+                write.path.to_string_lossy(),
+                serde_json::to_string(write).unwrap()
+            ],
+        )
+        .unwrap();
+    }
+    drop(db);
+    State::open(path.to_path_buf()).unwrap()
+}
+
+#[test]
+fn migrated_files_allow_updates_mode_changes_and_removal() {
+    let temp = tempdir().unwrap();
+    let target = temp.path().join("script");
+    fs::write(&target, [0, 255, 128]).unwrap();
+    fs::set_permissions(&target, fs::Permissions::from_mode(0o640)).unwrap();
+    let state = migrated_state(
+        &temp.path().join("state.db"),
+        &[owned(&target, &[0, 255, 128])],
+    );
+    let saved = serde_json::to_value(state.owned().unwrap()).unwrap();
+    assert_eq!(saved[0]["body"]["kind"], "file_fingerprint");
+    for (bytes, executable) in [(vec![0, 255, 128], true), (b"changed".to_vec(), false)] {
+        let write = OwnedWrite::new(
+            "review",
+            &target,
+            WriteBody::File {
+                bytes: bytes.clone(),
+                executable,
+            },
+        );
+        assert!(apply(vec![write], &state).ok());
+        assert_eq!(fs::read(&target).unwrap(), bytes);
+        assert_eq!(
+            fs::metadata(&target).unwrap().permissions().mode() & 0o111 != 0,
+            executable
+        );
+    }
+    assert!(apply(vec![], &state).ok());
+    assert!(!target.exists());
+    assert!(state.owned().unwrap().is_empty());
+}
+
+#[test]
+fn migrated_files_preserve_local_changes_missing_targets_and_symlinks() {
+    for change in ["content", "missing", "symlink"] {
+        let temp = tempdir().unwrap();
+        let target = temp.path().join("file");
+        let outside = temp.path().join("outside");
+        fs::write(&target, "managed").unwrap();
+        let state = migrated_state(&temp.path().join("state.db"), &[owned(&target, b"managed")]);
+        match change {
+            "content" => fs::write(&target, "local edit").unwrap(),
+            "missing" => fs::remove_file(&target).unwrap(),
+            _ => {
+                fs::remove_file(&target).unwrap();
+                fs::write(&outside, "outside data").unwrap();
+                symlink(&outside, &target).unwrap();
+            }
+        }
+        let before = serde_json::to_value(state.owned().unwrap()).unwrap();
+        assert!(
+            !apply(vec![owned(&target, b"new")], &state).ok(),
+            "{change}"
+        );
+        assert!(!apply(vec![], &state).ok(), "{change}");
+        assert_eq!(
+            serde_json::to_value(state.owned().unwrap()).unwrap(),
+            before
+        );
+        match change {
+            "content" => assert_eq!(fs::read(&target).unwrap(), b"local edit"),
+            "missing" => assert!(!target.exists()),
+            _ => {
+                assert!(
+                    fs::symlink_metadata(&target)
+                        .unwrap()
+                        .file_type()
+                        .is_symlink()
+                );
+                assert_eq!(fs::read(outside).unwrap(), b"outside data");
+            }
+        }
+    }
+}
+
+#[test]
+fn migrated_file_conflicts_block_every_shared_owner_before_cleanup() {
+    let temp = tempdir().unwrap();
+    let a_old = temp.path().join("a-old");
+    let b_old = temp.path().join("b-old");
+    let config = temp.path().join("hooks.json");
+    fs::write(&a_old, "managed").unwrap();
+    fs::write(&b_old, "managed").unwrap();
+    let mut a = owned(&a_old, b"managed");
+    a.resource_id = "a".into();
+    let mut b = owned(&b_old, b"managed");
+    b.resource_id = "b".into();
+    let fragment = |id: &str| {
+        json!({"hooks":{"Stop":[{"command":id}]}})
+            .as_object()
+            .unwrap()
+            .clone()
+    };
+    let hook = |id: &str| OwnedWrite::new(id, &config, WriteBody::Json(fragment(id)));
+    fs::write(
+        &config,
+        serde_json::to_vec(&json!({"hooks":{"Stop":[{"command":"a"},{"command":"b"}]}})).unwrap(),
+    )
+    .unwrap();
+    let state = migrated_state(&temp.path().join("state.db"), &[a, b, hook("a"), hook("b")]);
+    fs::write(&a_old, "local edit").unwrap();
+    let before = fs::read(&config).unwrap();
+    let mut a = owned(&temp.path().join("a-new"), b"new");
+    a.resource_id = "a".into();
+    let mut b = owned(&temp.path().join("b-new"), b"new");
+    b.resource_id = "b".into();
+    let report = apply(vec![a, b, hook("a"), hook("b")], &state);
+    assert!(!report.ok());
+    for id in ["a", "b"] {
+        assert_eq!(report.results[id].status, sm::model::ApplyStatus::Conflict);
+    }
+    assert_eq!(fs::read(&a_old).unwrap(), b"local edit");
+    assert_eq!(fs::read(&b_old).unwrap(), b"managed");
+    assert_eq!(fs::read(&config).unwrap(), before);
+    assert!(!temp.path().join("a-new").exists());
+    assert!(!temp.path().join("b-new").exists());
+    assert_eq!(state.owned().unwrap().len(), 4);
+}
+
 #[test]
 fn skill_is_client_independent_and_installed_once() {
     let temp = tempdir().unwrap();

@@ -102,6 +102,98 @@ impl Fixture {
     }
 }
 #[tokio::test]
+async fn interrupted_runs_are_marked_as_needing_attention() {
+    let f = Fixture::new();
+    let guard = sm::service::JobGuard::acquire(f.state.directory().unwrap()).unwrap();
+    {
+        let _run = sm::telemetry::RunTracker::start(&f.state, "cycle").unwrap();
+    }
+    drop(guard);
+    let (status, page) = f.get("/jobs").await;
+    assert_eq!(status, StatusCode::OK);
+    let history = page.split("<h2>执行记录</h2>").nth(1).unwrap();
+    assert!(history.contains("需处理"));
+}
+
+#[tokio::test]
+async fn activity_keeps_historical_totals_and_labels_current_evidence() {
+    let f = Fixture::new();
+    record_event(
+        sm::model::Client::Codex,
+        &json!({
+            "hook_event_name":"PostToolUse", "tool_name":"Read", "resource_id":"review",
+            "tool_input":{"path":f.runtime.home.join(".agents/skills/review/SKILL.md")},
+            "tool_response":{"status":"failed","duration_ms":12.5}
+        }),
+        f.state.directory().unwrap(),
+    )
+    .unwrap();
+    ingest_events(f.state.directory().unwrap(), &f.state).unwrap();
+    f.state
+        .set(
+            "usage_totals",
+            &json!({"review":{"events":5,"last_seen":"2026-01-01T00:00:00Z"}}),
+        )
+        .unwrap();
+    let (status, page) = f.get("/activity").await;
+    assert_eq!(status, StatusCode::OK);
+    for text in [
+        "6 条",
+        "历史摘要 5 条",
+        "保留明细中的会话",
+        "文件读取",
+        "失败",
+        "12.5 ms",
+    ] {
+        assert!(page.contains(text), "{text}");
+    }
+    assert!(!page.contains("完整执行了"));
+}
+
+#[tokio::test]
+async fn diagnostic_download_is_private_and_shares_health_with_jobs() {
+    let f = Fixture::new();
+    let (status, page) = f.get("/jobs").await;
+    assert_eq!(status, StatusCode::OK);
+    for label in ["采集健康", "待消化", "存储与留存", "下载脱敏诊断"] {
+        assert!(page.contains(label), "{label}");
+    }
+    let response = f
+        .app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri("/diagnostics.json")
+                .header("Host", "127.0.0.1:8765")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(response.headers()["cache-control"], "no-store");
+    assert!(
+        response.headers()["content-disposition"]
+            .to_str()
+            .unwrap()
+            .contains("attachment")
+    );
+    let body: Value =
+        serde_json::from_slice(&response.into_body().collect().await.unwrap().to_bytes()).unwrap();
+    assert_eq!(body["manager_version"], env!("CARGO_PKG_VERSION"));
+    assert!(body["health"]["storage"]["database_bytes"].is_number());
+    let (status, _) = f
+        .request(
+            "GET",
+            "/diagnostics.json",
+            String::new(),
+            &[("Origin", "https://foreign.invalid")],
+        )
+        .await;
+    assert_eq!(status, StatusCode::FORBIDDEN);
+}
+
+#[tokio::test]
 async fn embedded_views_and_portable_skill_filter_are_readable() {
     let f = Fixture::new();
     for path in [

@@ -5,6 +5,7 @@ use serde::{
     de::{self, Deserializer},
 };
 use serde_json::{Map, Value};
+use sha2::{Digest, Sha256};
 use std::{
     collections::{BTreeMap, BTreeSet},
     fmt, fs,
@@ -344,6 +345,44 @@ impl OwnedWrite {
             resource_id: id.into(),
             path: path.as_ref().to_path_buf(),
             body,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(
+    tag = "kind",
+    content = "content",
+    rename_all = "snake_case",
+    deny_unknown_fields
+)]
+pub enum StoredBody {
+    FileFingerprint { sha256: [u8; 32], executable: bool },
+    Markdown(Vec<u8>),
+    Json(Map<String, Value>),
+    Toml(Map<String, Value>),
+}
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct StoredWrite {
+    pub resource_id: String,
+    pub path: PathBuf,
+    pub body: StoredBody,
+}
+impl From<&OwnedWrite> for StoredWrite {
+    fn from(write: &OwnedWrite) -> Self {
+        Self {
+            resource_id: write.resource_id.clone(),
+            path: write.path.clone(),
+            body: match &write.body {
+                WriteBody::File { bytes, executable } => StoredBody::FileFingerprint {
+                    sha256: Sha256::digest(bytes).into(),
+                    executable: *executable,
+                },
+                WriteBody::Markdown(bytes) => StoredBody::Markdown(bytes.clone()),
+                WriteBody::Json(fragment) => StoredBody::Json(fragment.clone()),
+                WriteBody::Toml(fragment) => StoredBody::Toml(fragment.clone()),
+            },
         }
     }
 }

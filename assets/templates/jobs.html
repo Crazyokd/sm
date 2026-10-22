@@ -2,7 +2,28 @@
 {% block title %}运行状态{% endblock %}
 {% block breadcrumb %}运行状态{% endblock %}
 {% block content %}
-<div class="page-heading"><div><p class="eyebrow">LOCAL OPERATIONS</p><h1>运行状态</h1><p class="subtitle">首次启动立即同步，夜间统一处理资源和本地记录。</p></div><span class="schedule">每日 02:00 · 本机时间</span></div>
+<div class="page-heading"><div><p class="eyebrow">LOCAL OPERATIONS</p><h1>运行状态</h1><p class="subtitle">首次启动立即同步，夜间统一处理资源和本地记录。</p></div><div class="health-actions"><a class="button secondary" href="/jobs">刷新状态</a><a class="button" href="/diagnostics.json" download>下载脱敏诊断</a></div></div>
+<section class="scope-section"><div class="section-heading"><h2>当前任务</h2><span class="schedule">每日 02:00 · 本机时间</span></div>
+{% if health.runs.current %}{% set current=health.runs.current %}
+<p class="status {{ 'failed' if current.status=='interrupted' else 'applied' }}">{{ '任务中断' if current.status=='interrupted' else '正在运行' }} · {{ stage_label(current.stage) }}{% if current.resource %} · {{ current.resource }}{% endif %}</p>
+{% if current.total %}<label class="progress-label" for="job-progress">当前阶段：{{ current.completed }} / {{ current.total }}</label><progress id="job-progress" max="{{ current.total }}" value="{{ current.completed }}">{{ current.completed }} / {{ current.total }}</progress>{% endif %}
+<p class="quiet">已耗时 {{ (current.duration_ms / 1000)|round(1) }} 秒 · 触发方式：{{ {'startup':'启动','nightly':'定时','manual':'手动'}[current.trigger] }} · 开始于 {{ current.started_at }}</p>
+{% if current.error %}<p class="notice warning">{{ current.error }}</p>{% endif %}
+<details><summary>任务标识</summary><code>{{ current.id }}</code></details>
+{% else %}<p class="quiet">当前没有进行中的任务。</p>{% endif %}
+<p>最近成功任务：{% if last_success %}<time>{{ last_success }} UTC</time>{% else %}尚无带完整运行信息的成功记录{% endif %}</p>
+</section>
 <section class="scope-section"><h2>本地采集</h2>{% for agent in collectors %}{% set status=collectors[agent] %}<p><strong>{{ agent|capitalize }}</strong> · {{ status }}</p>{% else %}<p class="quiet">尚未配置采集。同步自建资源后会配置对应 Agent 的记录入口。</p>{% endfor %}</section>
-<section><h2>执行记录</h2>{% for run in runs %}<details class="run"><summary><span class="run-kind">{{ run.label }}</span><time>{{ run.time_label }} UTC</time><span class="status {{ 'failed' if run.failed else 'applied' }}">{{ '需处理' if run.failed else '查看结果' }}</span></summary><pre>{{ run.result|tojson(indent=2) }}</pre></details>{% else %}<p class="empty">尚无执行记录。</p>{% endfor %}</section>
+<section class="scope-section"><h2>采集健康</h2><p class="quiet">计数表示接收事件，不等于 Skill 使用次数。未收到事件不能直接判断为故障；历史计数从健康记录启用时开始。</p>
+<div class="table-wrap"><table><thead><tr><th>客户端</th><th>最后收到事件</th><th>接收事件</th><th>采集失败</th><th>截断 / 缺口</th></tr></thead><tbody>{% for agent in health.capture.clients %}{% set capture=health.capture.clients[agent] %}<tr><td>{{ agent|capitalize }}</td><td class="time">{{ capture.last_event or '尚未收到' }}</td><td>{{ capture.received }}</td><td>{{ capture.failures }}</td><td>{{ capture.truncated }} / {{ capture.gaps }}</td></tr>{% if capture.last_error %}<tr><td colspan="5" class="excerpt">最近采集错误：{{ capture.last_error }}</td></tr>{% endif %}{% endfor %}</tbody></table></div>
+<p>待消化原始记录：{{ format_bytes(health.pending_raw_bytes) }} · 待分析：{{ health.pending_observations }} 条 · 已处理明细：{{ health.processed_observations }} 条</p>
+{% if health.parsing_errors %}<details><summary class="status failed">记录解析缺口：{{ health.parsing_errors|length }} 处</summary><ul>{% for error in health.parsing_errors %}<li>{{ error.file }} · 偏移 {{ error.offset }} · {{ error.error }}</li>{% endfor %}</ul></details>{% endif %}
+</section>
+<section class="scope-section"><h2>存储与留存</h2><p>本地状态共 {{ format_bytes(health.storage.total_bytes) }} · 数据库 {{ format_bytes(health.storage.database_bytes) }} · 原始事件 {{ format_bytes(health.storage.events_bytes) }}</p>
+<p class="quiet">明细保留 {{ health.retention.retention_days }} 天；原始事件目标上限 {{ format_bytes(health.retention.raw_limit_bytes) }}。清理保留长期事件摘要，保护待处理数据和提案引用证据。</p>
+<p>受保护原始文件：{{ health.retention.protected_raw_files }} 个（{{ format_bytes(health.retention.protected_raw_bytes) }}） · 被引用证据：{{ health.retention.pinned_observations }} 条 · 历史去重索引：{{ health.retention.retired_observations }} 条</p>
+{% if health.retention.over_budget %}<p class="notice warning">原始事件超出目标 {{ format_bytes(health.retention.over_budget_bytes) }}。受保护数据不会为满足容量目标而删除；请检查积压和夜间任务。</p>{% endif %}
+{% if health.retention.unknown_raw_files or health.retention.unknown_timestamp_observations %}<p class="notice warning">存在时间未知的文件或记录，自动清理已保留这些数据。</p>{% endif %}
+</section>
+<section><h2>执行记录</h2>{% for run in runs %}<details class="run"><summary><span class="run-kind">{{ run.label }}</span><time>{{ run.time_label }} UTC</time>{% if run.result.run %}<span>{{ (run.result.run.duration_ms / 1000)|round(1) }} 秒 · {{ stage_label(run.result.run.stage) }}</span>{% endif %}<span class="status {{ 'failed' if run.failed else 'applied' }}">{{ '需处理' if run.failed else '查看结果' }}</span></summary><pre>{{ run.result|tojson(indent=2) }}</pre></details>{% else %}<p class="empty">尚无执行记录。</p>{% endfor %}</section>
 {% endblock %}

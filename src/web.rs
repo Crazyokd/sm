@@ -105,6 +105,36 @@ fn templates() -> Result<Environment<'static>> {
             AutoEscape::None
         }
     });
+    env.add_function("format_bytes", |bytes: u64| {
+        if bytes >= 1024 * 1024 {
+            format!("{:.1} MiB", bytes as f64 / 1048576.0)
+        } else if bytes >= 1024 {
+            format!("{:.1} KiB", bytes as f64 / 1024.0)
+        } else {
+            format!("{bytes} B")
+        }
+    });
+    env.add_function("stage_label", |stage: String| {
+        match stage.as_str() {
+            "starting" => "准备任务",
+            "configure" => "生成配置",
+            "register_services" => "注册服务",
+            "fetch_approved" => "获取已审核资源",
+            "catalog" => "读取清单",
+            "fetch_resource" => "获取资源",
+            "apply" => "投放文件",
+            "cache_metadata" => "更新资源状态",
+            "ingest" => "消化本地记录",
+            "analysis" => "分析自建资源",
+            "validation" => "验证候选修改",
+            "proposal" => "保存提案",
+            "submit_mr" => "提交 MR",
+            "complete_observations" => "标记记录处理完成",
+            "retention" => "清理过期明细",
+            _ => return stage,
+        }
+        .to_owned()
+    });
     for (name, text) in [
         ("base.html", include_str!("../assets/templates/base.html")),
         (
@@ -159,6 +189,7 @@ pub fn router_with(
         .route("/projects", get(projects))
         .route("/activity", get(activity))
         .route("/jobs", get(jobs))
+        .route("/diagnostics.json", get(download_diagnostics))
         .route("/proposals", post(propose))
         .route(
             "/static/app.js",
@@ -207,6 +238,21 @@ async fn local_boundary(
             return Err(WebError {
                 status: StatusCode::FORBIDDEN,
                 message: "Local access only".into(),
+            });
+        }
+        if request.uri().path() == "/diagnostics.json"
+            && (request
+                .headers()
+                .get("sec-fetch-site")
+                .is_some_and(|v| v == "cross-site")
+                || request
+                    .headers()
+                    .get("origin")
+                    .is_some_and(|v| v.as_bytes() != format!("http://{host}").as_bytes()))
+        {
+            return Err(WebError {
+                status: StatusCode::FORBIDDEN,
+                message: "Origin rejected".into(),
             });
         }
         if !matches!(request.method().as_str(), "GET" | "HEAD" | "OPTIONS") {
@@ -598,12 +644,16 @@ struct EventView {
     resource_id: Option<String>,
     event: String,
     coverage: Coverage,
+    evidence_kind: crate::observe::EvidenceKind,
+    outcome: Option<String>,
+    duration_ms: Option<f64>,
     excerpt: String,
 }
 #[derive(Serialize)]
 struct Usage {
     events: u64,
     sessions: u64,
+    retired_events: u64,
     last_seen_label: String,
 }
 #[derive(Serialize)]
@@ -626,17 +676,59 @@ struct ActivityPage {
     findings: Vec<FindingView>,
     usage: Vec<UsageView>,
     recording_errors: Vec<RecordingError>,
+    pending_raw_bytes: u64,
+    pending_observations: u64,
 }
 async fn activity(WebState(context): WebState<Shared>) -> WebResult<Html<String>> {
-    blocking(move||{
-    let rows=resource_rows(&context.state)?;let base=base(&context,"activity",&rows)?;let db=context.state.connect()?;let mut query=db.prepare("SELECT value FROM observations ORDER BY rowid DESC LIMIT 100")?;let mut events=Vec::new();
-    for text in query.query_map([],|row|row.get::<_,String>(0))?{let row:Observation=serde_json::from_str(&text?)?;let input=row.facts.get("tool_input");let excerpt=input.and_then(|i|i.get("command").or_else(||i.get("path"))).and_then(serde_json::Value::as_str).unwrap_or_default();events.push(EventView{id:row.id,time_label:time_label(&row.timestamp),agent:row.agent,resource_id:row.resource_id,event:row.event,coverage:row.coverage,excerpt:redact_text(excerpt,Some(180))});}
-    let mut counts=BTreeMap::new();let mut query=db.prepare("SELECT json_extract(value,'$.resource_id'),COUNT(*),COUNT(DISTINCT NULLIF(json_extract(value,'$.session_id'),'')),MAX(json_extract(value,'$.timestamp')) FROM observations GROUP BY 1")?;
-    for row in query.query_map([],|row|Ok((row.get::<_,Option<String>>(0)?,row.get::<_,u64>(1)?,row.get::<_,u64>(2)?,row.get::<_,String>(3)?)))?{let(id,events,sessions,last_seen)=row?;if let Some(id)=id{counts.insert(id,Usage{events,sessions,last_seen_label:time_label(&last_seen)});}}
-    let usage=rows.into_iter().filter(|r|r.resource.source.is_self()).map(|resource|{let usage=counts.remove(&resource.resource.id);UsageView{resource,usage}}).collect();
-    let mut findings=Vec::new();for finding in context.state.get::<Vec<Finding>>("findings")?{let proposals=proposals_for(&context.state,&finding.resource_id)?;findings.push(FindingView{finding,proposals});}
-    render(&context,"activity.html",&ActivityPage{base,events,findings,usage,recording_errors:context.state.get("recording_errors")?})
-}).await
+    blocking(move || {
+        let rows = resource_rows(&context.state)?;
+        let base = base(&context, "activity", &rows)?;
+        let db = context.state.connect()?;
+        let mut query = db.prepare("SELECT value FROM observations ORDER BY rowid DESC LIMIT 100")?;
+        let mut events = Vec::new();
+        for text in query.query_map([], |row| row.get::<_, String>(0))? {
+            let row: Observation = serde_json::from_str(&text?)?;
+            let excerpt = row.facts.get("tool_input")
+                .and_then(|i| i.get("command").or_else(|| i.get("path")))
+                .and_then(serde_json::Value::as_str).unwrap_or_default();
+            events.push(EventView {
+                id: row.id, time_label: time_label(&row.timestamp), agent: row.agent,
+                resource_id: row.resource_id, event: row.event, coverage: row.coverage,
+                evidence_kind: row.evidence_kind,
+                outcome: row.facts.get("outcome").and_then(serde_json::Value::as_str).map(str::to_owned),
+                duration_ms: row.facts.get("duration_ms").and_then(serde_json::Value::as_f64),
+                excerpt: redact_text(excerpt, Some(180)),
+            });
+        }
+        let mut counts = BTreeMap::new();
+        let mut query = db.prepare("SELECT json_extract(value,'$.resource_id'),COUNT(*),COUNT(DISTINCT NULLIF(json_extract(value,'$.session_id'),'')),MAX(json_extract(value,'$.timestamp')) FROM observations GROUP BY 1")?;
+        for row in query.query_map([], |row| Ok((row.get::<_, Option<String>>(0)?, row.get::<_, u64>(1)?, row.get::<_, u64>(2)?, row.get::<_, String>(3)?)))? {
+            let (id, events, sessions, last_seen) = row?;
+            if let Some(id) = id { counts.insert(id, Usage { events, sessions, retired_events: 0, last_seen_label: time_label(&last_seen) }); }
+        }
+        for (id, total) in context.state.get::<BTreeMap<String, crate::retention::UsageTotal>>("usage_totals")? {
+            let usage = counts.entry(id).or_insert(Usage { events: 0, sessions: 0, retired_events: 0, last_seen_label: String::new() });
+            usage.events = usage.events.saturating_add(total.events);
+            usage.retired_events = total.events;
+            if let Some(last) = total.last_seen {
+                let last = time_label(&last);
+                if last > usage.last_seen_label { usage.last_seen_label = last; }
+            }
+        }
+        let usage = rows.into_iter().filter(|r| r.resource.source.is_self()).map(|resource| {
+            let usage = counts.remove(&resource.resource.id); UsageView { resource, usage }
+        }).collect();
+        let mut findings = Vec::new();
+        for finding in context.state.get::<Vec<Finding>>("findings")? {
+            let proposals = proposals_for(&context.state, &finding.resource_id)?;
+            findings.push(FindingView { finding, proposals });
+        }
+        let health = crate::diagnostics::health(&context.state)?;
+        render(&context, "activity.html", &ActivityPage {
+            base, events, findings, usage, recording_errors: health.parsing_errors,
+            pending_raw_bytes: health.pending_raw_bytes, pending_observations: health.pending_observations,
+        })
+    }).await
 }
 #[derive(Serialize)]
 struct RunView {
@@ -652,6 +744,8 @@ struct JobsPage {
     base: BaseContext,
     runs: Vec<RunView>,
     collectors: BTreeMap<String, String>,
+    health: crate::diagnostics::Health,
+    last_success: Option<String>,
 }
 async fn jobs(WebState(context): WebState<Shared>) -> WebResult<Html<String>> {
     blocking(move || {
@@ -670,6 +764,12 @@ async fn jobs(WebState(context): WebState<Shared>) -> WebResult<Html<String>> {
                 }
                 .to_owned();
                 let failed = record.result.get("error").is_some()
+                    || record
+                        .result
+                        .get("run")
+                        .and_then(|r| r.get("status"))
+                        .and_then(serde_json::Value::as_str)
+                        .is_some_and(|s| matches!(s, "failed" | "interrupted"))
                     || record.result.get("ok") == Some(&serde_json::Value::Bool(false))
                     || record
                         .result
@@ -691,6 +791,8 @@ async fn jobs(WebState(context): WebState<Shared>) -> WebResult<Html<String>> {
                 }
             })
             .collect();
+        let health = crate::diagnostics::health(&context.state)?;
+        let last_success = crate::diagnostics::latest_success(&health).map(time_label);
         render(
             &context,
             "jobs.html",
@@ -698,8 +800,28 @@ async fn jobs(WebState(context): WebState<Shared>) -> WebResult<Html<String>> {
                 base,
                 runs,
                 collectors: context.state.get("collector_status")?,
+                health,
+                last_success,
             },
         )
+    })
+    .await
+}
+async fn download_diagnostics(WebState(context): WebState<Shared>) -> WebResult<Response> {
+    blocking(move || {
+        let report = crate::diagnostics::collect(&context.runtime, &context.state)?;
+        Ok((
+            [
+                ("content-type", "application/json; charset=utf-8"),
+                (
+                    "content-disposition",
+                    "attachment; filename=sm-diagnostics.json",
+                ),
+                ("cache-control", "no-store"),
+            ],
+            crate::diagnostics::bytes(&report)?,
+        )
+            .into_response())
     })
     .await
 }
@@ -769,6 +891,16 @@ pub async fn serve(runtime: Runtime, port: u16) -> Result<()> {
     let listener = tokio::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, port)).await?;
     eprintln!("SM: http://{}", listener.local_addr()?);
     let initial = tokio::task::spawn_blocking(move || synchronize(&runtime, &state));
+    tokio::spawn(async move {
+        match initial.await {
+            Ok(Ok(_)) => {}
+            Ok(Err(error)) => eprintln!(
+                "SM initial sync failed: {}",
+                redact_text(&error.to_string(), Some(500))
+            ),
+            Err(error) => eprintln!("SM initial sync worker failed: {error}"),
+        }
+    });
     axum::serve(listener, app)
         .with_graceful_shutdown(async {
             if let Err(error) = tokio::signal::ctrl_c().await {
@@ -776,13 +908,5 @@ pub async fn serve(runtime: Runtime, port: u16) -> Result<()> {
             }
         })
         .await?;
-    match initial.await {
-        Ok(Ok(_)) => {}
-        Ok(Err(error)) => eprintln!(
-            "SM initial sync failed: {}",
-            redact_text(&error.to_string(), Some(500))
-        ),
-        Err(error) => eprintln!("SM initial sync worker failed: {error}"),
-    };
     Ok(())
 }
