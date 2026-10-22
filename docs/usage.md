@@ -100,4 +100,6 @@ git diff --exit-code -- assets/static/app.js
 
 核心和 CLI 为 Rust；浏览器逻辑为严格模式 TypeScript，并检查未使用的局部变量和参数，类型声明位于 `frontend/types.d.ts`。页面、静态文件、分析提示和服务模板嵌入二进制。修改 TypeScript 后须同时更新已提交的 `assets/static/app.js`；不需要额外前端框架。
 
+GitLab 在每个 MR 和主线提交运行上述检查及 release 构建，构建成功的 Rust 任务保留可执行文件七天。CI 不运行需要个人凭据的模型请求或桌面浏览器交互，也不初始化真实用户服务。
+
 隔离浏览器验收可运行 `cargo run --example preview -- <临时仓库> <临时home> <端口> [状态数据库]`，然后执行 `SM_BROWSER_URL=http://127.0.0.1:<端口> npm run test:browser`。需要预装 browser-harness；回归驱动为 TypeScript，外部 Browser Harness 负责浏览器连接。预览的 MR 页面明确标记为演示，不会提交真实远端。

@@ -1,0 +1,65 @@
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+stages:
+  - check
+
+rust:
+  stage: check
+  image: nexus3.sr/library/rust:1.88-bookworm
+  tags:
+    - docker-cicd
+    - many-cores
+  timeout: 30m
+  variables:
+    CARGO_HOME: "$CI_PROJECT_DIR/.cargo"
+    CARGO_TERM_COLOR: always
+    CARGO_BUILD_JOBS: "4"
+  cache:
+    key:
+      prefix: rust-1.88
+      files:
+        - Cargo.lock
+    paths:
+      - .cargo/registry/
+      - target/debug/
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y --no-install-recommends git systemd
+    - rustup component add rustfmt clippy
+  script:
+    - cargo fmt --check
+    - cargo clippy --all-targets --locked -- -D warnings
+    - cargo test --locked
+    - cargo build --release --locked --bin sm
+    - target/release/sm --version
+  artifacts:
+    paths:
+      - target/release/sm
+    expire_in: 7 days
+
+typescript:
+  stage: check
+  image: nexus3.sr/library/node:24-bookworm-slim
+  tags:
+    - docker-cicd
+    - few-cores
+  timeout: 10m
+  cache:
+    key:
+      prefix: node-24
+      files:
+        - package-lock.json
+    paths:
+      - .npm/
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y --no-install-recommends git
+  script:
+    - npm ci --ignore-scripts --cache .npm --prefer-offline --registry http://nexus3.sr/repository/npm-group/ --loglevel=info
+    - npm run check
+    - npm run build
+    - git diff --exit-code -- assets/static/app.js
+    - node_modules/.bin/tsc -p tsconfig.browser.json --noEmit
