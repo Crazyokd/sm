@@ -1,4 +1,1091 @@
 {
-  "projects": {},
-  "resources": []
+  "projects": {
+    "easygo": "~/workspace/easygo",
+    "easygo-web": "~/workspace/easygo/src/easygo",
+    "perception-platform": "~/workspace/easygo/src/perception_platform",
+    "organism": "~/repo/organism",
+    "sros-core": "~/repo/sros-core"
+  },
+  "resources": [
+    {
+      "id": "agent-browser",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "easygo-web",
+      "payload": ".agents/skills/agent-browser",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/vercel-labs/agent-browser.git",
+          "agent-browser"
+        ]
+      }
+    },
+    {
+      "id": "archify",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/archify",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/tt-a1i/archify.git",
+          "archify"
+        ]
+      }
+    },
+    {
+      "id": "brain-bootstrap",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "organism",
+      "payload": ".agents/skills/brain-bootstrap",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/mindmuxai/brain.md.git",
+          "brain-bootstrap"
+        ]
+      }
+    },
+    {
+      "id": "brain-ingest",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "organism",
+      "payload": ".agents/skills/brain-ingest",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/mindmuxai/brain.md.git",
+          "brain-ingest"
+        ]
+      }
+    },
+    {
+      "id": "brain-page",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "organism",
+      "payload": ".agents/skills/brain-page",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/mindmuxai/brain.md.git",
+          "brain-page"
+        ]
+      }
+    },
+    {
+      "id": "brain-setup",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "organism",
+      "payload": ".agents/skills/brain-setup",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/mindmuxai/brain.md.git",
+          "brain-setup"
+        ]
+      }
+    },
+    {
+      "id": "browser-harness",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/browser-harness",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/browser-use/browser-harness.git",
+          "browser-harness"
+        ]
+      }
+    },
+    {
+      "id": "cavecrew",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/cavecrew",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/JuliusBrussee/caveman.git",
+          "cavecrew"
+        ]
+      }
+    },
+    {
+      "id": "caveman",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/caveman",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/JuliusBrussee/caveman.git",
+          "caveman"
+        ]
+      }
+    },
+    {
+      "id": "caveman-commit",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/caveman-commit",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/JuliusBrussee/caveman.git",
+          "caveman-commit"
+        ]
+      }
+    },
+    {
+      "id": "caveman-compress",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/caveman-compress",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/JuliusBrussee/caveman.git",
+          "caveman-compress"
+        ]
+      }
+    },
+    {
+      "id": "caveman-help",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/caveman-help",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/JuliusBrussee/caveman.git",
+          "caveman-help"
+        ]
+      }
+    },
+    {
+      "id": "caveman-review",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/caveman-review",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/JuliusBrussee/caveman.git",
+          "caveman-review"
+        ]
+      }
+    },
+    {
+      "id": "caveman-stats",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/caveman-stats",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/JuliusBrussee/caveman.git",
+          "caveman-stats"
+        ]
+      }
+    },
+    {
+      "id": "code-review-and-quality",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "organism",
+      "payload": ".agents/skills/code-review-and-quality",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/addyosmani/agent-skills.git",
+          "code-review-and-quality"
+        ]
+      }
+    },
+    {
+      "id": "code-simplification",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "organism",
+      "payload": ".agents/skills/code-simplification",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/addyosmani/agent-skills.git",
+          "code-simplification"
+        ]
+      }
+    },
+    {
+      "id": "diagram-design",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/diagram-design",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/cathrynlavery/diagram-design.git",
+          "diagram-design"
+        ]
+      }
+    },
+    {
+      "id": "distill-to-skills",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/distill-to-skills"
+    },
+    {
+      "id": "easygo-delivery-mode",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "project",
+      "project": "easygo",
+      "payload": "resources/easygo-delivery-mode"
+    },
+    {
+      "id": "easygo-deploy-dev-hot-update",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "project",
+      "project": "easygo",
+      "payload": "resources/easygo-deploy-dev-hot-update"
+    },
+    {
+      "id": "easygo-force-sync",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "project",
+      "project": "easygo",
+      "payload": "resources/easygo-force-sync"
+    },
+    {
+      "id": "easygo-motion-test-path-autotune",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "project",
+      "project": "easygo",
+      "payload": "resources/easygo-motion-test-path-autotune"
+    },
+    {
+      "id": "easygo-package-tag-mr",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "project",
+      "project": "easygo",
+      "payload": "resources/easygo-package-tag-mr"
+    },
+    {
+      "id": "easygo-robot-ssh",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "project",
+      "project": "perception-platform",
+      "payload": "resources/easygo-robot-ssh"
+    },
+    {
+      "id": "feishu-notify",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/feishu-notify"
+    },
+    {
+      "id": "figma-implement-design",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "easygo-web",
+      "payload": ".agents/skills/figma-implement-design",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/davila7/claude-code-templates.git",
+          "figma-implement-design"
+        ]
+      }
+    },
+    {
+      "id": "find-skills",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/find-skills",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/vercel-labs/skills.git",
+          "find-skills"
+        ]
+      }
+    },
+    {
+      "id": "forge-current-session",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/forge-current-session"
+    },
+    {
+      "id": "full-simulation",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "project",
+      "project": "easygo",
+      "payload": "resources/full-simulation"
+    },
+    {
+      "id": "git-commit",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/git-commit",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/github/awesome-copilot.git",
+          "git-commit"
+        ]
+      }
+    },
+    {
+      "id": "git-hunk-staging",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "project",
+      "project": "organism",
+      "payload": "resources/git-hunk-staging"
+    },
+    {
+      "id": "gitlab-api",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/gitlab-api"
+    },
+    {
+      "id": "grill-me",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/grill-me",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/mattpocock/skills.git",
+          "grill-me"
+        ]
+      }
+    },
+    {
+      "id": "hindsight-docs",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/hindsight-docs",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/vectorize-io/hindsight.git",
+          "hindsight-docs"
+        ]
+      }
+    },
+    {
+      "id": "improve-codebase-architecture",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/improve-codebase-architecture"
+    },
+    {
+      "id": "lark-approval",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-approval",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-approval"
+        ]
+      }
+    },
+    {
+      "id": "lark-apps",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-apps",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-apps"
+        ]
+      }
+    },
+    {
+      "id": "lark-attendance",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-attendance",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-attendance"
+        ]
+      }
+    },
+    {
+      "id": "lark-base",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-base",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-base"
+        ]
+      }
+    },
+    {
+      "id": "lark-calendar",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-calendar",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-calendar"
+        ]
+      }
+    },
+    {
+      "id": "lark-contact",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-contact",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-contact"
+        ]
+      }
+    },
+    {
+      "id": "lark-doc",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-doc",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-doc"
+        ]
+      }
+    },
+    {
+      "id": "lark-drive",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-drive",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-drive"
+        ]
+      }
+    },
+    {
+      "id": "lark-event",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-event",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-event"
+        ]
+      }
+    },
+    {
+      "id": "lark-im",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-im",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-im"
+        ]
+      }
+    },
+    {
+      "id": "lark-mail",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-mail",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-mail"
+        ]
+      }
+    },
+    {
+      "id": "lark-markdown",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-markdown",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-markdown"
+        ]
+      }
+    },
+    {
+      "id": "lark-minutes",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-minutes",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-minutes"
+        ]
+      }
+    },
+    {
+      "id": "lark-note",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-note",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-note"
+        ]
+      }
+    },
+    {
+      "id": "lark-okr",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-okr",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-okr"
+        ]
+      }
+    },
+    {
+      "id": "lark-openapi-explorer",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-openapi-explorer",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-openapi-explorer"
+        ]
+      }
+    },
+    {
+      "id": "lark-shared",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-shared",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-shared"
+        ]
+      }
+    },
+    {
+      "id": "lark-sheets",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-sheets",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-sheets"
+        ]
+      }
+    },
+    {
+      "id": "lark-skill-maker",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-skill-maker",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-skill-maker"
+        ]
+      }
+    },
+    {
+      "id": "lark-slides",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-slides",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-slides"
+        ]
+      }
+    },
+    {
+      "id": "lark-task",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-task",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-task"
+        ]
+      }
+    },
+    {
+      "id": "lark-vc",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-vc",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-vc"
+        ]
+      }
+    },
+    {
+      "id": "lark-vc-agent",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-vc-agent",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-vc-agent"
+        ]
+      }
+    },
+    {
+      "id": "lark-whiteboard",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-whiteboard",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-whiteboard"
+        ]
+      }
+    },
+    {
+      "id": "lark-wiki",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-wiki",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-wiki"
+        ]
+      }
+    },
+    {
+      "id": "lark-workflow-meeting-summary",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-workflow-meeting-summary",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-workflow-meeting-summary"
+        ]
+      }
+    },
+    {
+      "id": "lark-workflow-standup-report",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".agents/skills/lark-workflow-standup-report",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://open.feishu.cn",
+          "lark-workflow-standup-report"
+        ]
+      }
+    },
+    {
+      "id": "llm-wiki",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "project",
+      "project": "organism",
+      "payload": "resources/llm-wiki"
+    },
+    {
+      "id": "ones",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/ones"
+    },
+    {
+      "id": "perception-flow-plugin",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "project",
+      "project": "perception-platform",
+      "payload": "resources/perception-flow-plugin"
+    },
+    {
+      "id": "performance-optimization",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "organism",
+      "payload": ".agents/skills/performance-optimization",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/addyosmani/agent-skills.git",
+          "performance-optimization"
+        ]
+      }
+    },
+    {
+      "id": "pnpm",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "easygo-web",
+      "payload": ".agents/skills/pnpm",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/antfu/skills.git",
+          "pnpm"
+        ]
+      }
+    },
+    {
+      "id": "reka-ui",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "easygo-web",
+      "payload": ".agents/skills/reka-ui",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/onmax/nuxt-skills.git",
+          "reka-ui"
+        ]
+      }
+    },
+    {
+      "id": "remix-icon",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "project",
+      "project": "easygo-web",
+      "payload": "resources/remix-icon"
+    },
+    {
+      "id": "remote-build",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "project",
+      "project": "sros-core",
+      "payload": "resources/remote-build"
+    },
+    {
+      "id": "sim-deploy",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "project",
+      "project": "sros-core",
+      "payload": "resources/sim-deploy"
+    },
+    {
+      "id": "sim-stability",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "project",
+      "project": "sros-core",
+      "payload": "resources/sim-stability"
+    },
+    {
+      "id": "sim-tag-deploy",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "project",
+      "project": "sros-core",
+      "payload": "resources/sim-tag-deploy"
+    },
+    {
+      "id": "sim-test",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "project",
+      "project": "sros-core",
+      "payload": "resources/sim-test"
+    },
+    {
+      "id": "terminal-image-pane",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/terminal-image-pane"
+    },
+    {
+      "id": "vite",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "easygo-web",
+      "payload": ".agents/skills/vite",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/antfu/skills.git",
+          "vite"
+        ]
+      }
+    },
+    {
+      "id": "vue",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "easygo-web",
+      "payload": ".agents/skills/vue",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/antfu/skills.git",
+          "vue"
+        ]
+      }
+    },
+    {
+      "id": "vue-best-practices",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "easygo-web",
+      "payload": ".agents/skills/vue-best-practices",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/vuejs-ai/skills.git",
+          "vue-best-practices"
+        ]
+      }
+    },
+    {
+      "id": "vueuse-functions",
+      "kind": "skill",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "easygo-web",
+      "payload": ".agents/skills/vueuse-functions",
+      "upstream": {
+        "argv": [
+          "bash",
+          "resources/source-providers/skills.sh",
+          "https://github.com/vueuse/skills.git",
+          "vueuse-functions"
+        ]
+      }
+    }
+  ]
 }

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Forge Current Session"
+  short_description: "将当前 Codex 会话总结成单篇文档"
+  default_prompt: "Use $forge-current-session to summarize this Codex session into one publishable developer-knowledge document."

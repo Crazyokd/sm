@@ -1,0 +1,4 @@
+alias	host	user	port	note
+easygo	10.10.71.196	std	22	第一台样机
+easygo-300e	10.10.68.213	forlinx	2221	300E样车
+easygo-300e-2	10.10.71.210	linaro	2222	300E样车-2

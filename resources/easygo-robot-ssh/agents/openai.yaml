@@ -1,0 +1,4 @@
+interface:
+  display_name: "EasyGo 机器人 SSH"
+  short_description: "配置机器人免密 SSH。"
+  default_prompt: "从当前开发机配置到 EasyGo 机器人的免密 SSH。"

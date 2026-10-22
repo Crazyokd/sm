@@ -1,0 +1,4 @@
+interface:
+  display_name: "Terminal Image Pane"
+  short_description: "Preview images beside a terminal conversation"
+  default_prompt: "Use $terminal-image-pane to show this image in a tmux pane beside our conversation."

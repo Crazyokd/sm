@@ -1,0 +1,4 @@
+interface:
+  display_name: "EasyGo 全量仿真"
+  short_description: "EasyGo full simulation workflow guide"
+  default_prompt: "使用 $full-simulation 启动或排查 EasyGo 单车、多车全量仿真。"

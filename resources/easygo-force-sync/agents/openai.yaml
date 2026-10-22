@@ -1,0 +1,4 @@
+interface:
+  display_name: "EasyGo Force Sync"
+  short_description: "Force-sync EasyGo root and src repos"
+  default_prompt: "Use $easygo-force-sync to force update the EasyGo root repository and independent src repositories to origin/main."

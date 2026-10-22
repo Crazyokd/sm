@@ -4,7 +4,7 @@ SM 在每台 Linux 机器上本地运行，管理同一份已审核资源。Skil
 
 ## 初始化
 
-构建需要 Rust 1.88+（Cargo）、C 编译器／链接器、Git 和可用的 systemd 用户会话。本程序的运行、记录与服务不依赖 Python；前端产物已随仓库提供，普通初始化不需要 Node。复用本机 Codex／Kimi 登录、Git 提交身份、GitLab 认证。提交 MR 需要已认证的 `glab`，夜间分析需要 `codex` 或 `kimi`；缺项可在初始化结果中查看。
+构建需要 Rust 1.88+（Cargo）、C 编译器／链接器、Git 和可用的 systemd 用户会话。本程序的运行、记录与服务不依赖 Python；前端产物已随仓库提供。当前清单通过 Skills CLI 恢复上游 Skill，需要 Node.js 20+ 与 npm/npx。资源自带的业务脚本继续使用各自原有运行时。复用本机 Codex／Kimi 登录、Git 提交身份、GitLab 认证。提交 MR 需要已认证的 `glab`，夜间分析需要 `codex` 或 `kimi`；缺项可在初始化结果中查看。
 
 ```sh
 git clone http://git.standard-robots.com/yicao/sm

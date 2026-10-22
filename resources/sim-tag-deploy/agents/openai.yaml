@@ -1,0 +1,4 @@
+interface:
+  display_name: "SROS Sim Tag Deploy"
+  short_description: "Fast deploy SROS simulation tags to remote instances"
+  default_prompt: "Use $sim-tag-deploy to fast-deploy SROS simulation tag v5.70.0 to std@10.10.21.75 on main by pulling prebuilt Nexus images."

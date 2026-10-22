@@ -1,0 +1,4 @@
+interface:
+  display_name: "EasyGo Motion Path Autotune"
+  short_description: "Autonomously tune and validate EasyGo motionTestPath"
+  default_prompt: "Use $easygo-motion-test-path-autotune to iteratively tune and validate a motionTestPath task on a robot."

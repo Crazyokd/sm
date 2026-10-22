@@ -1,0 +1,4 @@
+interface:
+  display_name: "感知 Flow 插件"
+  short_description: "指导开发、拆分、接入和体检感知 pipeline Flow 插件。"
+  default_prompt: "帮我按感知 pipeline 规范开发或检查一个 Flow 插件。"
