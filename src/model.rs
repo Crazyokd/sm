@@ -46,6 +46,7 @@ pub enum Scope {
 #[serde(rename_all = "lowercase")]
 pub enum ResourceKind {
     Skill,
+    Bundle,
     Hook,
     Rule,
     Agent,
@@ -55,6 +56,7 @@ impl ResourceKind {
     pub fn label(self) -> &'static str {
         match self {
             Self::Skill => "Skill",
+            Self::Bundle => "资源包",
             Self::Hook => "Hook",
             Self::Rule => "规则",
             Self::Agent => "Agent 定义",
@@ -73,6 +75,7 @@ pub struct NativePayload {
 #[serde(tag = "kind", rename_all = "lowercase")]
 pub enum ResourceContent {
     Skill { payload: PathBuf },
+    Bundle { payload: PathBuf },
     Hook(NativePayload),
     Rule(NativePayload),
     Agent(NativePayload),
@@ -82,6 +85,7 @@ impl ResourceContent {
     pub fn kind(&self) -> ResourceKind {
         match self {
             Self::Skill { .. } => ResourceKind::Skill,
+            Self::Bundle { .. } => ResourceKind::Bundle,
             Self::Hook(_) => ResourceKind::Hook,
             Self::Rule(_) => ResourceKind::Rule,
             Self::Agent(_) => ResourceKind::Agent,
@@ -162,13 +166,19 @@ impl TryFrom<RawResource> for Resource {
             "scope and project do not match"
         );
         let content = match raw.kind {
-            ResourceKind::Skill => {
+            kind @ (ResourceKind::Skill | ResourceKind::Bundle) => {
                 ensure!(
                     raw.agents.is_empty() && raw.payloads.is_empty(),
-                    "Skill cannot have client classification"
+                    "{} cannot have client classification",
+                    kind.label()
                 );
-                ResourceContent::Skill {
-                    payload: raw.payload.context("Skill requires one payload")?,
+                let payload = raw
+                    .payload
+                    .context("shared resource requires one payload")?;
+                if kind == ResourceKind::Skill {
+                    ResourceContent::Skill { payload }
+                } else {
+                    ResourceContent::Bundle { payload }
                 }
             }
             kind => {
@@ -192,7 +202,7 @@ impl TryFrom<RawResource> for Resource {
                     ResourceKind::Rule => ResourceContent::Rule(native),
                     ResourceKind::Agent => ResourceContent::Agent(native),
                     ResourceKind::Mcp => ResourceContent::Mcp(native),
-                    ResourceKind::Skill => unreachable!("handled above"),
+                    ResourceKind::Skill | ResourceKind::Bundle => unreachable!("handled above"),
                 }
             }
         };
@@ -242,7 +252,7 @@ impl TryFrom<RawResource> for Resource {
 impl Resource {
     pub fn targets(&self) -> BTreeMap<Client, PathBuf> {
         match &self.content {
-            ResourceContent::Skill { payload } => Client::ALL
+            ResourceContent::Skill { payload } | ResourceContent::Bundle { payload } => Client::ALL
                 .into_iter()
                 .map(|c| (c, payload.clone()))
                 .collect(),
@@ -390,6 +400,7 @@ impl From<&OwnedWrite> for StoredWrite {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ApplyStatus {
+    Pending,
     Applied,
     Unsupported,
     Conflict,
@@ -399,6 +410,7 @@ pub enum ApplyStatus {
 impl ApplyStatus {
     pub fn label(self) -> &'static str {
         match self {
+            Self::Pending => "正在同步",
             Self::Applied => "文件已应用",
             Self::Unsupported => "暂不支持",
             Self::Conflict => "存在冲突",

@@ -1,0 +1,4 @@
+interface:
+  display_name: "SROS 配置参数"
+  short_description: "规范新增、评审与验证 SROS 功能配置参数的完整流程"
+  default_prompt: "使用 $sros-config-parameter 新增或评审一个 SROS 功能配置参数。"

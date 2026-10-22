@@ -1,0 +1,2338 @@
+{
+  "skills": [
+    "accessibility",
+    "agent-introspection-debugging",
+    "agent-self-evaluation",
+    "agent-sort",
+    "ai-regression-testing",
+    "android-clean-architecture",
+    "angular-developer",
+    "api-design",
+    "architecture-decision-records",
+    "backend-patterns",
+    "browser-qa",
+    "bun-runtime",
+    "ck",
+    "click-path-audit",
+    "clickhouse-io",
+    "code-tour",
+    "codebase-onboarding",
+    "codehealth-mcp",
+    "coding-standards",
+    "compose-multiplatform-patterns",
+    "config-gc",
+    "configure-ecc",
+    "context-budget",
+    "continuous-learning",
+    "continuous-learning-v2",
+    "contract-first",
+    "council",
+    "council-multi-model",
+    "cpp-coding-standards",
+    "cpp-testing",
+    "csharp-testing",
+    "dart-flutter-patterns",
+    "database-migrations",
+    "delivery-gate",
+    "design-system",
+    "dev-team",
+    "django-celery",
+    "django-patterns",
+    "django-tdd",
+    "django-verification",
+    "dmux-workflows",
+    "dotnet-patterns",
+    "e2e-testing",
+    "ecc-guide",
+    "ecc-recipes",
+    "error-handling",
+    "eval-harness",
+    "fastapi-patterns",
+    "flutter-dart-code-review",
+    "frontend-a11y",
+    "frontend-design-direction",
+    "frontend-patterns",
+    "frontend-slides",
+    "fsharp-testing",
+    "generating-python-installer",
+    "git-workflow",
+    "golang-patterns",
+    "golang-testing",
+    "growth-log",
+    "hexagonal-architecture",
+    "hookify-rules",
+    "inherit-legacy-style",
+    "intent-driven-development",
+    "iterative-retrieval",
+    "java-coding-standards",
+    "jpa-patterns",
+    "kotlin-coroutines-flows",
+    "kotlin-exposed-patterns",
+    "kotlin-ktor-patterns",
+    "kotlin-patterns",
+    "kotlin-testing",
+    "laravel-patterns",
+    "laravel-plugin-discovery",
+    "laravel-tdd",
+    "laravel-verification",
+    "living-docs-governance",
+    "loop-design-check",
+    "make-interfaces-feel-better",
+    "mcp-server-patterns",
+    "motion-advanced",
+    "motion-foundations",
+    "motion-patterns",
+    "mysql-patterns",
+    "nestjs-patterns",
+    "nextjs-turbopack",
+    "nuxt4-patterns",
+    "perl-patterns",
+    "perl-testing",
+    "plan-canvas",
+    "plankton-code-quality",
+    "postgres-patterns",
+    "prisma-patterns",
+    "product-lens",
+    "production-audit",
+    "python-patterns",
+    "python-testing",
+    "quarkus-patterns",
+    "quarkus-tdd",
+    "quarkus-verification",
+    "react-native-patterns",
+    "react-patterns",
+    "react-performance",
+    "react-testing",
+    "redis-patterns",
+    "repo-scan",
+    "rules-distill",
+    "rust-patterns",
+    "rust-testing",
+    "santa-method",
+    "skill-comply",
+    "skill-scout",
+    "skill-stocktake",
+    "springboot-patterns",
+    "springboot-tdd",
+    "springboot-verification",
+    "strategic-compact",
+    "tdd-workflow",
+    "tinystruct-patterns",
+    "ui-to-vue",
+    "unified-memory",
+    "verification-loop",
+    "vite-patterns",
+    "vue-patterns",
+    "windows-desktop-e2e"
+  ],
+  "commands": [
+    "aside",
+    "auto-update",
+    "build-fix",
+    "cost-report",
+    "cpp-build",
+    "cpp-review",
+    "cpp-test",
+    "ecc-guide",
+    "epic-claim",
+    "epic-decompose",
+    "epic-publish",
+    "epic-review",
+    "epic-sync",
+    "epic-unblock",
+    "epic-validate",
+    "evolve",
+    "fastapi-review",
+    "feature-dev",
+    "flutter-build",
+    "flutter-review",
+    "flutter-test",
+    "go-build",
+    "go-review",
+    "gradle-build",
+    "hookify",
+    "hookify-configure",
+    "hookify-help",
+    "hookify-list",
+    "instinct-export",
+    "instinct-import",
+    "instinct-status",
+    "jira",
+    "kotlin-build",
+    "kotlin-test",
+    "learn",
+    "learn-eval",
+    "marketing-campaign",
+    "plan",
+    "plan-canvas",
+    "project-init",
+    "projects",
+    "promote",
+    "prune",
+    "python-review",
+    "react-test",
+    "refactor-clean",
+    "resume-session",
+    "review-pr",
+    "rust-build",
+    "rust-review",
+    "save-session",
+    "setup-pm",
+    "skill-create",
+    "skill-health",
+    "test-coverage",
+    "update-codemaps",
+    "update-docs",
+    "vue-review"
+  ],
+  "agents": [
+    "a11y-architect",
+    "agent-evaluator",
+    "architect",
+    "build-error-resolver",
+    "chief-of-staff",
+    "code-architect",
+    "code-explorer",
+    "code-reviewer",
+    "code-simplifier",
+    "comment-analyzer",
+    "conversation-analyzer",
+    "cpp-build-resolver",
+    "cpp-reviewer",
+    "csharp-reviewer",
+    "dart-build-resolver",
+    "database-reviewer",
+    "django-build-resolver",
+    "django-reviewer",
+    "doc-updater",
+    "docs-lookup",
+    "e2e-runner",
+    "fastapi-reviewer",
+    "flutter-reviewer",
+    "fsharp-reviewer",
+    "gan-evaluator",
+    "gan-generator",
+    "gan-planner",
+    "go-build-resolver",
+    "go-reviewer",
+    "harmonyos-app-resolver",
+    "harness-optimizer",
+    "healthcare-reviewer",
+    "homelab-architect",
+    "java-build-resolver",
+    "java-reviewer",
+    "kotlin-build-resolver",
+    "kotlin-reviewer",
+    "loop-operator",
+    "marketing-agent",
+    "mle-reviewer",
+    "network-architect",
+    "network-config-reviewer",
+    "network-troubleshooter",
+    "opensource-forker",
+    "opensource-packager",
+    "opensource-sanitizer",
+    "performance-optimizer",
+    "php-reviewer",
+    "planner",
+    "pr-test-analyzer",
+    "python-reviewer",
+    "pytorch-build-resolver",
+    "rag-pipeline-reviewer",
+    "react-build-resolver",
+    "react-reviewer",
+    "refactor-cleaner",
+    "rust-build-resolver",
+    "rust-reviewer",
+    "security-reviewer",
+    "seo-specialist",
+    "silent-failure-hunter",
+    "spec-miner",
+    "swift-build-resolver",
+    "swift-reviewer",
+    "tdd-guide",
+    "type-design-analyzer",
+    "typescript-reviewer",
+    "vue-reviewer"
+  ],
+  "claude_skills": [
+    "accessibility",
+    "agent-introspection-debugging",
+    "agent-self-evaluation",
+    "agent-sort",
+    "ai-regression-testing",
+    "android-clean-architecture",
+    "angular-developer",
+    "api-design",
+    "architecture-decision-records",
+    "backend-patterns",
+    "browser-qa",
+    "bun-runtime",
+    "ck",
+    "click-path-audit",
+    "clickhouse-io",
+    "code-tour",
+    "codebase-onboarding",
+    "codehealth-mcp",
+    "coding-standards",
+    "compose-multiplatform-patterns",
+    "config-gc",
+    "configure-ecc",
+    "context-budget",
+    "continuous-learning",
+    "continuous-learning-v2",
+    "contract-first",
+    "council",
+    "council-multi-model",
+    "cpp-coding-standards",
+    "cpp-testing",
+    "csharp-testing",
+    "dart-flutter-patterns",
+    "database-migrations",
+    "delivery-gate",
+    "design-system",
+    "dev-team",
+    "django-celery",
+    "django-patterns",
+    "django-tdd",
+    "django-verification",
+    "dmux-workflows",
+    "dotnet-patterns",
+    "e2e-testing",
+    "ecc-guide",
+    "ecc-recipes",
+    "error-handling",
+    "eval-harness",
+    "fastapi-patterns",
+    "flutter-dart-code-review",
+    "frontend-a11y",
+    "frontend-design-direction",
+    "frontend-patterns",
+    "frontend-slides",
+    "fsharp-testing",
+    "generating-python-installer",
+    "git-workflow",
+    "golang-patterns",
+    "golang-testing",
+    "growth-log",
+    "hexagonal-architecture",
+    "hookify-rules",
+    "inherit-legacy-style",
+    "intent-driven-development",
+    "iterative-retrieval",
+    "java-coding-standards",
+    "jpa-patterns",
+    "kotlin-coroutines-flows",
+    "kotlin-exposed-patterns",
+    "kotlin-ktor-patterns",
+    "kotlin-patterns",
+    "kotlin-testing",
+    "laravel-patterns",
+    "laravel-plugin-discovery",
+    "laravel-tdd",
+    "laravel-verification",
+    "living-docs-governance",
+    "loop-design-check",
+    "make-interfaces-feel-better",
+    "mcp-server-patterns",
+    "motion-advanced",
+    "motion-foundations",
+    "motion-patterns",
+    "mysql-patterns",
+    "nestjs-patterns",
+    "nextjs-turbopack",
+    "nuxt4-patterns",
+    "perl-patterns",
+    "perl-testing",
+    "plan-canvas",
+    "plankton-code-quality",
+    "postgres-patterns",
+    "prisma-patterns",
+    "product-lens",
+    "production-audit",
+    "python-patterns",
+    "python-testing",
+    "quarkus-patterns",
+    "quarkus-tdd",
+    "quarkus-verification",
+    "react-native-patterns",
+    "react-patterns",
+    "react-performance",
+    "react-testing",
+    "redis-patterns",
+    "repo-scan",
+    "rules-distill",
+    "rust-patterns",
+    "rust-testing",
+    "santa-method",
+    "skill-comply",
+    "skill-scout",
+    "skill-stocktake",
+    "springboot-patterns",
+    "springboot-tdd",
+    "springboot-verification",
+    "strategic-compact",
+    "tdd-workflow",
+    "tinystruct-patterns",
+    "ui-to-vue",
+    "unified-memory",
+    "verification-loop",
+    "vite-patterns",
+    "vue-patterns",
+    "windows-desktop-e2e"
+  ],
+  "files": [
+    {
+      "source": "AGENTS.md",
+      "target": ".claude/AGENTS.md"
+    },
+    {
+      "source": "agents/a11y-architect.md",
+      "target": ".claude/agents/a11y-architect.md"
+    },
+    {
+      "source": "agents/agent-evaluator.md",
+      "target": ".claude/agents/agent-evaluator.md"
+    },
+    {
+      "source": "agents/architect.md",
+      "target": ".claude/agents/architect.md"
+    },
+    {
+      "source": "agents/build-error-resolver.md",
+      "target": ".claude/agents/build-error-resolver.md"
+    },
+    {
+      "source": "agents/chief-of-staff.md",
+      "target": ".claude/agents/chief-of-staff.md"
+    },
+    {
+      "source": "agents/code-architect.md",
+      "target": ".claude/agents/code-architect.md"
+    },
+    {
+      "source": "agents/code-explorer.md",
+      "target": ".claude/agents/code-explorer.md"
+    },
+    {
+      "source": "agents/code-reviewer.md",
+      "target": ".claude/agents/code-reviewer.md"
+    },
+    {
+      "source": "agents/code-simplifier.md",
+      "target": ".claude/agents/code-simplifier.md"
+    },
+    {
+      "source": "agents/comment-analyzer.md",
+      "target": ".claude/agents/comment-analyzer.md"
+    },
+    {
+      "source": "agents/conversation-analyzer.md",
+      "target": ".claude/agents/conversation-analyzer.md"
+    },
+    {
+      "source": "agents/cpp-build-resolver.md",
+      "target": ".claude/agents/cpp-build-resolver.md"
+    },
+    {
+      "source": "agents/cpp-reviewer.md",
+      "target": ".claude/agents/cpp-reviewer.md"
+    },
+    {
+      "source": "agents/csharp-reviewer.md",
+      "target": ".claude/agents/csharp-reviewer.md"
+    },
+    {
+      "source": "agents/dart-build-resolver.md",
+      "target": ".claude/agents/dart-build-resolver.md"
+    },
+    {
+      "source": "agents/database-reviewer.md",
+      "target": ".claude/agents/database-reviewer.md"
+    },
+    {
+      "source": "agents/django-build-resolver.md",
+      "target": ".claude/agents/django-build-resolver.md"
+    },
+    {
+      "source": "agents/django-reviewer.md",
+      "target": ".claude/agents/django-reviewer.md"
+    },
+    {
+      "source": "agents/doc-updater.md",
+      "target": ".claude/agents/doc-updater.md"
+    },
+    {
+      "source": "agents/docs-lookup.md",
+      "target": ".claude/agents/docs-lookup.md"
+    },
+    {
+      "source": "agents/e2e-runner.md",
+      "target": ".claude/agents/e2e-runner.md"
+    },
+    {
+      "source": "agents/fastapi-reviewer.md",
+      "target": ".claude/agents/fastapi-reviewer.md"
+    },
+    {
+      "source": "agents/flutter-reviewer.md",
+      "target": ".claude/agents/flutter-reviewer.md"
+    },
+    {
+      "source": "agents/fsharp-reviewer.md",
+      "target": ".claude/agents/fsharp-reviewer.md"
+    },
+    {
+      "source": "agents/gan-evaluator.md",
+      "target": ".claude/agents/gan-evaluator.md"
+    },
+    {
+      "source": "agents/gan-generator.md",
+      "target": ".claude/agents/gan-generator.md"
+    },
+    {
+      "source": "agents/gan-planner.md",
+      "target": ".claude/agents/gan-planner.md"
+    },
+    {
+      "source": "agents/go-build-resolver.md",
+      "target": ".claude/agents/go-build-resolver.md"
+    },
+    {
+      "source": "agents/go-reviewer.md",
+      "target": ".claude/agents/go-reviewer.md"
+    },
+    {
+      "source": "agents/harmonyos-app-resolver.md",
+      "target": ".claude/agents/harmonyos-app-resolver.md"
+    },
+    {
+      "source": "agents/harness-optimizer.md",
+      "target": ".claude/agents/harness-optimizer.md"
+    },
+    {
+      "source": "agents/healthcare-reviewer.md",
+      "target": ".claude/agents/healthcare-reviewer.md"
+    },
+    {
+      "source": "agents/homelab-architect.md",
+      "target": ".claude/agents/homelab-architect.md"
+    },
+    {
+      "source": "agents/java-build-resolver.md",
+      "target": ".claude/agents/java-build-resolver.md"
+    },
+    {
+      "source": "agents/java-reviewer.md",
+      "target": ".claude/agents/java-reviewer.md"
+    },
+    {
+      "source": "agents/kotlin-build-resolver.md",
+      "target": ".claude/agents/kotlin-build-resolver.md"
+    },
+    {
+      "source": "agents/kotlin-reviewer.md",
+      "target": ".claude/agents/kotlin-reviewer.md"
+    },
+    {
+      "source": "agents/loop-operator.md",
+      "target": ".claude/agents/loop-operator.md"
+    },
+    {
+      "source": "agents/marketing-agent.md",
+      "target": ".claude/agents/marketing-agent.md"
+    },
+    {
+      "source": "agents/mle-reviewer.md",
+      "target": ".claude/agents/mle-reviewer.md"
+    },
+    {
+      "source": "agents/network-architect.md",
+      "target": ".claude/agents/network-architect.md"
+    },
+    {
+      "source": "agents/network-config-reviewer.md",
+      "target": ".claude/agents/network-config-reviewer.md"
+    },
+    {
+      "source": "agents/network-troubleshooter.md",
+      "target": ".claude/agents/network-troubleshooter.md"
+    },
+    {
+      "source": "agents/opensource-forker.md",
+      "target": ".claude/agents/opensource-forker.md"
+    },
+    {
+      "source": "agents/opensource-packager.md",
+      "target": ".claude/agents/opensource-packager.md"
+    },
+    {
+      "source": "agents/opensource-sanitizer.md",
+      "target": ".claude/agents/opensource-sanitizer.md"
+    },
+    {
+      "source": "agents/performance-optimizer.md",
+      "target": ".claude/agents/performance-optimizer.md"
+    },
+    {
+      "source": "agents/php-reviewer.md",
+      "target": ".claude/agents/php-reviewer.md"
+    },
+    {
+      "source": "agents/planner.md",
+      "target": ".claude/agents/planner.md"
+    },
+    {
+      "source": "agents/pr-test-analyzer.md",
+      "target": ".claude/agents/pr-test-analyzer.md"
+    },
+    {
+      "source": "agents/python-reviewer.md",
+      "target": ".claude/agents/python-reviewer.md"
+    },
+    {
+      "source": "agents/pytorch-build-resolver.md",
+      "target": ".claude/agents/pytorch-build-resolver.md"
+    },
+    {
+      "source": "agents/rag-pipeline-reviewer.md",
+      "target": ".claude/agents/rag-pipeline-reviewer.md"
+    },
+    {
+      "source": "agents/react-build-resolver.md",
+      "target": ".claude/agents/react-build-resolver.md"
+    },
+    {
+      "source": "agents/react-reviewer.md",
+      "target": ".claude/agents/react-reviewer.md"
+    },
+    {
+      "source": "agents/refactor-cleaner.md",
+      "target": ".claude/agents/refactor-cleaner.md"
+    },
+    {
+      "source": "agents/rust-build-resolver.md",
+      "target": ".claude/agents/rust-build-resolver.md"
+    },
+    {
+      "source": "agents/rust-reviewer.md",
+      "target": ".claude/agents/rust-reviewer.md"
+    },
+    {
+      "source": "agents/security-reviewer.md",
+      "target": ".claude/agents/security-reviewer.md"
+    },
+    {
+      "source": "agents/seo-specialist.md",
+      "target": ".claude/agents/seo-specialist.md"
+    },
+    {
+      "source": "agents/silent-failure-hunter.md",
+      "target": ".claude/agents/silent-failure-hunter.md"
+    },
+    {
+      "source": "agents/spec-miner.md",
+      "target": ".claude/agents/spec-miner.md"
+    },
+    {
+      "source": "agents/swift-build-resolver.md",
+      "target": ".claude/agents/swift-build-resolver.md"
+    },
+    {
+      "source": "agents/swift-reviewer.md",
+      "target": ".claude/agents/swift-reviewer.md"
+    },
+    {
+      "source": "agents/tdd-guide.md",
+      "target": ".claude/agents/tdd-guide.md"
+    },
+    {
+      "source": "agents/type-design-analyzer.md",
+      "target": ".claude/agents/type-design-analyzer.md"
+    },
+    {
+      "source": "agents/typescript-reviewer.md",
+      "target": ".claude/agents/typescript-reviewer.md"
+    },
+    {
+      "source": "agents/vue-reviewer.md",
+      "target": ".claude/agents/vue-reviewer.md"
+    },
+    {
+      "source": "commands/aside.md",
+      "target": ".claude/commands/aside.md"
+    },
+    {
+      "source": "commands/auto-update.md",
+      "target": ".claude/commands/auto-update.md"
+    },
+    {
+      "source": "commands/build-fix.md",
+      "target": ".claude/commands/build-fix.md"
+    },
+    {
+      "source": "commands/checkpoint.md",
+      "target": ".claude/commands/checkpoint.md"
+    },
+    {
+      "source": "commands/code-review.md",
+      "target": ".claude/commands/code-review.md"
+    },
+    {
+      "source": "commands/cost-report.md",
+      "target": ".claude/commands/cost-report.md"
+    },
+    {
+      "source": "commands/cpp-build.md",
+      "target": ".claude/commands/cpp-build.md"
+    },
+    {
+      "source": "commands/cpp-review.md",
+      "target": ".claude/commands/cpp-review.md"
+    },
+    {
+      "source": "commands/cpp-test.md",
+      "target": ".claude/commands/cpp-test.md"
+    },
+    {
+      "source": "commands/ecc-guide.md",
+      "target": ".claude/commands/ecc-guide.md"
+    },
+    {
+      "source": "commands/epic-claim.md",
+      "target": ".claude/commands/epic-claim.md"
+    },
+    {
+      "source": "commands/epic-decompose.md",
+      "target": ".claude/commands/epic-decompose.md"
+    },
+    {
+      "source": "commands/epic-publish.md",
+      "target": ".claude/commands/epic-publish.md"
+    },
+    {
+      "source": "commands/epic-review.md",
+      "target": ".claude/commands/epic-review.md"
+    },
+    {
+      "source": "commands/epic-sync.md",
+      "target": ".claude/commands/epic-sync.md"
+    },
+    {
+      "source": "commands/epic-unblock.md",
+      "target": ".claude/commands/epic-unblock.md"
+    },
+    {
+      "source": "commands/epic-validate.md",
+      "target": ".claude/commands/epic-validate.md"
+    },
+    {
+      "source": "commands/evolve.md",
+      "target": ".claude/commands/evolve.md"
+    },
+    {
+      "source": "commands/fastapi-review.md",
+      "target": ".claude/commands/fastapi-review.md"
+    },
+    {
+      "source": "commands/feature-dev.md",
+      "target": ".claude/commands/feature-dev.md"
+    },
+    {
+      "source": "commands/flutter-build.md",
+      "target": ".claude/commands/flutter-build.md"
+    },
+    {
+      "source": "commands/flutter-review.md",
+      "target": ".claude/commands/flutter-review.md"
+    },
+    {
+      "source": "commands/flutter-test.md",
+      "target": ".claude/commands/flutter-test.md"
+    },
+    {
+      "source": "commands/gan-build.md",
+      "target": ".claude/commands/gan-build.md"
+    },
+    {
+      "source": "commands/gan-design.md",
+      "target": ".claude/commands/gan-design.md"
+    },
+    {
+      "source": "commands/go-build.md",
+      "target": ".claude/commands/go-build.md"
+    },
+    {
+      "source": "commands/go-review.md",
+      "target": ".claude/commands/go-review.md"
+    },
+    {
+      "source": "commands/go-test.md",
+      "target": ".claude/commands/go-test.md"
+    },
+    {
+      "source": "commands/gradle-build.md",
+      "target": ".claude/commands/gradle-build.md"
+    },
+    {
+      "source": "commands/harness-audit.md",
+      "target": ".claude/commands/harness-audit.md"
+    },
+    {
+      "source": "commands/hookify-configure.md",
+      "target": ".claude/commands/hookify-configure.md"
+    },
+    {
+      "source": "commands/hookify-help.md",
+      "target": ".claude/commands/hookify-help.md"
+    },
+    {
+      "source": "commands/hookify-list.md",
+      "target": ".claude/commands/hookify-list.md"
+    },
+    {
+      "source": "commands/hookify.md",
+      "target": ".claude/commands/hookify.md"
+    },
+    {
+      "source": "commands/instinct-export.md",
+      "target": ".claude/commands/instinct-export.md"
+    },
+    {
+      "source": "commands/instinct-import.md",
+      "target": ".claude/commands/instinct-import.md"
+    },
+    {
+      "source": "commands/instinct-status.md",
+      "target": ".claude/commands/instinct-status.md"
+    },
+    {
+      "source": "commands/jira.md",
+      "target": ".claude/commands/jira.md"
+    },
+    {
+      "source": "commands/kotlin-build.md",
+      "target": ".claude/commands/kotlin-build.md"
+    },
+    {
+      "source": "commands/kotlin-review.md",
+      "target": ".claude/commands/kotlin-review.md"
+    },
+    {
+      "source": "commands/kotlin-test.md",
+      "target": ".claude/commands/kotlin-test.md"
+    },
+    {
+      "source": "commands/learn-eval.md",
+      "target": ".claude/commands/learn-eval.md"
+    },
+    {
+      "source": "commands/learn.md",
+      "target": ".claude/commands/learn.md"
+    },
+    {
+      "source": "commands/loop-start.md",
+      "target": ".claude/commands/loop-start.md"
+    },
+    {
+      "source": "commands/loop-status.md",
+      "target": ".claude/commands/loop-status.md"
+    },
+    {
+      "source": "commands/marketing-campaign.md",
+      "target": ".claude/commands/marketing-campaign.md"
+    },
+    {
+      "source": "commands/model-route.md",
+      "target": ".claude/commands/model-route.md"
+    },
+    {
+      "source": "commands/multi-backend.md",
+      "target": ".claude/commands/multi-backend.md"
+    },
+    {
+      "source": "commands/multi-execute.md",
+      "target": ".claude/commands/multi-execute.md"
+    },
+    {
+      "source": "commands/multi-frontend.md",
+      "target": ".claude/commands/multi-frontend.md"
+    },
+    {
+      "source": "commands/multi-plan.md",
+      "target": ".claude/commands/multi-plan.md"
+    },
+    {
+      "source": "commands/multi-workflow.md",
+      "target": ".claude/commands/multi-workflow.md"
+    },
+    {
+      "source": "commands/orch-add-feature.md",
+      "target": ".claude/commands/orch-add-feature.md"
+    },
+    {
+      "source": "commands/orch-build-mvp.md",
+      "target": ".claude/commands/orch-build-mvp.md"
+    },
+    {
+      "source": "commands/orch-change-feature.md",
+      "target": ".claude/commands/orch-change-feature.md"
+    },
+    {
+      "source": "commands/orch-fix-defect.md",
+      "target": ".claude/commands/orch-fix-defect.md"
+    },
+    {
+      "source": "commands/orch-refine-code.md",
+      "target": ".claude/commands/orch-refine-code.md"
+    },
+    {
+      "source": "commands/orch-review.md",
+      "target": ".claude/commands/orch-review.md"
+    },
+    {
+      "source": "commands/plan-canvas.md",
+      "target": ".claude/commands/plan-canvas.md"
+    },
+    {
+      "source": "commands/plan-prd.md",
+      "target": ".claude/commands/plan-prd.md"
+    },
+    {
+      "source": "commands/plan.md",
+      "target": ".claude/commands/plan.md"
+    },
+    {
+      "source": "commands/pm2.md",
+      "target": ".claude/commands/pm2.md"
+    },
+    {
+      "source": "commands/pr.md",
+      "target": ".claude/commands/pr.md"
+    },
+    {
+      "source": "commands/project-init.md",
+      "target": ".claude/commands/project-init.md"
+    },
+    {
+      "source": "commands/projects.md",
+      "target": ".claude/commands/projects.md"
+    },
+    {
+      "source": "commands/promote.md",
+      "target": ".claude/commands/promote.md"
+    },
+    {
+      "source": "commands/prp-commit.md",
+      "target": ".claude/commands/prp-commit.md"
+    },
+    {
+      "source": "commands/prp-implement.md",
+      "target": ".claude/commands/prp-implement.md"
+    },
+    {
+      "source": "commands/prp-plan.md",
+      "target": ".claude/commands/prp-plan.md"
+    },
+    {
+      "source": "commands/prp-pr.md",
+      "target": ".claude/commands/prp-pr.md"
+    },
+    {
+      "source": "commands/prp-prd.md",
+      "target": ".claude/commands/prp-prd.md"
+    },
+    {
+      "source": "commands/prune.md",
+      "target": ".claude/commands/prune.md"
+    },
+    {
+      "source": "commands/python-review.md",
+      "target": ".claude/commands/python-review.md"
+    },
+    {
+      "source": "commands/quality-gate.md",
+      "target": ".claude/commands/quality-gate.md"
+    },
+    {
+      "source": "commands/react-build.md",
+      "target": ".claude/commands/react-build.md"
+    },
+    {
+      "source": "commands/react-review.md",
+      "target": ".claude/commands/react-review.md"
+    },
+    {
+      "source": "commands/refactor-clean.md",
+      "target": ".claude/commands/refactor-clean.md"
+    },
+    {
+      "source": "commands/resume-session.md",
+      "target": ".claude/commands/resume-session.md"
+    },
+    {
+      "source": "commands/review-pr.md",
+      "target": ".claude/commands/review-pr.md"
+    },
+    {
+      "source": "commands/rust-build.md",
+      "target": ".claude/commands/rust-build.md"
+    },
+    {
+      "source": "commands/rust-review.md",
+      "target": ".claude/commands/rust-review.md"
+    },
+    {
+      "source": "commands/rust-test.md",
+      "target": ".claude/commands/rust-test.md"
+    },
+    {
+      "source": "commands/santa-loop.md",
+      "target": ".claude/commands/santa-loop.md"
+    },
+    {
+      "source": "commands/save-session.md",
+      "target": ".claude/commands/save-session.md"
+    },
+    {
+      "source": "commands/security-scan.md",
+      "target": ".claude/commands/security-scan.md"
+    },
+    {
+      "source": "commands/sessions.md",
+      "target": ".claude/commands/sessions.md"
+    },
+    {
+      "source": "commands/setup-pm.md",
+      "target": ".claude/commands/setup-pm.md"
+    },
+    {
+      "source": "commands/skill-create.md",
+      "target": ".claude/commands/skill-create.md"
+    },
+    {
+      "source": "commands/skill-health.md",
+      "target": ".claude/commands/skill-health.md"
+    },
+    {
+      "source": "commands/test-coverage.md",
+      "target": ".claude/commands/test-coverage.md"
+    },
+    {
+      "source": "commands/update-codemaps.md",
+      "target": ".claude/commands/update-codemaps.md"
+    },
+    {
+      "source": "commands/update-docs.md",
+      "target": ".claude/commands/update-docs.md"
+    },
+    {
+      "source": "commands/vue-review.md",
+      "target": ".claude/commands/vue-review.md"
+    },
+    {
+      "source": "hooks/codex-hooks.json",
+      "target": ".claude/hooks/codex-hooks.json"
+    },
+    {
+      "source": "hooks/memory-persistence/README.md",
+      "target": ".claude/hooks/memory-persistence/README.md"
+    },
+    {
+      "source": "hooks/memory-persistence/hooks.json",
+      "target": ".claude/hooks/memory-persistence/hooks.json"
+    },
+    {
+      "source": "rules/README.md",
+      "target": ".claude/rules/ecc/README.md"
+    },
+    {
+      "source": "rules/angular/coding-style.md",
+      "target": ".claude/rules/ecc/angular/coding-style.md"
+    },
+    {
+      "source": "rules/angular/hooks.md",
+      "target": ".claude/rules/ecc/angular/hooks.md"
+    },
+    {
+      "source": "rules/angular/patterns.md",
+      "target": ".claude/rules/ecc/angular/patterns.md"
+    },
+    {
+      "source": "rules/angular/security.md",
+      "target": ".claude/rules/ecc/angular/security.md"
+    },
+    {
+      "source": "rules/angular/testing.md",
+      "target": ".claude/rules/ecc/angular/testing.md"
+    },
+    {
+      "source": "rules/arkts/coding-style.md",
+      "target": ".claude/rules/ecc/arkts/coding-style.md"
+    },
+    {
+      "source": "rules/arkts/hooks.md",
+      "target": ".claude/rules/ecc/arkts/hooks.md"
+    },
+    {
+      "source": "rules/arkts/patterns.md",
+      "target": ".claude/rules/ecc/arkts/patterns.md"
+    },
+    {
+      "source": "rules/arkts/security.md",
+      "target": ".claude/rules/ecc/arkts/security.md"
+    },
+    {
+      "source": "rules/arkts/testing.md",
+      "target": ".claude/rules/ecc/arkts/testing.md"
+    },
+    {
+      "source": "rules/common/agents.md",
+      "target": ".claude/rules/ecc/common/agents.md"
+    },
+    {
+      "source": "rules/common/code-review.md",
+      "target": ".claude/rules/ecc/common/code-review.md"
+    },
+    {
+      "source": "rules/common/coding-style.md",
+      "target": ".claude/rules/ecc/common/coding-style.md"
+    },
+    {
+      "source": "rules/common/development-workflow.md",
+      "target": ".claude/rules/ecc/common/development-workflow.md"
+    },
+    {
+      "source": "rules/common/git-workflow.md",
+      "target": ".claude/rules/ecc/common/git-workflow.md"
+    },
+    {
+      "source": "rules/common/hooks.md",
+      "target": ".claude/rules/ecc/common/hooks.md"
+    },
+    {
+      "source": "rules/common/patterns.md",
+      "target": ".claude/rules/ecc/common/patterns.md"
+    },
+    {
+      "source": "rules/common/performance.md",
+      "target": ".claude/rules/ecc/common/performance.md"
+    },
+    {
+      "source": "rules/common/security.md",
+      "target": ".claude/rules/ecc/common/security.md"
+    },
+    {
+      "source": "rules/common/testing.md",
+      "target": ".claude/rules/ecc/common/testing.md"
+    },
+    {
+      "source": "rules/cpp/coding-style.md",
+      "target": ".claude/rules/ecc/cpp/coding-style.md"
+    },
+    {
+      "source": "rules/cpp/hooks.md",
+      "target": ".claude/rules/ecc/cpp/hooks.md"
+    },
+    {
+      "source": "rules/cpp/patterns.md",
+      "target": ".claude/rules/ecc/cpp/patterns.md"
+    },
+    {
+      "source": "rules/cpp/security.md",
+      "target": ".claude/rules/ecc/cpp/security.md"
+    },
+    {
+      "source": "rules/cpp/testing.md",
+      "target": ".claude/rules/ecc/cpp/testing.md"
+    },
+    {
+      "source": "rules/csharp/coding-style.md",
+      "target": ".claude/rules/ecc/csharp/coding-style.md"
+    },
+    {
+      "source": "rules/csharp/hooks.md",
+      "target": ".claude/rules/ecc/csharp/hooks.md"
+    },
+    {
+      "source": "rules/csharp/patterns.md",
+      "target": ".claude/rules/ecc/csharp/patterns.md"
+    },
+    {
+      "source": "rules/csharp/security.md",
+      "target": ".claude/rules/ecc/csharp/security.md"
+    },
+    {
+      "source": "rules/csharp/testing.md",
+      "target": ".claude/rules/ecc/csharp/testing.md"
+    },
+    {
+      "source": "rules/dart/coding-style.md",
+      "target": ".claude/rules/ecc/dart/coding-style.md"
+    },
+    {
+      "source": "rules/dart/hooks.md",
+      "target": ".claude/rules/ecc/dart/hooks.md"
+    },
+    {
+      "source": "rules/dart/patterns.md",
+      "target": ".claude/rules/ecc/dart/patterns.md"
+    },
+    {
+      "source": "rules/dart/security.md",
+      "target": ".claude/rules/ecc/dart/security.md"
+    },
+    {
+      "source": "rules/dart/testing.md",
+      "target": ".claude/rules/ecc/dart/testing.md"
+    },
+    {
+      "source": "rules/fsharp/coding-style.md",
+      "target": ".claude/rules/ecc/fsharp/coding-style.md"
+    },
+    {
+      "source": "rules/fsharp/hooks.md",
+      "target": ".claude/rules/ecc/fsharp/hooks.md"
+    },
+    {
+      "source": "rules/fsharp/patterns.md",
+      "target": ".claude/rules/ecc/fsharp/patterns.md"
+    },
+    {
+      "source": "rules/fsharp/security.md",
+      "target": ".claude/rules/ecc/fsharp/security.md"
+    },
+    {
+      "source": "rules/fsharp/testing.md",
+      "target": ".claude/rules/ecc/fsharp/testing.md"
+    },
+    {
+      "source": "rules/golang/coding-style.md",
+      "target": ".claude/rules/ecc/golang/coding-style.md"
+    },
+    {
+      "source": "rules/golang/hooks.md",
+      "target": ".claude/rules/ecc/golang/hooks.md"
+    },
+    {
+      "source": "rules/golang/patterns.md",
+      "target": ".claude/rules/ecc/golang/patterns.md"
+    },
+    {
+      "source": "rules/golang/security.md",
+      "target": ".claude/rules/ecc/golang/security.md"
+    },
+    {
+      "source": "rules/golang/testing.md",
+      "target": ".claude/rules/ecc/golang/testing.md"
+    },
+    {
+      "source": "rules/java/coding-style.md",
+      "target": ".claude/rules/ecc/java/coding-style.md"
+    },
+    {
+      "source": "rules/java/hooks.md",
+      "target": ".claude/rules/ecc/java/hooks.md"
+    },
+    {
+      "source": "rules/java/patterns.md",
+      "target": ".claude/rules/ecc/java/patterns.md"
+    },
+    {
+      "source": "rules/java/security.md",
+      "target": ".claude/rules/ecc/java/security.md"
+    },
+    {
+      "source": "rules/java/testing.md",
+      "target": ".claude/rules/ecc/java/testing.md"
+    },
+    {
+      "source": "rules/kotlin/coding-style.md",
+      "target": ".claude/rules/ecc/kotlin/coding-style.md"
+    },
+    {
+      "source": "rules/kotlin/hooks.md",
+      "target": ".claude/rules/ecc/kotlin/hooks.md"
+    },
+    {
+      "source": "rules/kotlin/patterns.md",
+      "target": ".claude/rules/ecc/kotlin/patterns.md"
+    },
+    {
+      "source": "rules/kotlin/security.md",
+      "target": ".claude/rules/ecc/kotlin/security.md"
+    },
+    {
+      "source": "rules/kotlin/testing.md",
+      "target": ".claude/rules/ecc/kotlin/testing.md"
+    },
+    {
+      "source": "rules/nuxt/coding-style.md",
+      "target": ".claude/rules/ecc/nuxt/coding-style.md"
+    },
+    {
+      "source": "rules/nuxt/hooks.md",
+      "target": ".claude/rules/ecc/nuxt/hooks.md"
+    },
+    {
+      "source": "rules/nuxt/patterns.md",
+      "target": ".claude/rules/ecc/nuxt/patterns.md"
+    },
+    {
+      "source": "rules/nuxt/security.md",
+      "target": ".claude/rules/ecc/nuxt/security.md"
+    },
+    {
+      "source": "rules/nuxt/testing.md",
+      "target": ".claude/rules/ecc/nuxt/testing.md"
+    },
+    {
+      "source": "rules/perl/coding-style.md",
+      "target": ".claude/rules/ecc/perl/coding-style.md"
+    },
+    {
+      "source": "rules/perl/hooks.md",
+      "target": ".claude/rules/ecc/perl/hooks.md"
+    },
+    {
+      "source": "rules/perl/patterns.md",
+      "target": ".claude/rules/ecc/perl/patterns.md"
+    },
+    {
+      "source": "rules/perl/security.md",
+      "target": ".claude/rules/ecc/perl/security.md"
+    },
+    {
+      "source": "rules/perl/testing.md",
+      "target": ".claude/rules/ecc/perl/testing.md"
+    },
+    {
+      "source": "rules/php/coding-style.md",
+      "target": ".claude/rules/ecc/php/coding-style.md"
+    },
+    {
+      "source": "rules/php/hooks.md",
+      "target": ".claude/rules/ecc/php/hooks.md"
+    },
+    {
+      "source": "rules/php/patterns.md",
+      "target": ".claude/rules/ecc/php/patterns.md"
+    },
+    {
+      "source": "rules/php/security.md",
+      "target": ".claude/rules/ecc/php/security.md"
+    },
+    {
+      "source": "rules/php/testing.md",
+      "target": ".claude/rules/ecc/php/testing.md"
+    },
+    {
+      "source": "rules/python/coding-style.md",
+      "target": ".claude/rules/ecc/python/coding-style.md"
+    },
+    {
+      "source": "rules/python/fastapi.md",
+      "target": ".claude/rules/ecc/python/fastapi.md"
+    },
+    {
+      "source": "rules/python/hooks.md",
+      "target": ".claude/rules/ecc/python/hooks.md"
+    },
+    {
+      "source": "rules/python/patterns.md",
+      "target": ".claude/rules/ecc/python/patterns.md"
+    },
+    {
+      "source": "rules/python/security.md",
+      "target": ".claude/rules/ecc/python/security.md"
+    },
+    {
+      "source": "rules/python/testing.md",
+      "target": ".claude/rules/ecc/python/testing.md"
+    },
+    {
+      "source": "rules/react-native/accessibility.md",
+      "target": ".claude/rules/ecc/react-native/accessibility.md"
+    },
+    {
+      "source": "rules/react-native/coding-style.md",
+      "target": ".claude/rules/ecc/react-native/coding-style.md"
+    },
+    {
+      "source": "rules/react-native/hooks.md",
+      "target": ".claude/rules/ecc/react-native/hooks.md"
+    },
+    {
+      "source": "rules/react-native/patterns.md",
+      "target": ".claude/rules/ecc/react-native/patterns.md"
+    },
+    {
+      "source": "rules/react-native/performance.md",
+      "target": ".claude/rules/ecc/react-native/performance.md"
+    },
+    {
+      "source": "rules/react-native/production-readiness.md",
+      "target": ".claude/rules/ecc/react-native/production-readiness.md"
+    },
+    {
+      "source": "rules/react-native/security.md",
+      "target": ".claude/rules/ecc/react-native/security.md"
+    },
+    {
+      "source": "rules/react-native/testing.md",
+      "target": ".claude/rules/ecc/react-native/testing.md"
+    },
+    {
+      "source": "rules/react/coding-style.md",
+      "target": ".claude/rules/ecc/react/coding-style.md"
+    },
+    {
+      "source": "rules/react/hooks.md",
+      "target": ".claude/rules/ecc/react/hooks.md"
+    },
+    {
+      "source": "rules/react/patterns.md",
+      "target": ".claude/rules/ecc/react/patterns.md"
+    },
+    {
+      "source": "rules/react/security.md",
+      "target": ".claude/rules/ecc/react/security.md"
+    },
+    {
+      "source": "rules/ruby/coding-style.md",
+      "target": ".claude/rules/ecc/ruby/coding-style.md"
+    },
+    {
+      "source": "rules/ruby/hooks.md",
+      "target": ".claude/rules/ecc/ruby/hooks.md"
+    },
+    {
+      "source": "rules/ruby/patterns.md",
+      "target": ".claude/rules/ecc/ruby/patterns.md"
+    },
+    {
+      "source": "rules/ruby/security.md",
+      "target": ".claude/rules/ecc/ruby/security.md"
+    },
+    {
+      "source": "rules/ruby/testing.md",
+      "target": ".claude/rules/ecc/ruby/testing.md"
+    },
+    {
+      "source": "rules/rust/coding-style.md",
+      "target": ".claude/rules/ecc/rust/coding-style.md"
+    },
+    {
+      "source": "rules/rust/hooks.md",
+      "target": ".claude/rules/ecc/rust/hooks.md"
+    },
+    {
+      "source": "rules/rust/patterns.md",
+      "target": ".claude/rules/ecc/rust/patterns.md"
+    },
+    {
+      "source": "rules/rust/security.md",
+      "target": ".claude/rules/ecc/rust/security.md"
+    },
+    {
+      "source": "rules/rust/testing.md",
+      "target": ".claude/rules/ecc/rust/testing.md"
+    },
+    {
+      "source": "rules/swift/coding-style.md",
+      "target": ".claude/rules/ecc/swift/coding-style.md"
+    },
+    {
+      "source": "rules/swift/hooks.md",
+      "target": ".claude/rules/ecc/swift/hooks.md"
+    },
+    {
+      "source": "rules/swift/patterns.md",
+      "target": ".claude/rules/ecc/swift/patterns.md"
+    },
+    {
+      "source": "rules/swift/security.md",
+      "target": ".claude/rules/ecc/swift/security.md"
+    },
+    {
+      "source": "rules/swift/testing.md",
+      "target": ".claude/rules/ecc/swift/testing.md"
+    },
+    {
+      "source": "rules/typescript/coding-style.md",
+      "target": ".claude/rules/ecc/typescript/coding-style.md"
+    },
+    {
+      "source": "rules/typescript/hooks.md",
+      "target": ".claude/rules/ecc/typescript/hooks.md"
+    },
+    {
+      "source": "rules/typescript/patterns.md",
+      "target": ".claude/rules/ecc/typescript/patterns.md"
+    },
+    {
+      "source": "rules/typescript/security.md",
+      "target": ".claude/rules/ecc/typescript/security.md"
+    },
+    {
+      "source": "rules/typescript/testing.md",
+      "target": ".claude/rules/ecc/typescript/testing.md"
+    },
+    {
+      "source": "rules/vue/coding-style.md",
+      "target": ".claude/rules/ecc/vue/coding-style.md"
+    },
+    {
+      "source": "rules/vue/hooks.md",
+      "target": ".claude/rules/ecc/vue/hooks.md"
+    },
+    {
+      "source": "rules/vue/patterns.md",
+      "target": ".claude/rules/ecc/vue/patterns.md"
+    },
+    {
+      "source": "rules/vue/security.md",
+      "target": ".claude/rules/ecc/vue/security.md"
+    },
+    {
+      "source": "rules/vue/testing.md",
+      "target": ".claude/rules/ecc/vue/testing.md"
+    },
+    {
+      "source": "rules/web/coding-style.md",
+      "target": ".claude/rules/ecc/web/coding-style.md"
+    },
+    {
+      "source": "rules/web/design-quality.md",
+      "target": ".claude/rules/ecc/web/design-quality.md"
+    },
+    {
+      "source": "rules/web/hooks.md",
+      "target": ".claude/rules/ecc/web/hooks.md"
+    },
+    {
+      "source": "rules/web/patterns.md",
+      "target": ".claude/rules/ecc/web/patterns.md"
+    },
+    {
+      "source": "rules/web/performance.md",
+      "target": ".claude/rules/ecc/web/performance.md"
+    },
+    {
+      "source": "rules/web/security.md",
+      "target": ".claude/rules/ecc/web/security.md"
+    },
+    {
+      "source": "rules/web/testing.md",
+      "target": ".claude/rules/ecc/web/testing.md"
+    },
+    {
+      "source": "scripts/auto-update.js",
+      "target": ".claude/scripts/auto-update.js"
+    },
+    {
+      "source": "scripts/harness-audit.js",
+      "target": ".claude/scripts/harness-audit.js"
+    },
+    {
+      "source": "scripts/hooks/auto-tmux-dev.js",
+      "target": ".claude/scripts/hooks/auto-tmux-dev.js"
+    },
+    {
+      "source": "scripts/hooks/bash-hook-dispatcher.js",
+      "target": ".claude/scripts/hooks/bash-hook-dispatcher.js"
+    },
+    {
+      "source": "scripts/hooks/block-no-verify.js",
+      "target": ".claude/scripts/hooks/block-no-verify.js"
+    },
+    {
+      "source": "scripts/hooks/check-console-log.js",
+      "target": ".claude/scripts/hooks/check-console-log.js"
+    },
+    {
+      "source": "scripts/hooks/check-hook-enabled.js",
+      "target": ".claude/scripts/hooks/check-hook-enabled.js"
+    },
+    {
+      "source": "scripts/hooks/config-protection.js",
+      "target": ".claude/scripts/hooks/config-protection.js"
+    },
+    {
+      "source": "scripts/hooks/cost-tracker.js",
+      "target": ".claude/scripts/hooks/cost-tracker.js"
+    },
+    {
+      "source": "scripts/hooks/cursor-session-env.js",
+      "target": ".claude/scripts/hooks/cursor-session-env.js"
+    },
+    {
+      "source": "scripts/hooks/design-quality-check.js",
+      "target": ".claude/scripts/hooks/design-quality-check.js"
+    },
+    {
+      "source": "scripts/hooks/desktop-notify.js",
+      "target": ".claude/scripts/hooks/desktop-notify.js"
+    },
+    {
+      "source": "scripts/hooks/doc-file-warning.js",
+      "target": ".claude/scripts/hooks/doc-file-warning.js"
+    },
+    {
+      "source": "scripts/hooks/ecc-context-monitor.js",
+      "target": ".claude/scripts/hooks/ecc-context-monitor.js"
+    },
+    {
+      "source": "scripts/hooks/ecc-metrics-bridge.js",
+      "target": ".claude/scripts/hooks/ecc-metrics-bridge.js"
+    },
+    {
+      "source": "scripts/hooks/ecc-statusline.js",
+      "target": ".claude/scripts/hooks/ecc-statusline.js"
+    },
+    {
+      "source": "scripts/hooks/evaluate-session.js",
+      "target": ".claude/scripts/hooks/evaluate-session.js"
+    },
+    {
+      "source": "scripts/hooks/gateguard-fact-force.js",
+      "target": ".claude/scripts/hooks/gateguard-fact-force.js"
+    },
+    {
+      "source": "scripts/hooks/gateguard-heredoc.js",
+      "target": ".claude/scripts/hooks/gateguard-heredoc.js"
+    },
+    {
+      "source": "scripts/hooks/governance-capture.js",
+      "target": ".claude/scripts/hooks/governance-capture.js"
+    },
+    {
+      "source": "scripts/hooks/insaits-security-monitor.py",
+      "target": ".claude/scripts/hooks/insaits-security-monitor.py"
+    },
+    {
+      "source": "scripts/hooks/insaits-security-wrapper.js",
+      "target": ".claude/scripts/hooks/insaits-security-wrapper.js"
+    },
+    {
+      "source": "scripts/hooks/mcp-health-check.js",
+      "target": ".claude/scripts/hooks/mcp-health-check.js"
+    },
+    {
+      "source": "scripts/hooks/observe-runner.js",
+      "target": ".claude/scripts/hooks/observe-runner.js"
+    },
+    {
+      "source": "scripts/hooks/plan-canvas-pending.js",
+      "target": ".claude/scripts/hooks/plan-canvas-pending.js"
+    },
+    {
+      "source": "scripts/hooks/plan-canvas-sessions.js",
+      "target": ".claude/scripts/hooks/plan-canvas-sessions.js"
+    },
+    {
+      "source": "scripts/hooks/plugin-hook-bootstrap.js",
+      "target": ".claude/scripts/hooks/plugin-hook-bootstrap.js"
+    },
+    {
+      "source": "scripts/hooks/post-bash-build-complete.js",
+      "target": ".claude/scripts/hooks/post-bash-build-complete.js"
+    },
+    {
+      "source": "scripts/hooks/post-bash-command-log.js",
+      "target": ".claude/scripts/hooks/post-bash-command-log.js"
+    },
+    {
+      "source": "scripts/hooks/post-bash-dispatcher.js",
+      "target": ".claude/scripts/hooks/post-bash-dispatcher.js"
+    },
+    {
+      "source": "scripts/hooks/post-bash-pr-created.js",
+      "target": ".claude/scripts/hooks/post-bash-pr-created.js"
+    },
+    {
+      "source": "scripts/hooks/post-edit-accumulator.js",
+      "target": ".claude/scripts/hooks/post-edit-accumulator.js"
+    },
+    {
+      "source": "scripts/hooks/post-edit-console-warn.js",
+      "target": ".claude/scripts/hooks/post-edit-console-warn.js"
+    },
+    {
+      "source": "scripts/hooks/post-edit-format.js",
+      "target": ".claude/scripts/hooks/post-edit-format.js"
+    },
+    {
+      "source": "scripts/hooks/post-edit-typecheck.js",
+      "target": ".claude/scripts/hooks/post-edit-typecheck.js"
+    },
+    {
+      "source": "scripts/hooks/posttooluse-dispatcher.js",
+      "target": ".claude/scripts/hooks/posttooluse-dispatcher.js"
+    },
+    {
+      "source": "scripts/hooks/pre-bash-commit-quality.js",
+      "target": ".claude/scripts/hooks/pre-bash-commit-quality.js"
+    },
+    {
+      "source": "scripts/hooks/pre-bash-dev-server-block.js",
+      "target": ".claude/scripts/hooks/pre-bash-dev-server-block.js"
+    },
+    {
+      "source": "scripts/hooks/pre-bash-dispatcher.js",
+      "target": ".claude/scripts/hooks/pre-bash-dispatcher.js"
+    },
+    {
+      "source": "scripts/hooks/pre-bash-git-push-reminder.js",
+      "target": ".claude/scripts/hooks/pre-bash-git-push-reminder.js"
+    },
+    {
+      "source": "scripts/hooks/pre-bash-tmux-reminder.js",
+      "target": ".claude/scripts/hooks/pre-bash-tmux-reminder.js"
+    },
+    {
+      "source": "scripts/hooks/pre-compact.js",
+      "target": ".claude/scripts/hooks/pre-compact.js"
+    },
+    {
+      "source": "scripts/hooks/pre-write-doc-warn.js",
+      "target": ".claude/scripts/hooks/pre-write-doc-warn.js"
+    },
+    {
+      "source": "scripts/hooks/pretooluse-visible-output.js",
+      "target": ".claude/scripts/hooks/pretooluse-visible-output.js"
+    },
+    {
+      "source": "scripts/hooks/quality-gate.js",
+      "target": ".claude/scripts/hooks/quality-gate.js"
+    },
+    {
+      "source": "scripts/hooks/run-with-flags-shell.sh",
+      "target": ".claude/scripts/hooks/run-with-flags-shell.sh"
+    },
+    {
+      "source": "scripts/hooks/run-with-flags.js",
+      "target": ".claude/scripts/hooks/run-with-flags.js"
+    },
+    {
+      "source": "scripts/hooks/session-activity-tracker.js",
+      "target": ".claude/scripts/hooks/session-activity-tracker.js"
+    },
+    {
+      "source": "scripts/hooks/session-end-marker.js",
+      "target": ".claude/scripts/hooks/session-end-marker.js"
+    },
+    {
+      "source": "scripts/hooks/session-end.js",
+      "target": ".claude/scripts/hooks/session-end.js"
+    },
+    {
+      "source": "scripts/hooks/session-start-bootstrap.js",
+      "target": ".claude/scripts/hooks/session-start-bootstrap.js"
+    },
+    {
+      "source": "scripts/hooks/session-start.js",
+      "target": ".claude/scripts/hooks/session-start.js"
+    },
+    {
+      "source": "scripts/hooks/skill-run-tracker.js",
+      "target": ".claude/scripts/hooks/skill-run-tracker.js"
+    },
+    {
+      "source": "scripts/hooks/stop-format-typecheck.js",
+      "target": ".claude/scripts/hooks/stop-format-typecheck.js"
+    },
+    {
+      "source": "scripts/hooks/suggest-compact.js",
+      "target": ".claude/scripts/hooks/suggest-compact.js"
+    },
+    {
+      "source": "scripts/lib/agent-compress.js",
+      "target": ".claude/scripts/lib/agent-compress.js"
+    },
+    {
+      "source": "scripts/lib/agent-data-home.js",
+      "target": ".claude/scripts/lib/agent-data-home.js"
+    },
+    {
+      "source": "scripts/lib/agent-proximity/distance.js",
+      "target": ".claude/scripts/lib/agent-proximity/distance.js"
+    },
+    {
+      "source": "scripts/lib/agent-proximity/graph.js",
+      "target": ".claude/scripts/lib/agent-proximity/graph.js"
+    },
+    {
+      "source": "scripts/lib/agent-proximity/index.js",
+      "target": ".claude/scripts/lib/agent-proximity/index.js"
+    },
+    {
+      "source": "scripts/lib/agent-tools.js",
+      "target": ".claude/scripts/lib/agent-tools.js"
+    },
+    {
+      "source": "scripts/lib/atomic-write.js",
+      "target": ".claude/scripts/lib/atomic-write.js"
+    },
+    {
+      "source": "scripts/lib/claude-commit-attribution.js",
+      "target": ".claude/scripts/lib/claude-commit-attribution.js"
+    },
+    {
+      "source": "scripts/lib/claude-dry-run-sandbox.js",
+      "target": ".claude/scripts/lib/claude-dry-run-sandbox.js"
+    },
+    {
+      "source": "scripts/lib/claude-plugin-setup.js",
+      "target": ".claude/scripts/lib/claude-plugin-setup.js"
+    },
+    {
+      "source": "scripts/lib/claude-scope-migration.js",
+      "target": ".claude/scripts/lib/claude-scope-migration.js"
+    },
+    {
+      "source": "scripts/lib/codex-legacy-sync.js",
+      "target": ".claude/scripts/lib/codex-legacy-sync.js"
+    },
+    {
+      "source": "scripts/lib/codex-plugin-setup.js",
+      "target": ".claude/scripts/lib/codex-plugin-setup.js"
+    },
+    {
+      "source": "scripts/lib/compute-sponsor.js",
+      "target": ".claude/scripts/lib/compute-sponsor.js"
+    },
+    {
+      "source": "scripts/lib/control-pane/actions.js",
+      "target": ".claude/scripts/lib/control-pane/actions.js"
+    },
+    {
+      "source": "scripts/lib/control-pane/message-sink.js",
+      "target": ".claude/scripts/lib/control-pane/message-sink.js"
+    },
+    {
+      "source": "scripts/lib/control-pane/proximity-viz.js",
+      "target": ".claude/scripts/lib/control-pane/proximity-viz.js"
+    },
+    {
+      "source": "scripts/lib/control-pane/proximity.js",
+      "target": ".claude/scripts/lib/control-pane/proximity.js"
+    },
+    {
+      "source": "scripts/lib/control-pane/server.js",
+      "target": ".claude/scripts/lib/control-pane/server.js"
+    },
+    {
+      "source": "scripts/lib/control-pane/state.js",
+      "target": ".claude/scripts/lib/control-pane/state.js"
+    },
+    {
+      "source": "scripts/lib/control-pane/ui.js",
+      "target": ".claude/scripts/lib/control-pane/ui.js"
+    },
+    {
+      "source": "scripts/lib/control-pane/work-item-mutations.js",
+      "target": ".claude/scripts/lib/control-pane/work-item-mutations.js"
+    },
+    {
+      "source": "scripts/lib/cursor-agent-names.js",
+      "target": ".claude/scripts/lib/cursor-agent-names.js"
+    },
+    {
+      "source": "scripts/lib/ecc_dashboard_runtime.py",
+      "target": ".claude/scripts/lib/ecc_dashboard_runtime.py"
+    },
+    {
+      "source": "scripts/lib/feedback-links.js",
+      "target": ".claude/scripts/lib/feedback-links.js"
+    },
+    {
+      "source": "scripts/lib/github-coordination.js",
+      "target": ".claude/scripts/lib/github-coordination.js"
+    },
+    {
+      "source": "scripts/lib/github-coordination/actions.js",
+      "target": ".claude/scripts/lib/github-coordination/actions.js"
+    },
+    {
+      "source": "scripts/lib/github-coordination/gh-api.js",
+      "target": ".claude/scripts/lib/github-coordination/gh-api.js"
+    },
+    {
+      "source": "scripts/lib/github-coordination/parsing.js",
+      "target": ".claude/scripts/lib/github-coordination/parsing.js"
+    },
+    {
+      "source": "scripts/lib/github-coordination/policy.js",
+      "target": ".claude/scripts/lib/github-coordination/policy.js"
+    },
+    {
+      "source": "scripts/lib/github-coordination/state.js",
+      "target": ".claude/scripts/lib/github-coordination/state.js"
+    },
+    {
+      "source": "scripts/lib/github-coordination/store.js",
+      "target": ".claude/scripts/lib/github-coordination/store.js"
+    },
+    {
+      "source": "scripts/lib/github-discussions.js",
+      "target": ".claude/scripts/lib/github-discussions.js"
+    },
+    {
+      "source": "scripts/lib/github-origin.js",
+      "target": ".claude/scripts/lib/github-origin.js"
+    },
+    {
+      "source": "scripts/lib/harness-adapter-compliance.js",
+      "target": ".claude/scripts/lib/harness-adapter-compliance.js"
+    },
+    {
+      "source": "scripts/lib/harness-capabilities.js",
+      "target": ".claude/scripts/lib/harness-capabilities.js"
+    },
+    {
+      "source": "scripts/lib/hook-flags.js",
+      "target": ".claude/scripts/lib/hook-flags.js"
+    },
+    {
+      "source": "scripts/lib/inspection.js",
+      "target": ".claude/scripts/lib/inspection.js"
+    },
+    {
+      "source": "scripts/lib/install-executor.js",
+      "target": ".claude/scripts/lib/install-executor.js"
+    },
+    {
+      "source": "scripts/lib/install-lifecycle.js",
+      "target": ".claude/scripts/lib/install-lifecycle.js"
+    },
+    {
+      "source": "scripts/lib/install-manifests.js",
+      "target": ".claude/scripts/lib/install-manifests.js"
+    },
+    {
+      "source": "scripts/lib/install-state-store-sync.js",
+      "target": ".claude/scripts/lib/install-state-store-sync.js"
+    },
+    {
+      "source": "scripts/lib/install-state.js",
+      "target": ".claude/scripts/lib/install-state.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/adal-project.js",
+      "target": ".claude/scripts/lib/install-targets/adal-project.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/antigravity-project.js",
+      "target": ".claude/scripts/lib/install-targets/antigravity-project.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/claude-home.js",
+      "target": ".claude/scripts/lib/install-targets/claude-home.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/claude-project.js",
+      "target": ".claude/scripts/lib/install-targets/claude-project.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/codebuddy-project.js",
+      "target": ".claude/scripts/lib/install-targets/codebuddy-project.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/codex-home.js",
+      "target": ".claude/scripts/lib/install-targets/codex-home.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/cursor-project.js",
+      "target": ".claude/scripts/lib/install-targets/cursor-project.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/gemini-project.js",
+      "target": ".claude/scripts/lib/install-targets/gemini-project.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/helpers.js",
+      "target": ".claude/scripts/lib/install-targets/helpers.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/hermes-home.js",
+      "target": ".claude/scripts/lib/install-targets/hermes-home.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/joycode-project.js",
+      "target": ".claude/scripts/lib/install-targets/joycode-project.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/kimi-project.js",
+      "target": ".claude/scripts/lib/install-targets/kimi-project.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/openclaw-home.js",
+      "target": ".claude/scripts/lib/install-targets/openclaw-home.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/opencode-home.js",
+      "target": ".claude/scripts/lib/install-targets/opencode-home.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/qwen-home.js",
+      "target": ".claude/scripts/lib/install-targets/qwen-home.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/registry.js",
+      "target": ".claude/scripts/lib/install-targets/registry.js"
+    },
+    {
+      "source": "scripts/lib/install-targets/zed-project.js",
+      "target": ".claude/scripts/lib/install-targets/zed-project.js"
+    },
+    {
+      "source": "scripts/lib/install/antigravity-agent.js",
+      "target": ".claude/scripts/lib/install/antigravity-agent.js"
+    },
+    {
+      "source": "scripts/lib/install/antigravity-legacy-migration.js",
+      "target": ".claude/scripts/lib/install/antigravity-legacy-migration.js"
+    },
+    {
+      "source": "scripts/lib/install/apply.js",
+      "target": ".claude/scripts/lib/install/apply.js"
+    },
+    {
+      "source": "scripts/lib/install/claude-settings-lock.js",
+      "target": ".claude/scripts/lib/install/claude-settings-lock.js"
+    },
+    {
+      "source": "scripts/lib/install/claude-settings.js",
+      "target": ".claude/scripts/lib/install/claude-settings.js"
+    },
+    {
+      "source": "scripts/lib/install/claude-skill-migration.js",
+      "target": ".claude/scripts/lib/install/claude-skill-migration.js"
+    },
+    {
+      "source": "scripts/lib/install/config.js",
+      "target": ".claude/scripts/lib/install/config.js"
+    },
+    {
+      "source": "scripts/lib/install/hook-consent.js",
+      "target": ".claude/scripts/lib/install/hook-consent.js"
+    },
+    {
+      "source": "scripts/lib/install/inventory.js",
+      "target": ".claude/scripts/lib/install/inventory.js"
+    },
+    {
+      "source": "scripts/lib/install/link-rewrite.js",
+      "target": ".claude/scripts/lib/install/link-rewrite.js"
+    },
+    {
+      "source": "scripts/lib/install/opencode-legacy-migration.js",
+      "target": ".claude/scripts/lib/install/opencode-legacy-migration.js"
+    },
+    {
+      "source": "scripts/lib/install/ownership-guard.js",
+      "target": ".claude/scripts/lib/install/ownership-guard.js"
+    },
+    {
+      "source": "scripts/lib/install/plan.js",
+      "target": ".claude/scripts/lib/install/plan.js"
+    },
+    {
+      "source": "scripts/lib/install/request.js",
+      "target": ".claude/scripts/lib/install/request.js"
+    },
+    {
+      "source": "scripts/lib/install/runtime.js",
+      "target": ".claude/scripts/lib/install/runtime.js"
+    },
+    {
+      "source": "scripts/lib/instinct-relevance.js",
+      "target": ".claude/scripts/lib/instinct-relevance.js"
+    },
+    {
+      "source": "scripts/lib/invocation-environment.js",
+      "target": ".claude/scripts/lib/invocation-environment.js"
+    },
+    {
+      "source": "scripts/lib/ito-environment.js",
+      "target": ".claude/scripts/lib/ito-environment.js"
+    },
+    {
+      "source": "scripts/lib/llm-summary.js",
+      "target": ".claude/scripts/lib/llm-summary.js"
+    },
+    {
+      "source": "scripts/lib/loopback-guard.js",
+      "target": ".claude/scripts/lib/loopback-guard.js"
+    },
+    {
+      "source": "scripts/lib/mcp-config.js",
+      "target": ".claude/scripts/lib/mcp-config.js"
+    },
+    {
+      "source": "scripts/lib/mcp-inventory/canonical-mcp.js",
+      "target": ".claude/scripts/lib/mcp-inventory/canonical-mcp.js"
+    },
+    {
+      "source": "scripts/lib/mcp-inventory/collect.js",
+      "target": ".claude/scripts/lib/mcp-inventory/collect.js"
+    },
+    {
+      "source": "scripts/lib/mcp-inventory/readers/claude-code.js",
+      "target": ".claude/scripts/lib/mcp-inventory/readers/claude-code.js"
+    },
+    {
+      "source": "scripts/lib/mcp-inventory/readers/codex.js",
+      "target": ".claude/scripts/lib/mcp-inventory/readers/codex.js"
+    },
+    {
+      "source": "scripts/lib/mcp-inventory/readers/opencode.js",
+      "target": ".claude/scripts/lib/mcp-inventory/readers/opencode.js"
+    },
+    {
+      "source": "scripts/lib/memory-vault-format.js",
+      "target": ".claude/scripts/lib/memory-vault-format.js"
+    },
+    {
+      "source": "scripts/lib/memory-vault.js",
+      "target": ".claude/scripts/lib/memory-vault.js"
+    },
+    {
+      "source": "scripts/lib/missing-dependency.js",
+      "target": ".claude/scripts/lib/missing-dependency.js"
+    },
+    {
+      "source": "scripts/lib/multi-harness-setup.js",
+      "target": ".claude/scripts/lib/multi-harness-setup.js"
+    },
+    {
+      "source": "scripts/lib/nasiko-release.js",
+      "target": ".claude/scripts/lib/nasiko-release.js"
+    },
+    {
+      "source": "scripts/lib/observer-sessions.js",
+      "target": ".claude/scripts/lib/observer-sessions.js"
+    },
+    {
+      "source": "scripts/lib/opencode-paths.js",
+      "target": ".claude/scripts/lib/opencode-paths.js"
+    },
+    {
+      "source": "scripts/lib/orchestration-session.js",
+      "target": ".claude/scripts/lib/orchestration-session.js"
+    },
+    {
+      "source": "scripts/lib/package-manager.d.ts",
+      "target": ".claude/scripts/lib/package-manager.d.ts"
+    },
+    {
+      "source": "scripts/lib/package-manager.js",
+      "target": ".claude/scripts/lib/package-manager.js"
+    },
+    {
+      "source": "scripts/lib/path-safety.js",
+      "target": ".claude/scripts/lib/path-safety.js"
+    },
+    {
+      "source": "scripts/lib/plan-canvas/markdown.js",
+      "target": ".claude/scripts/lib/plan-canvas/markdown.js"
+    },
+    {
+      "source": "scripts/lib/plan-canvas/sdk.js",
+      "target": ".claude/scripts/lib/plan-canvas/sdk.js"
+    },
+    {
+      "source": "scripts/lib/plan-canvas/server.js",
+      "target": ".claude/scripts/lib/plan-canvas/server.js"
+    },
+    {
+      "source": "scripts/lib/plan-canvas/sessions.js",
+      "target": ".claude/scripts/lib/plan-canvas/sessions.js"
+    },
+    {
+      "source": "scripts/lib/plan-canvas/ui.js",
+      "target": ".claude/scripts/lib/plan-canvas/ui.js"
+    },
+    {
+      "source": "scripts/lib/powershell-destructive-command.js",
+      "target": ".claude/scripts/lib/powershell-destructive-command.js"
+    },
+    {
+      "source": "scripts/lib/project-detect.js",
+      "target": ".claude/scripts/lib/project-detect.js"
+    },
+    {
+      "source": "scripts/lib/resolve-ecc-root.js",
+      "target": ".claude/scripts/lib/resolve-ecc-root.js"
+    },
+    {
+      "source": "scripts/lib/resolve-formatter.js",
+      "target": ".claude/scripts/lib/resolve-formatter.js"
+    },
+    {
+      "source": "scripts/lib/session-adapters/canonical-session.js",
+      "target": ".claude/scripts/lib/session-adapters/canonical-session.js"
+    },
+    {
+      "source": "scripts/lib/session-adapters/claude-history.js",
+      "target": ".claude/scripts/lib/session-adapters/claude-history.js"
+    },
+    {
+      "source": "scripts/lib/session-adapters/codex-worktree.js",
+      "target": ".claude/scripts/lib/session-adapters/codex-worktree.js"
+    },
+    {
+      "source": "scripts/lib/session-adapters/dmux-tmux.js",
+      "target": ".claude/scripts/lib/session-adapters/dmux-tmux.js"
+    },
+    {
+      "source": "scripts/lib/session-adapters/opencode.js",
+      "target": ".claude/scripts/lib/session-adapters/opencode.js"
+    },
+    {
+      "source": "scripts/lib/session-adapters/registry.js",
+      "target": ".claude/scripts/lib/session-adapters/registry.js"
+    },
+    {
+      "source": "scripts/lib/session-aliases.d.ts",
+      "target": ".claude/scripts/lib/session-aliases.d.ts"
+    },
+    {
+      "source": "scripts/lib/session-aliases.js",
+      "target": ".claude/scripts/lib/session-aliases.js"
+    },
+    {
+      "source": "scripts/lib/session-bridge.js",
+      "target": ".claude/scripts/lib/session-bridge.js"
+    },
+    {
+      "source": "scripts/lib/session-manager.d.ts",
+      "target": ".claude/scripts/lib/session-manager.d.ts"
+    },
+    {
+      "source": "scripts/lib/session-manager.js",
+      "target": ".claude/scripts/lib/session-manager.js"
+    },
+    {
+      "source": "scripts/lib/shell-split.js",
+      "target": ".claude/scripts/lib/shell-split.js"
+    },
+    {
+      "source": "scripts/lib/shell-substitution.js",
+      "target": ".claude/scripts/lib/shell-substitution.js"
+    },
+    {
+      "source": "scripts/lib/skill-evolution/dashboard.js",
+      "target": ".claude/scripts/lib/skill-evolution/dashboard.js"
+    },
+    {
+      "source": "scripts/lib/skill-evolution/health.js",
+      "target": ".claude/scripts/lib/skill-evolution/health.js"
+    },
+    {
+      "source": "scripts/lib/skill-evolution/index.js",
+      "target": ".claude/scripts/lib/skill-evolution/index.js"
+    },
+    {
+      "source": "scripts/lib/skill-evolution/provenance.js",
+      "target": ".claude/scripts/lib/skill-evolution/provenance.js"
+    },
+    {
+      "source": "scripts/lib/skill-evolution/tracker.js",
+      "target": ".claude/scripts/lib/skill-evolution/tracker.js"
+    },
+    {
+      "source": "scripts/lib/skill-evolution/versioning.js",
+      "target": ".claude/scripts/lib/skill-evolution/versioning.js"
+    },
+    {
+      "source": "scripts/lib/skill-improvement/amendify.js",
+      "target": ".claude/scripts/lib/skill-improvement/amendify.js"
+    },
+    {
+      "source": "scripts/lib/skill-improvement/evaluate.js",
+      "target": ".claude/scripts/lib/skill-improvement/evaluate.js"
+    },
+    {
+      "source": "scripts/lib/skill-improvement/health.js",
+      "target": ".claude/scripts/lib/skill-improvement/health.js"
+    },
+    {
+      "source": "scripts/lib/skill-improvement/observations.js",
+      "target": ".claude/scripts/lib/skill-improvement/observations.js"
+    },
+    {
+      "source": "scripts/lib/state-store/index.js",
+      "target": ".claude/scripts/lib/state-store/index.js"
+    },
+    {
+      "source": "scripts/lib/state-store/install-state-projection.js",
+      "target": ".claude/scripts/lib/state-store/install-state-projection.js"
+    },
+    {
+      "source": "scripts/lib/state-store/migrations.js",
+      "target": ".claude/scripts/lib/state-store/migrations.js"
+    },
+    {
+      "source": "scripts/lib/state-store/queries.js",
+      "target": ".claude/scripts/lib/state-store/queries.js"
+    },
+    {
+      "source": "scripts/lib/state-store/schema.js",
+      "target": ".claude/scripts/lib/state-store/schema.js"
+    },
+    {
+      "source": "scripts/lib/terminal-spinner.js",
+      "target": ".claude/scripts/lib/terminal-spinner.js"
+    },
+    {
+      "source": "scripts/lib/terminal-welcome.js",
+      "target": ".claude/scripts/lib/terminal-welcome.js"
+    },
+    {
+      "source": "scripts/lib/tmux-worktree-orchestrator.js",
+      "target": ".claude/scripts/lib/tmux-worktree-orchestrator.js"
+    },
+    {
+      "source": "scripts/lib/transcript-context.js",
+      "target": ".claude/scripts/lib/transcript-context.js"
+    },
+    {
+      "source": "scripts/lib/utils.d.ts",
+      "target": ".claude/scripts/lib/utils.d.ts"
+    },
+    {
+      "source": "scripts/lib/utils.js",
+      "target": ".claude/scripts/lib/utils.js"
+    },
+    {
+      "source": "scripts/lib/worktree-lifecycle/git.js",
+      "target": ".claude/scripts/lib/worktree-lifecycle/git.js"
+    },
+    {
+      "source": "scripts/lib/worktree-lifecycle/lifecycle.js",
+      "target": ".claude/scripts/lib/worktree-lifecycle/lifecycle.js"
+    },
+    {
+      "source": "scripts/orchestrate-codex-worker.sh",
+      "target": ".claude/scripts/orchestrate-codex-worker.sh"
+    },
+    {
+      "source": "scripts/orchestrate-worktrees.js",
+      "target": ".claude/scripts/orchestrate-worktrees.js"
+    },
+    {
+      "source": "scripts/orchestration-status.js",
+      "target": ".claude/scripts/orchestration-status.js"
+    },
+    {
+      "source": "scripts/setup-package-manager.js",
+      "target": ".claude/scripts/setup-package-manager.js"
+    },
+    {
+      "source": "scripts/skills-health.js",
+      "target": ".claude/scripts/skills-health.js"
+    }
+  ]
+}

@@ -178,7 +178,9 @@ fn actual_server_starts_first_sync_and_serves_embedded_views() {
     loop {
         let response = http(port);
         assert!(response.starts_with("HTTP/1.1 200"));
-        if response.contains("class=\"resource-name\"") {
+        if response.contains("class=\"resource-name\"")
+            && home.join(".agents/skills/review/SKILL.md").is_file()
+        {
             break;
         }
         assert!(

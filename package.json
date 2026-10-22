@@ -2,8 +2,8 @@
   "name": "sm-frontend",
   "private": true,
   "scripts": {
-    "check": "tsc --noEmit",
-    "build": "tsc",
+    "check": "tsc --noEmit && tsc -p tsconfig.native.json --noEmit",
+    "build": "tsc && tsc -p tsconfig.native.json",
     "test:browser": "tsc -p tsconfig.browser.json && node .browser-tests/tests/browser_editor.js"
   },
   "devDependencies": {

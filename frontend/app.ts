@@ -21,6 +21,34 @@ function responseFields(body: unknown): { message?: string; error?: string; url?
   return fields;
 }
 
+for (const form of document.querySelectorAll<HTMLFormElement>(".installation-editor")) {
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    const result = required<HTMLElement>(form, ".form-result");
+    const button = required<HTMLButtonElement>(form, "button");
+    const submit = async (): Promise<void> => {
+      button.disabled = true; result.textContent = "正在提交修改提案…";
+      try {
+        const token = required<HTMLMetaElement>(document, 'meta[name="sm-csrf"]').content;
+        const reason = required<HTMLInputElement>(form, "input[name=reason]").value.trim();
+        const response = await fetch(`/installations/${encodeURIComponent(form.dataset.id ?? "")}`, {
+          method: "POST", headers: { "Content-Type": "application/json", "X-SM-CSRF": token },
+          body: JSON.stringify({ enabled: form.dataset.enabled === "true", reason }),
+        });
+        const body = responseFields(await response.json());
+        if (!response.ok || !body.message) throw new Error(body.error ?? "提交失败，请查看运行状态。");
+        result.textContent = body.message;
+        if (body.url && /^https?:\/\//.test(body.url)) {
+          const link = document.createElement("a"); link.href = body.url; link.textContent = "打开 MR ↗";
+          link.target = "_blank"; link.rel = "noopener noreferrer"; result.append(link);
+        }
+      } catch (error: unknown) { result.textContent = error instanceof Error ? error.message : "提交失败"; }
+      finally { button.disabled = false; }
+    };
+    void submit();
+  });
+}
+
 for (const form of document.querySelectorAll<HTMLFormElement>(".resource-editor")) {
   const encoded = required<HTMLScriptElement>(form, ".editor-data").textContent;
   if (!encoded) throw new Error("资源目录尚未加载。");
@@ -44,11 +72,11 @@ for (const form of document.querySelectorAll<HTMLFormElement>(".resource-editor"
   const currentKind = (): Kind => {
     const kind = value("kind");
     switch (kind) {
-      case "skill": case "hook": case "rule": case "agent": case "mcp": return kind;
+      case "skill": case "bundle": case "hook": case "rule": case "agent": case "mcp": return kind;
       default: throw new Error("无效的资源类型。");
     }
   };
-  const clients = (): Client[] => currentKind() === "skill" ? ["codex", "kimi"] : [...form.querySelectorAll<HTMLInputElement>("input[name=agents]:checked")].map(input => {
+  const clients = (): Client[] => (currentKind() === "skill" || currentKind() === "bundle") ? ["codex", "kimi"] : [...form.querySelectorAll<HTMLInputElement>("input[name=agents]:checked")].map(input => {
     if (input.value === "codex" || input.value === "kimi") return input.value;
     throw new Error("无效的客户端。");
   });
@@ -56,6 +84,7 @@ for (const form of document.querySelectorAll<HTMLFormElement>(".resource-editor"
   const templates = (kind: Kind, client: Client, id: string): [string, string] => {
     switch (kind) {
       case "skill": return ["SKILL.md", `---\nname: ${id}\ndescription: 说明何时应使用这项技能\n---\n\n# ${id}\n\n写下工作流程和完成标准。\n`];
+      case "bundle": return ["bundle.json", JSON.stringify({ entries: [] }, null, 2) + "\n"];
       case "rule": return ["AGENTS.md", "# 工作约定\n\n在这里写下需要持续遵循的约定。\n"];
       case "agent": return client === "codex" ? ["agent.toml", `name = "${id}"\ndescription = "说明角色用途"\ndeveloper_instructions = "描述角色的工作方法"\n`] : ["agent.md", `---\nname: ${id}\ndescription: 说明角色用途\n---\n\n描述角色的工作方法。\n`];
       case "mcp": return client === "codex" ? ["config.toml", `[mcp_servers.${id}]\ncommand = "your-mcp-command"\n`] : ["mcp.json", JSON.stringify({ mcpServers: { [id]: { command: "your-mcp-command" } } }, null, 2)];
@@ -65,14 +94,14 @@ for (const form of document.querySelectorAll<HTMLFormElement>(".resource-editor"
   const renamedPath = (path: string, id: string): string => original && id !== original.id ? path.replace(`resources/${original.id}/`, `resources/${id}/`) : path;
   const sourcePath = (path: string, id: string): string => original && id !== original.id ? path.replace(`resources/${id}/`, `resources/${original.id}/`) : path;
   const payloadPath = (client: Client, id: string, kind: Kind): string => {
-    const path = original?.kind === "skill" ? original.payload : original?.payloads[client];
-    return renamedPath(path || `resources/${id}/${kind === "skill" || kind === "rule" ? "shared" : client}`, id);
+    const path = (original?.kind === "skill" || original?.kind === "bundle") ? original.payload : original?.payloads[client];
+    return renamedPath(path || `resources/${id}/${kind === "skill" || kind === "bundle" || kind === "rule" ? "shared" : client}`, id);
   };
   const render = (): void => {
     save();
     const upstream = value("origin") === "upstream";
     required<HTMLElement>(form, ".upstream-fields").hidden = !upstream;
-    required<HTMLElement>(form, ".agent-options").hidden = currentKind() === "skill";
+    required<HTMLElement>(form, ".agent-options").hidden = (currentKind() === "skill" || currentKind() === "bundle");
     for (const name of ["project", "project_path"] as const) {
       const label = control(name).closest("label");
       if (label) label.hidden = value("scope") !== "project";
@@ -154,12 +183,12 @@ for (const form of document.querySelectorAll<HTMLFormElement>(".resource-editor"
           source = { origin, upstream };
         } else source = { origin };
         let definition: ContentFields;
-        if (kind === "skill") definition = { kind, payload: origin === "upstream" ? value("upstream_path") || "." : payloadPath("codex", id, kind) };
+        if (kind === "skill" || kind === "bundle") definition = { kind, payload: origin === "upstream" ? value("upstream_path") || "." : payloadPath("codex", id, kind) };
         else {
           const payloads: Partial<Record<Client, string>> = {};
-          const oldPath = original?.kind === "skill" ? original.payload : Object.values(original?.payloads || {})[0];
+          const oldPath = (original?.kind === "skill" || original?.kind === "bundle") ? original.payload : Object.values(original?.payloads || {})[0];
           const changedPath = value("upstream_path") !== oldPath;
-          for (const client of selected) payloads[client] = origin === "self" ? payloadPath(client, id, kind) : original && original.kind !== "skill" && original.payloads[client] && !changedPath ? original.payloads[client] : value("upstream_path") || ".";
+          for (const client of selected) payloads[client] = origin === "self" ? payloadPath(client, id, kind) : original && original.kind !== "skill" && original.kind !== "bundle" && original.payloads[client] && !changedPath ? original.payloads[client] : value("upstream_path") || ".";
           definition = { kind, agents: selected, payloads };
         }
         if (origin === "self") for (const option of fields.querySelectorAll<HTMLOptionElement>("option")) {

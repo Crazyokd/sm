@@ -265,6 +265,74 @@ fn apply_source_tracked(
         run.stage("catalog", None, 0, 1)?;
     }
     let catalog = Catalog::load(source)?;
+    // A reviewed existing resource stays governable while its network refresh is unavailable.
+    let local_sources = catalog
+        .resources
+        .iter()
+        .filter(|r| r.source.is_self())
+        .map(|r| (r.id.clone(), source.to_path_buf()))
+        .collect();
+    let clients: BTreeSet<_> = catalog
+        .resources
+        .iter()
+        .filter(|r| r.source.is_self())
+        .flat_map(|r| r.targets().into_keys())
+        .collect();
+    let mut baseline = plan_apply(&catalog, &local_sources, &runtime.home);
+    for resource in catalog.resources.iter().filter(|r| !r.source.is_self()) {
+        baseline.results.insert(
+            resource.id.clone(),
+            ResourceResult::new(ApplyStatus::Pending, "本轮上游刷新待完成；保留现有本地内容"),
+        );
+    }
+    for client in &clients {
+        baseline.writes.push(crate::providers::collector(
+            *client,
+            &runtime.home,
+            &runtime.executable,
+            state.directory()?,
+        ));
+    }
+    // Delay unrelated retirements until the complete upstream plan is available.
+    let ready: BTreeSet<_> = baseline
+        .writes
+        .iter()
+        .map(|w| w.resource_id.clone())
+        .chain(baseline.results.keys().cloned())
+        .collect();
+    for owned in state.owned()? {
+        if !ready.contains(&owned.resource_id) {
+            baseline.results.insert(
+                owned.resource_id,
+                ResourceResult::new(ApplyStatus::Pending, "完整同步完成后再清理旧投放"),
+            );
+        }
+    }
+    if let Some(run) = &mut run {
+        run.stage("apply_existing", None, 0, catalog.resources.len())?;
+    }
+    crate::adoption::adopt(source, &catalog, &runtime.home, &baseline, state)?;
+    let mut local_report = apply_writes(&baseline, state)?;
+    local_report
+        .results
+        .extend(crate::aliases::synchronize(source, &runtime.home, state)?);
+    state.set("resource_results", &local_report.results)?;
+    cache_resources(
+        &catalog,
+        &local_sources,
+        &local_report,
+        &runtime.home,
+        state,
+    )?;
+    state.set(
+        "installation_manifest",
+        &crate::installations::load(source)?,
+    )?;
+    crate::installations::register_existing(source, &runtime.home, state)?;
+    state.set(
+        "inventory",
+        &crate::inventory::scan(&catalog, state, &runtime.home)?,
+    )?;
     let temporary = tempfile::tempdir()?;
     let mut sources = BTreeMap::new();
     let mut errors = BTreeMap::new();
@@ -316,12 +384,6 @@ fn apply_source_tracked(
     }
     let mut plan = plan_apply(&catalog, &sources, &runtime.home);
     plan.results.extend(errors);
-    let clients: BTreeSet<_> = catalog
-        .resources
-        .iter()
-        .filter(|r| r.source.is_self())
-        .flat_map(|r| r.targets().into_keys())
-        .collect();
     for client in &clients {
         plan.writes.push(crate::providers::collector(
             *client,
@@ -330,7 +392,20 @@ fn apply_source_tracked(
             state.directory()?,
         ));
     }
-    let report = apply_writes(&plan, state)?;
+    crate::adoption::adopt(source, &catalog, &runtime.home, &plan, state)?;
+    let mut report = apply_writes(&plan, state)?;
+    report
+        .results
+        .extend(crate::aliases::synchronize(source, &runtime.home, state)?);
+    if let Some(run) = &mut run {
+        run.stage("native_installations", None, 0, 1)?;
+    }
+    report.results.extend(crate::installations::synchronize(
+        source,
+        &runtime.home,
+        state,
+    )?);
+    state.set("resource_results", &report.results)?;
     if let Some(run) = &mut run {
         for (index, (resource, result)) in report.results.iter().enumerate() {
             let status = serde_json::to_value(result.status)?;
@@ -343,6 +418,36 @@ fn apply_source_tracked(
         }
         run.stage("cache_metadata", None, 0, 1)?;
     }
+    cache_resources(&catalog, &sources, &report, &runtime.home, state)?;
+    let collectors: BTreeMap<_, _> = clients
+        .into_iter()
+        .map(|client| {
+            (
+                client.to_string(),
+                format!(
+                    "已配置；以收到事件为准{}",
+                    if client == Client::Codex {
+                        "，Codex 需原生信任"
+                    } else {
+                        ""
+                    }
+                ),
+            )
+        })
+        .collect();
+    state.set("collector_status", &collectors)?;
+    if let Some(run) = &mut run {
+        run.stage("cache_metadata", None, 1, 1)?;
+    }
+    Ok((catalog, report))
+}
+fn cache_resources(
+    catalog: &Catalog,
+    sources: &BTreeMap<String, PathBuf>,
+    report: &ApplyReport,
+    home: &Path,
+    state: &State,
+) -> Result<()> {
     let mut previous_contents: BTreeMap<String, BTreeMap<String, String>> =
         if sources.len() < catalog.resources.len() {
             state.get("resource_contents")?
@@ -380,7 +485,8 @@ fn apply_source_tracked(
             hashes.insert(resource.id.clone(), content_hash(resource)?);
         }
     }
-    state.set("catalog", &catalog)?;
+    state.set("catalog", catalog)?;
+    state.set("inventory", &crate::inventory::scan(catalog, state, home)?)?;
     state.set("resource_contents", &contents)?;
     let owned = state
         .owned()?
@@ -396,27 +502,7 @@ fn apply_source_tracked(
         &serde_json::to_vec(&ActiveIndex { owned, hashes })?,
         None,
     )?;
-    let collectors: BTreeMap<_, _> = clients
-        .into_iter()
-        .map(|client| {
-            (
-                client.to_string(),
-                format!(
-                    "已配置；以收到事件为准{}",
-                    if client == Client::Codex {
-                        "，Codex 需原生信任"
-                    } else {
-                        ""
-                    }
-                ),
-            )
-        })
-        .collect();
-    state.set("collector_status", &collectors)?;
-    if let Some(run) = &mut run {
-        run.stage("cache_metadata", None, 1, 1)?;
-    }
-    Ok((catalog, report))
+    Ok(())
 }
 #[derive(Serialize)]
 struct Failure {

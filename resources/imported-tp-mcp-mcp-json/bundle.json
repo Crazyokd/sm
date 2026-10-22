@@ -1,0 +1,18 @@
+{
+  "entries": [
+    {
+      "target": ".mcp.json",
+      "json": {
+        "mcpServers": {
+          "tp": {
+            "args": [
+              "run",
+              "mcp"
+            ],
+            "command": "npm"
+          }
+        }
+      }
+    }
+  ]
+}

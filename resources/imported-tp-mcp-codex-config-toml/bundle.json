@@ -1,0 +1,18 @@
+{
+  "entries": [
+    {
+      "target": ".codex/config.toml",
+      "toml": {
+        "mcp_servers": {
+          "tp": {
+            "args": [
+              "run",
+              "mcp"
+            ],
+            "command": "npm"
+          }
+        }
+      }
+    }
+  ]
+}

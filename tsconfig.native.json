@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "module": "NodeNext", "moduleResolution": "NodeNext",
+    "strict": true, "noUnusedLocals": true, "noUnusedParameters": true,
+    "noUncheckedIndexedAccess": true, "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true, "noImplicitReturns": true,
+    "types": ["node"], "rootDir": "resources/source-providers",
+    "outDir": "resources/source-providers"
+  },
+  "include": ["resources/source-providers/native-plugins.ts"], "exclude": []
+}

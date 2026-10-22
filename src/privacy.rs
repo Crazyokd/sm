@@ -21,12 +21,17 @@ static ASSIGNMENT: LazyLock<Regex> = LazyLock::new(|| {
 static URL_AUTH: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(https?://)[^/\s@]+:[^/\s@]+@").expect("fixed URL credential regex")
 });
+fn policy_flag(key: &str, value: &str) -> bool {
+    key.eq_ignore_ascii_case("HERMES_REDACT_SECRETS") && matches!(value, "true" | "false")
+}
 pub fn redact_text(text: &str, limit: Option<usize>) -> String {
     let value = AUTH.replace_all(text, "$1 [redacted]");
     let value = TOKEN.replace_all(&value, "[redacted]");
     let value = ASSIGNMENT.replace_all(&value, |captures: &Captures<'_>| {
         let raw = captures[2].trim_matches(['\'', '"']);
-        if raw.starts_with(['$', '<']) || raw.starts_with("[redacted]") {
+        let key =
+            captures[1].trim_end_matches(|c: char| c.is_ascii_whitespace() || "=:\"'".contains(c));
+        if raw.starts_with(['$', '<']) || raw.starts_with("[redacted]") || policy_flag(key, raw) {
             captures[0].to_owned()
         } else {
             format!("{}\"[redacted]\"", &captures[1])
@@ -43,7 +48,8 @@ pub fn redact(value: &Value, limit: Option<usize>) -> Value {
                 .map(|(k, v)| {
                     (
                         k.clone(),
-                        if KEY.is_match(k) {
+                        if KEY.is_match(k) && !v.as_str().is_some_and(|value| policy_flag(k, value))
+                        {
                             Value::String("[redacted]".into())
                         } else {
                             redact(v, limit)

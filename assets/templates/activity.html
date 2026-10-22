@@ -2,7 +2,7 @@
 {% block title %}使用与改进{% endblock %}
 {% block breadcrumb %}使用与改进{% endblock %}
 {% block content %}
-<div class="page-heading"><div><p class="eyebrow">OBSERVE & IMPROVE</p><h1>使用与改进</h1><p class="subtitle">查看自建资源的使用线索和有证据的改进尝试。</p></div><span class="pill self">仅分析用户自建</span></div>
+<div class="page-heading"><div><p class="eyebrow">OBSERVE & IMPROVE</p><h1>使用与改进</h1><p class="subtitle">查看自维护资源的使用线索和有证据的改进尝试。</p></div><span class="pill self">仅分析自行维护</span></div>
 <p class="notice">记录反映可见调用；未观测不等于未使用。以下为已消化的本地记录，日常采集由夜间任务处理。</p>
 {% if pending_raw_bytes or pending_observations %}<p class="notice">尚有 {{ format_bytes(pending_raw_bytes) }} 原始记录待消化、{{ pending_observations }} 条记录待分析。<a href="/jobs">检查采集和处理状态</a></p>{% endif %}
 {% if recording_errors %}<p class="notice warning">存在 {{ recording_errors|length }} 处记录缺口，请到运行状态检查采集情况。</p>{% endif %}

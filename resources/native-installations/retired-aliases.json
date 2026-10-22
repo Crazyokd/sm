@@ -1,0 +1,14 @@
+[
+  {
+    "path": ".claude/skills/easygo-motion-test-path-autotune",
+    "previous": "/home/standard/.agents/skills/easygo-motion-test-path-autotune"
+  },
+  {
+    "path": ".claude/skills/wiki-query",
+    "previous": "/home/standard/repo/obsidian-wiki/.skills/wiki-query"
+  },
+  {
+    "path": ".claude/skills/wiki-update",
+    "previous": "/home/standard/repo/obsidian-wiki/.skills/wiki-update"
+  }
+]

@@ -11,6 +11,14 @@ fn run() -> Result<i32> {
     if let Commands::Record { agent, state_dir } = &args.command {
         return Ok(sm::cli::record(*agent, state_dir));
     }
+    if let Commands::SourceEcc { selection, output } = &args.command {
+        sm::ecc::generate(selection, output)?;
+        return Ok(0);
+    }
+    if let Commands::SourceSkills { selection, output } = &args.command {
+        sm::skill_source::generate(selection, output)?;
+        return Ok(0);
+    }
     let runtime = Runtime::discover(args.repo.as_deref())?;
     match sm::cli::run(args, &runtime)? {
         CommandOutcome::Exit(code) => Ok(code),

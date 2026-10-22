@@ -47,6 +47,16 @@ fn paths_and_credentials_are_rejected_at_proposal_boundary() {
         "api_key=\"$LOCAL_API_KEY\"".into(),
     );
     assert!(input.validate().is_ok());
+    input.writes.insert(
+        "resources/review/config.toml".into(),
+        "HERMES_REDACT_SECRETS=\"true\"".into(),
+    );
+    assert!(input.validate().is_ok());
+    input.writes.insert(
+        "resources/review/config.toml".into(),
+        "API_TOKEN=\"true\"".into(),
+    );
+    assert!(input.validate().is_err());
 }
 #[test]
 fn repeated_proposals_reuse_the_same_key_and_saved_draft() {

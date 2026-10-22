@@ -1,0 +1,12 @@
+{
+  "entries": [
+    {
+      "source": "files/.codex/skills/iteration-cleanup/SKILL.md",
+      "target": ".codex/skills/iteration-cleanup/SKILL.md"
+    },
+    {
+      "source": "files/.codex/skills/iteration-cleanup/agents/openai.yaml",
+      "target": ".codex/skills/iteration-cleanup/agents/openai.yaml"
+    }
+  ]
+}

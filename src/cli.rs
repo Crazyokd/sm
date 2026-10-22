@@ -33,6 +33,17 @@ pub enum Commands {
     Sync,
     Cycle,
     Status,
+    Inventory,
+    #[command(hide = true)]
+    SourceEcc {
+        selection: PathBuf,
+        output: PathBuf,
+    },
+    #[command(hide = true)]
+    SourceSkills {
+        selection: PathBuf,
+        output: PathBuf,
+    },
     Diagnose {
         #[arg(long)]
         output: PathBuf,
@@ -80,6 +91,14 @@ pub fn record(agent: Client, directory: &std::path::Path) -> i32 {
     0
 }
 pub fn run(args: Args, runtime: &Runtime) -> Result<CommandOutcome> {
+    if let Commands::SourceSkills { selection, output } = args.command {
+        crate::skill_source::generate(&selection, &output)?;
+        return Ok(CommandOutcome::Exit(0));
+    }
+    if let Commands::SourceEcc { selection, output } = args.command {
+        crate::ecc::generate(&selection, &output)?;
+        return Ok(CommandOutcome::Exit(0));
+    }
     if let Commands::Record { agent, state_dir } = args.command {
         return Ok(CommandOutcome::Exit(record(agent, &state_dir)));
     }
@@ -123,6 +142,12 @@ pub fn run(args: Args, runtime: &Runtime) -> Result<CommandOutcome> {
             })?;
             0
         }
+        Commands::Inventory => {
+            let catalog: Catalog = state.get("catalog")?;
+            let inventory = crate::inventory::scan(&catalog, &state, &runtime.home)?;
+            print(&inventory)?;
+            0
+        }
         Commands::Diagnose { output } => {
             let report = crate::diagnostics::collect(runtime, &state)?;
             crate::diagnostics::write(&output, &report)?;
@@ -136,7 +161,10 @@ pub fn run(args: Args, runtime: &Runtime) -> Result<CommandOutcome> {
             println!("{}", crate::gitlab::submit_mr(&mut proposal, &state)?);
             0
         }
-        Commands::Serve { .. } | Commands::Record { .. } => unreachable!("handled above"),
+        Commands::Serve { .. }
+        | Commands::Record { .. }
+        | Commands::SourceEcc { .. }
+        | Commands::SourceSkills { .. } => unreachable!("handled above"),
     };
     Ok(CommandOutcome::Exit(exit))
 }

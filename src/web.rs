@@ -25,7 +25,11 @@ use serde::{
     Deserialize, Serialize,
     de::{DeserializeOwned, Deserializer, value::StringDeserializer},
 };
-use std::{collections::BTreeMap, path::Path, sync::Arc};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    path::Path,
+    sync::Arc,
+};
 use subtle::ConstantTimeEq;
 
 struct WebContext {
@@ -105,6 +109,32 @@ fn templates() -> Result<Environment<'static>> {
             AutoEscape::None
         }
     });
+    env.add_function("inventory_client", |path: String| {
+        for (part, label) in [
+            ("/.codex/", "Codex"),
+            ("/.kimi-code/", "Kimi"),
+            ("/.claude/", "Claude"),
+            ("/.cursor/", "Cursor"),
+        ] {
+            if path.contains(part) {
+                return label;
+            }
+        }
+        "通用"
+    });
+    env.add_function("inventory_kind", |kind: String| match kind.as_str() {
+        "skill" => "Skill",
+        "hook" => "Hook",
+        "hook-support" => "Hook 依赖",
+        "rule" => "规则／策略",
+        "agent" => "Agent",
+        "prompt" => "提示词／命令",
+        "mcp" => "MCP",
+        "plugin" => "插件",
+        "skill-config" => "Skill 启停",
+        "config" => "原生配置",
+        _ => "关联文件",
+    });
     env.add_function("format_bytes", |bytes: u64| {
         if bytes >= 1024 * 1024 {
             format!("{:.1} MiB", bytes as f64 / 1048576.0)
@@ -123,6 +153,7 @@ fn templates() -> Result<Environment<'static>> {
             "catalog" => "读取清单",
             "fetch_resource" => "获取资源",
             "apply" => "投放文件",
+            "apply_existing" => "接管已有资源",
             "cache_metadata" => "更新资源状态",
             "ingest" => "消化本地记录",
             "analysis" => "分析自建资源",
@@ -158,6 +189,10 @@ fn templates() -> Result<Environment<'static>> {
             include_str!("../assets/templates/activity.html"),
         ),
         ("jobs.html", include_str!("../assets/templates/jobs.html")),
+        (
+            "inventory.html",
+            include_str!("../assets/templates/inventory.html"),
+        ),
     ] {
         env.add_template(name, text)?;
     }
@@ -189,6 +224,9 @@ pub fn router_with(
         .route("/projects", get(projects))
         .route("/activity", get(activity))
         .route("/jobs", get(jobs))
+        .route("/inventory", get(inventory))
+        .route("/inventory.json", get(inventory_json))
+        .route("/installations/{id}", post(propose_installation))
         .route("/diagnostics.json", get(download_diagnostics))
         .route("/proposals", post(propose))
         .route(
@@ -380,6 +418,7 @@ fn base(context: &WebContext, nav: &'static str, rows: &[ResourceView]) -> Resul
             ("rule", "规则"),
             ("agent", "Agent 定义"),
             ("mcp", "MCP 配置"),
+            ("bundle", "资源集合"),
         ],
         total: rows.len(),
         self_count: rows.iter().filter(|r| r.resource.source.is_self()).count(),
@@ -437,6 +476,107 @@ struct ResourcePage {
     base: BaseContext,
     resources: Vec<ResourceView>,
     filters: Filters,
+}
+#[derive(Serialize)]
+struct InventoryPage {
+    #[serde(flatten)]
+    base: BaseContext,
+    inventory: crate::inventory::Inventory,
+    unmanaged: usize,
+    drift: usize,
+    native: usize,
+    installations: Vec<crate::installations::Installation>,
+    results: BTreeMap<String, ResourceResult>,
+    entries: Vec<crate::inventory::InventoryEntry>,
+    filters: InventoryFilters,
+    kinds: BTreeSet<String>,
+    owners: Vec<String>,
+}
+#[derive(Default, Deserialize, Serialize)]
+struct InventoryFilters {
+    #[serde(default)]
+    q: String,
+    #[serde(default)]
+    status: String,
+    #[serde(default)]
+    kind: String,
+}
+async fn inventory(
+    WebState(context): WebState<Shared>,
+    query: std::result::Result<Query<InventoryFilters>, QueryRejection>,
+) -> WebResult<Html<String>> {
+    let Query(filters) = query.map_err(WebError::bad)?;
+    blocking(move || {
+        let rows = resource_rows(&context.state)?;
+        let catalog = context.state.get("catalog")?;
+        let inventory = crate::inventory::scan(&catalog, &context.state, &context.runtime.home)?;
+        let unmanaged = inventory
+            .entries
+            .iter()
+            .filter(|e| e.status == "unmanaged")
+            .count();
+        let drift = inventory
+            .entries
+            .iter()
+            .filter(|e| e.status == "drift")
+            .count();
+        let native = inventory
+            .entries
+            .iter()
+            .filter(|e| e.status == "native")
+            .count();
+        let kinds = inventory.entries.iter().map(|e| e.kind.clone()).collect();
+        let q = filters.q.to_lowercase();
+        let entries = inventory
+            .entries
+            .iter()
+            .filter(|e| {
+                (filters.status.is_empty() || e.status == filters.status)
+                    && (filters.kind.is_empty() || e.kind == filters.kind)
+                    && format!(
+                        "{} {} {} {}",
+                        e.id,
+                        e.name,
+                        e.project.as_deref().unwrap_or(""),
+                        e.owner.as_deref().unwrap_or("")
+                    )
+                    .to_lowercase()
+                    .contains(&q)
+            })
+            .cloned()
+            .collect();
+        let owners = rows.iter().map(|r| r.resource.id.clone()).collect();
+        render(
+            &context,
+            "inventory.html",
+            &InventoryPage {
+                base: base(&context, "inventory", &rows)?,
+                inventory,
+                unmanaged,
+                drift,
+                native,
+                installations: context.state.get("installation_manifest")?,
+                results: context.state.get("resource_results")?,
+                entries,
+                filters,
+                kinds,
+                owners,
+            },
+        )
+    })
+    .await
+}
+async fn inventory_json(WebState(context): WebState<Shared>) -> WebResult<Response> {
+    blocking(move || {
+        let catalog = context.state.get("catalog")?;
+        let inventory = crate::inventory::scan(&catalog, &context.state, &context.runtime.home)?;
+        let mut response = Json(inventory).into_response();
+        response
+            .headers_mut()
+            .insert("Cache-Control", HeaderValue::from_static("no-store"));
+        Ok(response)
+    })
+    .await
 }
 async fn resources(
     WebState(context): WebState<Shared>,
@@ -833,6 +973,42 @@ struct ProposalResponse {
     #[serde(skip_serializing_if = "Option::is_none")]
     url: Option<String>,
 }
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct InstallationChange {
+    enabled: bool,
+    reason: String,
+}
+async fn propose_installation(
+    WebState(context): WebState<Shared>,
+    WebPath(id): WebPath<String>,
+    body: std::result::Result<Json<InstallationChange>, JsonRejection>,
+) -> WebResult<Response> {
+    let Json(request) = body.map_err(WebError::bad)?;
+    blocking(move || {
+        let mut declarations: Vec<crate::installations::Installation> =
+            context.state.get("installation_manifest")?;
+        let declaration = declarations
+            .iter_mut()
+            .find(|item| item.id == id)
+            .ok_or_else(|| WebError::bad("未知的原生安装"))?;
+        declaration.enabled = request.enabled;
+        let change = ChangeSet {
+            resource_ids: vec!["native-installations".into()],
+            reason: request.reason,
+            evidence: Vec::new(),
+            writes: BTreeMap::from([(
+                "resources/native-installations/installations.json".into(),
+                serde_json::to_string_pretty(&declarations)? + "\n",
+            )]),
+            deletions: Vec::new(),
+            renames: BTreeMap::new(),
+            validation: Default::default(),
+        };
+        submit_change(&context, &change)
+    })
+    .await
+}
 async fn propose(
     WebState(context): WebState<Shared>,
     body: std::result::Result<Json<ChangeSet>, JsonRejection>,
@@ -845,45 +1021,45 @@ async fn propose(
         },
         message: redact_text(&error.body_text(), Some(500)),
     })?;
-    blocking(move || {
-        let _guard = JobGuard::acquire(context.state.directory()?).map_err(|error| WebError {
-            status: if error.is::<Busy>() {
-                StatusCode::CONFLICT
-            } else {
-                StatusCode::BAD_REQUEST
-            },
-            message: redact_text(&error.to_string(), Some(500)),
-        })?;
-        let mut proposal =
-            crate::proposals::create_proposal(&context.runtime.repo, &change, &context.state)
-                .map_err(WebError::bad)?;
-        match context.submitter.submit(&mut proposal, &context.state) {
-            Ok(url) => Ok((
-                StatusCode::OK,
-                Json(ProposalResponse {
-                    status: "submitted",
-                    key: proposal.key,
-                    message: "MR 已提交，审核合并后将在下次同步应用。".into(),
-                    url: Some(url),
-                }),
-            )
-                .into_response()),
-            Err(error) => Ok((
-                StatusCode::ACCEPTED,
-                Json(ProposalResponse {
-                    status: "draft",
-                    key: proposal.key,
-                    message: format!(
-                        "本地提案已保存，远端提交未完成：{}",
-                        redact_text(&format!("{error:#}"), Some(500))
-                    ),
-                    url: None,
-                }),
-            )
-                .into_response()),
-        }
-    })
-    .await
+    blocking(move || submit_change(&context, &change)).await
+}
+fn submit_change(context: &WebContext, change: &ChangeSet) -> WebResult<Response> {
+    let _guard = JobGuard::acquire(context.state.directory()?).map_err(|error| WebError {
+        status: if error.is::<Busy>() {
+            StatusCode::CONFLICT
+        } else {
+            StatusCode::BAD_REQUEST
+        },
+        message: redact_text(&error.to_string(), Some(500)),
+    })?;
+    let mut proposal =
+        crate::proposals::create_proposal(&context.runtime.repo, change, &context.state)
+            .map_err(WebError::bad)?;
+    match context.submitter.submit(&mut proposal, &context.state) {
+        Ok(url) => Ok((
+            StatusCode::OK,
+            Json(ProposalResponse {
+                status: "submitted",
+                key: proposal.key,
+                message: "MR 已提交，审核合并后将在下次同步应用。".into(),
+                url: Some(url),
+            }),
+        )
+            .into_response()),
+        Err(error) => Ok((
+            StatusCode::ACCEPTED,
+            Json(ProposalResponse {
+                status: "draft",
+                key: proposal.key,
+                message: format!(
+                    "本地提案已保存，远端提交未完成：{}",
+                    redact_text(&format!("{error:#}"), Some(500))
+                ),
+                url: None,
+            }),
+        )
+            .into_response()),
+    }
 }
 pub async fn serve(runtime: Runtime, port: u16) -> Result<()> {
     let state = runtime.state()?;

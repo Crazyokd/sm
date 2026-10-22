@@ -55,7 +55,15 @@ pub fn plan_apply(
             Ok(writes)
         };
         match build() {
-            Ok(writes) => plan.writes.extend(writes),
+            Ok(writes) => {
+                if writes.is_empty() {
+                    plan.results.insert(
+                        resource.id.clone(),
+                        ResourceResult::new(ApplyStatus::Applied, "Resource metadata registered"),
+                    );
+                }
+                plan.writes.extend(writes);
+            }
             Err(error) => {
                 plan.results.insert(
                     resource.id.clone(),
@@ -386,7 +394,12 @@ pub fn apply_writes(plan: &ApplyPlan, state: &State) -> Result<ApplyReport> {
     }
     let paths: BTreeSet<_> = desired.keys().chain(previous.keys()).cloned().collect();
     let mut prepared = BTreeMap::new();
-    let mut blocked: BTreeSet<_> = plan.results.keys().cloned().collect();
+    let mut blocked: BTreeSet<_> = plan
+        .results
+        .iter()
+        .filter(|(_, result)| result.status != ApplyStatus::Applied)
+        .map(|(id, _)| id.clone())
+        .collect();
     for path in paths {
         let new = desired.remove(&path).unwrap_or_default();
         let old = previous.remove(&path).unwrap_or_default();

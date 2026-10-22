@@ -28,6 +28,9 @@ fn shipped_self_resources_apply_to_declared_scopes() {
     assert!(report.ok(), "{report:?}");
     for resource in &catalog.resources {
         assert_eq!(report.results[&resource.id].status, ApplyStatus::Applied);
+        if resource.content.kind() != sm::model::ResourceKind::Skill {
+            continue;
+        }
         let skill = catalog
             .scope_root(resource, &home)
             .unwrap()

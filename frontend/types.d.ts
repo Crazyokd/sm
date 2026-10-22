@@ -1,10 +1,11 @@
 export type Client = "codex" | "kimi";
 export type NativeKind = "hook" | "rule" | "agent" | "mcp";
-export type Kind = "skill" | NativeKind;
+export type SharedKind = "skill" | "bundle";
+export type Kind = SharedKind | NativeKind;
 export type Upstream = { git: string } | { argv: string[] };
 export type ScopeFields = { scope: "user"; project: null } | { scope: "project"; project: string };
 export type SourceFields = { origin: "self" } | { origin: "upstream"; upstream: Upstream };
-export type ContentFields = { kind: "skill"; payload: string } | { kind: NativeKind; agents: Client[]; payloads: Partial<Record<Client, string>> };
+export type ContentFields = { kind: "skill"; payload: string } | { kind: "bundle"; payload: string } | { kind: NativeKind; agents: Client[]; payloads: Partial<Record<Client, string>> };
 export type Resource = { id: string } & ScopeFields & SourceFields & ContentFields;
 export interface Catalog { projects: Record<string, string>; resources: Resource[] }
 export interface EditorData { catalog: Catalog; files: Record<string, string> }

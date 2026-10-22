@@ -2,7 +2,7 @@
 
 以 Rust 和严格 TypeScript 实现的 Linux 本地 AI 资源管理：可视化维护、跨机器恢复、夜间同步与基于使用记录的改进提案。
 
-- 管理 Skill、Hook、规则、Agent 定义和 MCP 配置，区分来源与用户／项目作用域。
+- 管理 Skill、Hook、规则、Agent 定义、提示词、执行策略、MCP 配置和原生插件，区分来源与用户／项目作用域。
 - Skill 只有一份通用内容，Codex、Kimi 通过共享目录加载。
 - 自建修改经 MR 审核合并后再同步生效；上游定时直接跟随，不参与本地优化。
 - 日常轻量记录，夜间提出带证据和验证边界的 Draft MR，人工决定是否合并。
@@ -18,5 +18,7 @@ cd sm
 [使用说明](docs/usage.md) · [验证结果与限制](docs/verification.md) · [需求](docs/superpowers/specs/2026-10-21-sm-design.md) · [Rust 迁移计划](docs/superpowers/plans/2026-10-21-sm-rust.md)
 
 [首批资源与接管说明](docs/resource-adoption.md)：整合 easygo-skills 的自建资源、项目归属和第三方来源。
+
+[完整纳管说明](docs/resource-governance.md)：实际资源覆盖检查、已有资源指纹接管、原生插件和嵌套项目规则。
 
 ![资源目录](docs/screenshots/resources.png)

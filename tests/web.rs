@@ -27,6 +27,97 @@ struct Fixture {
     state: State,
     app: axum::Router,
 }
+#[tokio::test]
+async fn inventory_page_detects_resources_added_since_last_sync_without_exposing_config() {
+    let f = Fixture::new();
+    let extra = f.runtime.home.join(".agents/skills/outside");
+    fs::create_dir_all(&extra).unwrap();
+    fs::write(extra.join("SKILL.md"), "Private resource body").unwrap();
+    let (status, page) = f.get("/inventory").await;
+    assert_eq!(status, StatusCode::OK);
+    assert!(page.contains("纳管覆盖") && page.contains("outside") && page.contains("未纳管"));
+    assert!(!page.contains("Private resource body"));
+    let (status, data) = f.get("/inventory.json").await;
+    assert_eq!(status, StatusCode::OK);
+    let data: Value = serde_json::from_str(&data).unwrap();
+    assert!(data["entries"].as_array().unwrap().iter().any(|e| {
+        e["path"].as_str().is_some_and(|p| p.ends_with("/outside"))
+            && e["status"] == "unmanaged"
+            && e["name"] == "outside"
+    }));
+    let (_, filtered) = f.get("/inventory?status=managed").await;
+    assert!(!filtered.contains("<strong>outside</strong>"));
+    fs::write(
+        f.runtime.home.join(".codex/config.toml"),
+        "[[skills.config]]\nname='cavecrew'\nenabled=false\n",
+    )
+    .unwrap();
+    let (status, named) = f.get("/inventory?kind=skill-config&q=cavecrew").await;
+    assert_eq!(status, StatusCode::OK);
+    assert!(named.contains("<strong>cavecrew</strong>"));
+    assert!(!named.contains("<strong>review</strong>"));
+}
+
+#[tokio::test]
+async fn plugin_toggle_proposes_reviewed_declaration_without_mutating_native_installation() {
+    let f = Fixture::new();
+    let path = f.repo.work.join("resources/native-installations");
+    fs::create_dir_all(&path).unwrap();
+    fs::write(path.join("bundle.json"), "{\"entries\":[]}").unwrap();
+    let declaration = json!([{"id":"kimi-example","agent":"kimi","source":"https://example.invalid/plugin","selector":"example","enabled":true,"paths":["~/.kimi-code/plugins/managed/example"],"update":[["node","resources/source-providers/native-plugins.js","kimi","https://example.invalid/plugin","example","${SM_ENABLED}"]]}]);
+    fs::write(path.join("installations.json"), declaration.to_string()).unwrap();
+    let mut catalog: Value =
+        serde_json::from_slice(&fs::read(f.repo.work.join("catalog.json")).unwrap()).unwrap();
+    catalog["resources"].as_array_mut().unwrap().push(json!({"id":"native-installations","kind":"bundle","origin":"self","scope":"user","project":null,"payload":"resources/native-installations"}));
+    f.repo.catalog(catalog);
+    f.repo.publish("Register native installation declaration");
+    f.state
+        .set("catalog", &sm::model::Catalog::load(&f.repo.work).unwrap())
+        .unwrap();
+    f.state.set("installation_manifest", &declaration).unwrap();
+    let token = f.token().await;
+    let (status, body) = f
+        .request(
+            "POST",
+            "/installations/kimi-example",
+            json!({"enabled":false,"reason":"Disable the unused plugin after review"}).to_string(),
+            &[
+                ("Content-Type", "application/json"),
+                ("X-SM-CSRF", &token),
+                ("Origin", "http://127.0.0.1:8765"),
+            ],
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK, "{body}");
+    assert!(body.contains("审核合并后"));
+    assert_eq!(
+        serde_json::from_slice::<Value>(&fs::read(path.join("installations.json")).unwrap())
+            .unwrap()[0]["enabled"],
+        true
+    );
+    assert_eq!(
+        f.state.get::<Value>("installation_manifest").unwrap()[0]["enabled"],
+        true
+    );
+    let proposals = f
+        .state
+        .get::<BTreeMap<String, Proposal>>("proposals")
+        .unwrap();
+    let proposed: Value = serde_json::from_slice(
+        &fs::read(
+            proposals
+                .values()
+                .next()
+                .unwrap()
+                .directory
+                .join("resources/native-installations/installations.json"),
+        )
+        .unwrap(),
+    )
+    .unwrap();
+    assert_eq!(proposed[0]["enabled"], false);
+    assert_eq!(proposed[0]["update"][0][5], "${SM_ENABLED}");
+}
 impl Fixture {
     fn new() -> Self {
         let repo = Repo::new();

@@ -111,6 +111,7 @@ pub fn render(
         Client::Kimi => ".kimi-code",
     });
     match kind {
+        ResourceKind::Bundle => crate::bundles::render(resource, payload, scope),
         ResourceKind::Skill => {
             fs::read_to_string(payload.join("SKILL.md"))?;
             copy_payload(

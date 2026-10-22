@@ -4,7 +4,12 @@
     "easygo-web": "~/workspace/easygo/src/easygo",
     "perception-platform": "~/workspace/easygo/src/perception_platform",
     "organism": "~/repo/organism",
-    "sros-core": "~/repo/sros-core"
+    "sros-core": "~/repo/sros-core",
+    "easygo-app": "~/repo/easygo-app",
+    "easygo-fe": "~/workspace/easygo/src/easygo-fe",
+    "simenv": "~/workspace/simenv",
+    "tp": "~/repo/tp",
+    "sm": "~/repo/sm"
   },
   "resources": [
     {
@@ -1086,6 +1091,464 @@
           "vueuse-functions"
         ]
       }
+    },
+    {
+      "id": "ecc-user-resources",
+      "kind": "bundle",
+      "origin": "upstream",
+      "scope": "user",
+      "project": null,
+      "payload": ".",
+      "upstream": {
+        "argv": [
+          "@sm",
+          "source-ecc",
+          "resources/source-providers/ecc-selection.json"
+        ]
+      }
+    },
+    {
+      "id": "imported-user-resources",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/imported-user-resources"
+    },
+    {
+      "id": "iteration-cleanup",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/iteration-cleanup"
+    },
+    {
+      "id": "imported-easygo-resources",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "project",
+      "project": "easygo",
+      "payload": "resources/imported-easygo-resources"
+    },
+    {
+      "id": "imported-easygo-web-resources",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "project",
+      "project": "easygo-web",
+      "payload": "resources/imported-easygo-web-resources"
+    },
+    {
+      "id": "imported-perception-platform-resources",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "project",
+      "project": "perception-platform",
+      "payload": "resources/imported-perception-platform-resources"
+    },
+    {
+      "id": "imported-organism-resources",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "project",
+      "project": "organism",
+      "payload": "resources/imported-organism-resources"
+    },
+    {
+      "id": "imported-sros-core-resources",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "project",
+      "project": "sros-core",
+      "payload": "resources/imported-sros-core-resources"
+    },
+    {
+      "id": "imported-easygo-app-resources",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "project",
+      "project": "easygo-app",
+      "payload": "resources/imported-easygo-app-resources"
+    },
+    {
+      "id": "imported-easygo-fe-resources",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "project",
+      "project": "easygo-fe",
+      "payload": "resources/imported-easygo-fe-resources"
+    },
+    {
+      "id": "imported-simenv-resources",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "project",
+      "project": "simenv",
+      "payload": "resources/imported-simenv-resources"
+    },
+    {
+      "id": "imported-tp-resources",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "project",
+      "project": "tp",
+      "payload": "resources/imported-tp-resources"
+    },
+    {
+      "id": "upstream-organism-design",
+      "kind": "bundle",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "organism",
+      "payload": ".",
+      "upstream": {
+        "argv": [
+          "@sm",
+          "source-skills",
+          "resources/source-providers/upstream-organism-design.json"
+        ]
+      }
+    },
+    {
+      "id": "upstream-easygo-fe-vercel-labs",
+      "kind": "bundle",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "easygo-fe",
+      "payload": ".",
+      "upstream": {
+        "argv": [
+          "@sm",
+          "source-skills",
+          "resources/source-providers/upstream-easygo-fe-vercel-labs.json"
+        ]
+      }
+    },
+    {
+      "id": "upstream-easygo-fe-davila7",
+      "kind": "bundle",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "easygo-fe",
+      "payload": ".",
+      "upstream": {
+        "argv": [
+          "@sm",
+          "source-skills",
+          "resources/source-providers/upstream-easygo-fe-davila7.json"
+        ]
+      }
+    },
+    {
+      "id": "upstream-easygo-fe-antfu",
+      "kind": "bundle",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "easygo-fe",
+      "payload": ".",
+      "upstream": {
+        "argv": [
+          "@sm",
+          "source-skills",
+          "resources/source-providers/upstream-easygo-fe-antfu.json"
+        ]
+      }
+    },
+    {
+      "id": "upstream-easygo-fe-onmax",
+      "kind": "bundle",
+      "origin": "upstream",
+      "scope": "project",
+      "project": "easygo-fe",
+      "payload": ".",
+      "upstream": {
+        "argv": [
+          "@sm",
+          "source-skills",
+          "resources/source-providers/upstream-easygo-fe-onmax.json"
+        ]
+      }
+    },
+    {
+      "id": "automate",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/automate"
+    },
+    {
+      "id": "autopilot",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/autopilot"
+    },
+    {
+      "id": "browser-use",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/browser-use"
+    },
+    {
+      "id": "canvas",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/canvas"
+    },
+    {
+      "id": "create-hook",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/create-hook"
+    },
+    {
+      "id": "create-rule",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/create-rule"
+    },
+    {
+      "id": "create-skill",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/create-skill"
+    },
+    {
+      "id": "create-subagent",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/create-subagent"
+    },
+    {
+      "id": "deploy-with-vercel",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/deploy-with-vercel"
+    },
+    {
+      "id": "goal",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/goal"
+    },
+    {
+      "id": "loop",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/loop"
+    },
+    {
+      "id": "migrate-to-skills",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/migrate-to-skills"
+    },
+    {
+      "id": "new-repo",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/new-repo"
+    },
+    {
+      "id": "onboard",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/onboard"
+    },
+    {
+      "id": "origin",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/origin"
+    },
+    {
+      "id": "rename-chat",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/rename-chat"
+    },
+    {
+      "id": "review",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/review"
+    },
+    {
+      "id": "review-bugbot",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/review-bugbot"
+    },
+    {
+      "id": "review-security",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/review-security"
+    },
+    {
+      "id": "sdk",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/sdk"
+    },
+    {
+      "id": "share",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/share"
+    },
+    {
+      "id": "shell",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/shell"
+    },
+    {
+      "id": "split-to-prs",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/split-to-prs"
+    },
+    {
+      "id": "statusline",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/statusline"
+    },
+    {
+      "id": "update-cli-config",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/update-cli-config"
+    },
+    {
+      "id": "update-cursor-settings",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/update-cursor-settings"
+    },
+    {
+      "id": "native-installations",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/native-installations"
+    },
+    {
+      "id": "motion-ui",
+      "kind": "skill",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/motion-ui"
+    },
+    {
+      "id": "imported-sm-resources",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "project",
+      "project": "sm",
+      "payload": "resources/imported-sm-resources"
+    },
+    {
+      "id": "imported-user-mcp-codex-config-toml",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/imported-user-mcp-codex-config-toml"
+    },
+    {
+      "id": "imported-user-mcp-kimi-code-mcp-json",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/imported-user-mcp-kimi-code-mcp-json"
+    },
+    {
+      "id": "imported-user-mcp-claude-settings-json",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/imported-user-mcp-claude-settings-json"
+    },
+    {
+      "id": "imported-user-mcp-claude-json",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "user",
+      "project": null,
+      "payload": "resources/imported-user-mcp-claude-json"
+    },
+    {
+      "id": "imported-tp-mcp-mcp-json",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "project",
+      "project": "tp",
+      "payload": "resources/imported-tp-mcp-mcp-json"
+    },
+    {
+      "id": "imported-tp-mcp-codex-config-toml",
+      "kind": "bundle",
+      "origin": "self",
+      "scope": "project",
+      "project": "tp",
+      "payload": "resources/imported-tp-mcp-codex-config-toml"
     }
   ]
 }

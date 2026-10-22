@@ -1,0 +1,180 @@
+{
+  "entries": [
+    {
+      "source": "files/.agents/skills/feishu-notify/SKILL.md",
+      "target": ".agents/skills/feishu-notify/SKILL.md"
+    },
+    {
+      "source": "files/.agents/skills/feishu-notify/scripts/feishu_lark.py",
+      "target": ".agents/skills/feishu-notify/scripts/feishu_lark.py"
+    },
+    {
+      "source": "files/.agents/skills/feishu-notify/scripts/feishu_notify.py",
+      "target": ".agents/skills/feishu-notify/scripts/feishu_notify.py"
+    },
+    {
+      "source": "files/.agents/skills/gitlab-api/SKILL.md",
+      "target": ".agents/skills/gitlab-api/SKILL.md"
+    },
+    {
+      "source": "files/.agents/skills/ones/SKILL.md",
+      "target": ".agents/skills/ones/SKILL.md"
+    },
+    {
+      "source": "files/.agents/skills/ones/agents/openai.yaml",
+      "target": ".agents/skills/ones/agents/openai.yaml"
+    },
+    {
+      "source": "files/.agents/skills/ones/references/analyze.md",
+      "target": ".agents/skills/ones/references/analyze.md"
+    },
+    {
+      "source": "files/.agents/skills/ones/references/bugfix.md",
+      "target": ".agents/skills/ones/references/bugfix.md"
+    },
+    {
+      "source": "files/.agents/skills/ones/references/comment.md",
+      "target": ".agents/skills/ones/references/comment.md"
+    },
+    {
+      "source": "files/.agents/skills/ones/references/common.md",
+      "target": ".agents/skills/ones/references/common.md"
+    },
+    {
+      "source": "files/.agents/skills/ones/references/create.md",
+      "target": ".agents/skills/ones/references/create.md"
+    },
+    {
+      "source": "files/.agents/skills/ones/references/implement.md",
+      "target": ".agents/skills/ones/references/implement.md"
+    },
+    {
+      "source": "files/.agents/skills/ones/references/release.md",
+      "target": ".agents/skills/ones/references/release.md"
+    },
+    {
+      "source": "files/.agents/skills/ones/references/update.md",
+      "target": ".agents/skills/ones/references/update.md"
+    },
+    {
+      "source": "files/.agents/skills/ones/references/view.md",
+      "target": ".agents/skills/ones/references/view.md"
+    },
+    {
+      "source": "files/.agents/skills/ones/scripts/ones_api.py",
+      "target": ".agents/skills/ones/scripts/ones_api.py"
+    },
+    {
+      "source": "files/.agents/skills/ones/scripts/ones_api_test.py",
+      "target": ".agents/skills/ones/scripts/ones_api_test.py"
+    },
+    {
+      "source": "files/.agents/skills/ones/scripts/ones_create_task.py",
+      "target": ".agents/skills/ones/scripts/ones_create_task.py"
+    },
+    {
+      "source": "files/.agents/skills/ones/scripts/ones_gitlab_mr.py",
+      "target": ".agents/skills/ones/scripts/ones_gitlab_mr.py"
+    },
+    {
+      "source": "files/.agents/skills/ones/scripts/ones_list_releases.py",
+      "target": ".agents/skills/ones/scripts/ones_list_releases.py"
+    },
+    {
+      "source": "files/.agents/skills/ones/scripts/ones_list_releases_test.py",
+      "target": ".agents/skills/ones/scripts/ones_list_releases_test.py"
+    },
+    {
+      "source": "files/.agents/skills/ones/scripts/ones_refresh_token.py",
+      "target": ".agents/skills/ones/scripts/ones_refresh_token.py"
+    },
+    {
+      "source": "files/.agents/skills/sros-config-parameter/SKILL.md",
+      "target": ".agents/skills/sros-config-parameter/SKILL.md"
+    },
+    {
+      "source": "files/.agents/skills/sros-config-parameter/agents/openai.yaml",
+      "target": ".agents/skills/sros-config-parameter/agents/openai.yaml"
+    },
+    {
+      "source": "files/AGENTS.md",
+      "target": "AGENTS.md"
+    },
+    {
+      "source": "files/CLAUDE.md",
+      "target": "CLAUDE.md"
+    },
+    {
+      "target": "simulation/AGENTS.md",
+      "source": "files/simulation/AGENTS.md"
+    },
+    {
+      "target": "simulation/CLAUDE.md",
+      "source": "files/simulation/CLAUDE.md"
+    },
+    {
+      "target": "simulation/tests/modbus/AGENTS.md",
+      "source": "files/simulation/tests/modbus/AGENTS.md"
+    },
+    {
+      "target": "simulation/tests/vda5050/AGENTS.md",
+      "source": "files/simulation/tests/vda5050/AGENTS.md"
+    },
+    {
+      "target": ".claude/commands/mr-review.md",
+      "source": "files/.claude/commands/mr-review.md"
+    },
+    {
+      "target": ".claude/commands/ones.md",
+      "source": "files/.claude/commands/ones.md"
+    },
+    {
+      "target": ".claude/commands/ones/analyze.md",
+      "source": "files/.claude/commands/ones/analyze.md"
+    },
+    {
+      "target": ".claude/commands/ones/bugfix.md",
+      "source": "files/.claude/commands/ones/bugfix.md"
+    },
+    {
+      "target": ".claude/commands/ones/comment.md",
+      "source": "files/.claude/commands/ones/comment.md"
+    },
+    {
+      "target": ".claude/commands/ones/common.md",
+      "source": "files/.claude/commands/ones/common.md"
+    },
+    {
+      "target": ".claude/commands/ones/create.md",
+      "source": "files/.claude/commands/ones/create.md"
+    },
+    {
+      "target": ".claude/commands/ones/implement.md",
+      "source": "files/.claude/commands/ones/implement.md"
+    },
+    {
+      "target": ".claude/commands/ones/update.md",
+      "source": "files/.claude/commands/ones/update.md"
+    },
+    {
+      "target": ".claude/commands/ones/view.md",
+      "source": "files/.claude/commands/ones/view.md"
+    },
+    {
+      "target": ".claude/commands/opsx/apply.md",
+      "source": "files/.claude/commands/opsx/apply.md"
+    },
+    {
+      "target": ".claude/commands/opsx/archive.md",
+      "source": "files/.claude/commands/opsx/archive.md"
+    },
+    {
+      "target": ".claude/commands/opsx/explore.md",
+      "source": "files/.claude/commands/opsx/explore.md"
+    },
+    {
+      "target": ".claude/commands/opsx/propose.md",
+      "source": "files/.claude/commands/opsx/propose.md"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "entries": [
+    {
+      "target": ".claude.json",
+      "json": {
+        "mcpServers": {
+          "codegraph": {
+            "args": [
+              "serve",
+              "--mcp"
+            ],
+            "command": "codegraph",
+            "type": "stdio"
+          }
+        }
+      }
+    }
+  ]
+}

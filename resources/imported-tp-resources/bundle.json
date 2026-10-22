@@ -1,0 +1,28 @@
+{
+  "entries": [
+    {
+      "source": "files/.agents/skills/tp-run-case/SKILL.md",
+      "target": ".agents/skills/tp-run-case/SKILL.md"
+    },
+    {
+      "source": "files/.agents/skills/tp-edit-case/SKILL.md",
+      "target": ".agents/skills/tp-edit-case/SKILL.md"
+    },
+    {
+      "source": "files/.agents/skills/easygo-tp-hotupdate-verify/SKILL.md",
+      "target": ".agents/skills/easygo-tp-hotupdate-verify/SKILL.md"
+    },
+    {
+      "source": "files/AGENTS.md",
+      "target": "AGENTS.md"
+    },
+    {
+      "target": ".cursor/rules/codegraph.mdc",
+      "source": "files/.cursor/rules/codegraph.mdc"
+    },
+    {
+      "target": ".cursor/rules/git-land-main.mdc",
+      "source": "files/.cursor/rules/git-land-main.mdc"
+    }
+  ]
+}

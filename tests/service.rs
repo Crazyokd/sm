@@ -48,6 +48,31 @@ fn runtime(repo: &Repo) -> Runtime {
         executable: PathBuf::from(env!("CARGO_BIN_EXE_sm")),
     }
 }
+
+#[test]
+fn local_apply_and_capture_are_ready_before_upstream_fetch_and_old_retirement_waits() {
+    use std::os::unix::fs::PermissionsExt;
+    let repo = Repo::new();
+    let runtime = runtime(&repo);
+    let state = runtime.state().unwrap();
+    assert!(synchronize(&runtime, &state).unwrap().ok());
+    let path = repo.work.join("resources/new");
+    fs::create_dir_all(&path).unwrap();
+    fs::write(path.join("SKILL.md"), "New approved content").unwrap();
+    let script = repo.temp.path().join("check-local");
+    fs::write(&script,"#!/bin/sh\nset -eu\ntest -f \"$1\"\ntest -f \"$2\"\ngrep -q new \"$3\"\nmkdir -p \"$4\"\nprintf 'Upstream ready' > \"$4/SKILL.md\"\n").unwrap();
+    fs::set_permissions(&script, fs::Permissions::from_mode(0o700)).unwrap();
+    repo.catalog(json!({"projects":{},"resources":[{"id":"new","kind":"skill","origin":"self","scope":"user","project":null,"payload":"resources/new"},{"id":"external","kind":"skill","origin":"upstream","scope":"user","project":null,"payload":".","upstream":{"argv":[script,runtime.home.join(".agents/skills/new/SKILL.md"),runtime.home.join(".agents/skills/review/SKILL.md"),state.directory().unwrap().join("active.json")]}}]}));
+    repo.publish("Replace local skill and fetch upstream");
+    let report = synchronize(&runtime, &state).unwrap();
+    assert!(report.ok(), "{report:?}");
+    assert!(runtime.home.join(".agents/skills/new/SKILL.md").is_file());
+    assert!(!runtime.home.join(".agents/skills/review/SKILL.md").exists());
+    assert_eq!(
+        fs::read_to_string(runtime.home.join(".agents/skills/external/SKILL.md")).unwrap(),
+        "Upstream ready"
+    );
+}
 #[test]
 fn repeated_initialization_registers_only_same_native_units() {
     let repo = Repo::new();

@@ -28,7 +28,7 @@ rust:
   before_script:
     - sed -i 's|http://deb.debian.org|http://mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list.d/debian.sources
     - apt-get update -qq
-    - apt-get install -y --no-install-recommends git systemd
+    - apt-get install -y --no-install-recommends git systemd nodejs
     - mkdir -p "$CARGO_HOME"
     - |
       cat > "$CARGO_HOME/config.toml" <<'EOF'
@@ -72,4 +72,5 @@ typescript:
     - npm run check
     - npm run build
     - git diff --exit-code -- assets/static/app.js
+    - git diff --exit-code -- resources/source-providers/native-plugins.js
     - node_modules/.bin/tsc -p tsconfig.browser.json --noEmit

@@ -1,0 +1,4 @@
+interface:
+  display_name: "迭代产物清理"
+  short_description: "控制构建与仿真迭代的磁盘占用，核对归属后清理可重建产物"
+  default_prompt: "使用 $iteration-cleanup 检查本轮迭代占用，保留源码和验收证据，清理自己生成的可重建中间产物。"

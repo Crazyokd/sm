@@ -2,7 +2,7 @@
 {% block title %}{{ resource.id }}{% endblock %}
 {% block breadcrumb %}<a href="/resources">资源目录</a> / {{ resource.id }}{% endblock %}
 {% block content %}
-<div class="page-heading"><div><p class="eyebrow">{{ resource.kind_label }}</p><h1>{{ resource.id }}</h1><p class="subtitle">{{ '你维护的资源，修改经 MR 审核后应用。' if resource.origin=='self' else '由上游维护，定时直接跟随，不参与本地优化分析。' }}</p></div><span class="pill {{ resource.origin }}">{{ '用户自建' if resource.origin=='self' else '上游拉取' }}</span></div>
+<div class="page-heading"><div><p class="eyebrow">{{ resource.kind_label }}</p><h1>{{ resource.id }}</h1><p class="subtitle">{{ '你维护的资源，修改经 MR 审核后应用。' if resource.origin=='self' else '由上游维护，定时直接跟随，不参与本地优化分析。' }}</p></div><span class="pill {{ resource.origin }}">{{ '自行维护' if resource.origin=='self' else '上游拉取' }}</span></div>
 <dl class="resource-facts"><div><dt>作用域</dt><dd>{{ resource.project if resource.scope=='project' else '用户级' }}</dd></div><div><dt>客户端适配</dt><dd>{{ resource.client_label }}</dd></div><div><dt>文件应用</dt><dd class="status {{ resource.status }}">{{ resource.status_label }}</dd></div></dl>
 <p class="notice">{{ resource.status_message }}</p>
 {% for article in articles %}<section class="article-section"><h2>{{ article.title }}</h2>{% if article.html %}<article class="prose">{{ article.html|safe }}</article>{% else %}<pre class="source"><code>{{ article.text }}</code></pre>{% endif %}</section>{% else %}<p class="empty">尚无可阅读内容，应用失败或暂不支持时请先查看运行结果。</p>{% endfor %}

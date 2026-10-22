@@ -73,7 +73,12 @@ pub fn fetch_upstream(resource: &Resource, output: &Path) -> Result<PathBuf> {
         UpstreamSource::Generator { argv } => {
             let (program, args) = argv.split_first().context("upstream generator is empty")?;
             fs::create_dir_all(output)?;
-            let mut command = Command::new(program);
+            let executable = if program == "@sm" {
+                std::env::current_exe()?
+            } else {
+                program.into()
+            };
+            let mut command = Command::new(executable);
             command
                 .args(args)
                 .arg(output.canonicalize()?)
@@ -82,6 +87,14 @@ pub fn fetch_upstream(resource: &Resource, output: &Path) -> Result<PathBuf> {
         }
     };
     command.env("SM_INTERNAL_RUN", "1");
-    run_command(command, None, Duration::from_secs(120))?;
+    let timeout = match upstream {
+        UpstreamSource::Generator { argv }
+            if argv.first().is_some_and(|program| program == "@sm") =>
+        {
+            600
+        }
+        _ => 120,
+    };
+    run_command(command, None, Duration::from_secs(timeout))?;
     Ok(output.to_path_buf())
 }

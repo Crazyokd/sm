@@ -1,0 +1,37 @@
+---
+description: 全量仿真改动必须保持单车与多车模式兼容（强约束）
+globs: easygo_backend/src/easygo_sim_bringup/**,easygo_backend/docker/sim-multi/**,easygo_backend/script/sim-launcher/**,easygo_backend/script/run_full_sim.sh,src/easygo_sim_bringup/**,docker/sim-multi/**,script/sim-launcher/**,script/run_full_sim.sh
+alwaysApply: false
+---
+
+# 全量仿真：单车 / 多车必须兼容（强约束）
+
+调整全量仿真时，**必须同时考虑单车全量仿真与多车全量仿真的兼容性**。禁止只验证一种模式、导致另一种模式回归。
+
+## 两种入口（共用实现，必须双线可用）
+
+| 模式 | 入口 | 架构 |
+| --- | --- | --- |
+| 单车 | `easygo-sim start` | `sim_easygo.launch.py`（本进程启 Gazebo + 完整单车栈） |
+| 多车 | `easygo-sim multi` | 1 × `sim_multi_gazebo.launch.py` + N × `sim_easygo.launch.py start_gazebo:=false` |
+
+多车不是独立 fork：每台车容器跑的是**同一套**单车全量栈，只是 Gazebo 由共享容器提供。
+
+## 交付要求
+
+改 launch、observe/webgz、`easygo-sim`、sim-multi compose/entrypoint 等共享路径时：
+
+1. **两种模式都要能工作**，或
+2. 用 launch 测试 / 审查证明变更被严格隔离（如仅 `start_gazebo:=true` 分支、或明确的 `robot_count`/命名空间边界），且不会波及另一模式。
+
+## 常见互踩点
+
+改到以下方面时必须双线核对：
+
+- 全局 Gazebo 进程 / `pkill "gz sim"`（多车会误杀其他实例）
+- GZ topic：单车全局 vs 多车命名空间（如 `GameModePlugin`、ros_gz_bridge）
+- `ROS_DOMAIN_ID`、`/clock`、TF 帧名
+- host 网络端口偏移与 observe / 驾驶台 API 的 `robot_name`
+- 多车共用 world 时的 GUI、`<camera_pose>`
+
+完整协作约束见仓库根 [AGENTS.md](../../AGENTS.md)「仿真纪律 → 全量仿真：单车 / 多车必须兼容」。
