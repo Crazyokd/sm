@@ -26,8 +26,17 @@ rust:
       - .cargo/registry/
       - target/debug/
   before_script:
+    - sed -i 's|http://deb.debian.org|http://mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list.d/debian.sources
     - apt-get update -qq
     - apt-get install -y --no-install-recommends git systemd
+    - mkdir -p "$CARGO_HOME"
+    - |
+      cat > "$CARGO_HOME/config.toml" <<'EOF'
+      [source.crates-io]
+      replace-with = "rsproxy-sparse"
+      [source.rsproxy-sparse]
+      registry = "sparse+https://rsproxy.cn/index/"
+      EOF
     - rustup component add rustfmt clippy
   script:
     - cargo fmt --check
@@ -55,6 +64,7 @@ typescript:
     paths:
       - .npm/
   before_script:
+    - sed -i 's|http://deb.debian.org|http://mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list.d/debian.sources
     - apt-get update -qq
     - apt-get install -y --no-install-recommends git
   script:

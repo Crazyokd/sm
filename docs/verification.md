@@ -40,7 +40,7 @@ TypeScript 额外开启未使用变量／参数检查；产物保持一致。源
 
 `.gitlab-ci.yml` 在 MR 和主线提交时运行两个并行任务。Rust 1.88 任务执行格式、全目标 Clippy、常规测试与 release 构建，并保留可执行文件七天；Node 24 任务通过锁文件安装依赖，执行 TypeScript 严格／未使用项检查、编译、生成产物一致性和浏览器驱动编译。测试容器安装 `systemd-analyze` 所需工具，只验证单元语法，不启动真实用户服务。
 
-构建镜像与 npm 包通过公司现有的 `nexus3.sr` 代理拉取，避免 Runner 依赖直连 Docker Hub 或公共 npm 源。
+构建镜像与 npm 包通过公司现有的 `nexus3.sr` 代理拉取。Debian 软件包使用清华镜像，保持发行版原有签名校验；CI 的 Cargo 使用 RsProxy 稀疏索引，继续按 `Cargo.lock` 与 `--locked` 校验依赖。镜像配置只写入任务容器，不修改开发机配置。
 
 CI 不提供模型凭据或桌面浏览器；真实模型测试继续默认忽略，桌面 browser-harness 的交互验收单独进行。所有常规任务均须成功才能合并，保留项目的 CI 门禁。
 
