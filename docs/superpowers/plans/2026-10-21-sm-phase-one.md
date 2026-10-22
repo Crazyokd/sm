@@ -1,5 +1,7 @@
 # SM Phase One Implementation Plan
 
+> 历史初版计划。当前语言与运行入口以 [Rust 迁移计划](2026-10-21-sm-rust.md) 为准。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 在 Linux 上提供可初始化、可视化的 Codex／Kimi 资源管理工具，完成自建资源经 MR 审核后应用、上游直接同步，以及本地记录和夜间自建资源改进。

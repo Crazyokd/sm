@@ -1,14 +1,16 @@
 #!/bin/sh
 set -eu
 sm_checkout=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+cd "$sm_checkout"
 if [ "${1:-}" = init ]; then
-    if [ ! -x "$sm_checkout/.venv/bin/python" ]; then
-        python3 -m venv "$sm_checkout/.venv"
+    if ! command -v cargo >/dev/null 2>&1; then
+        echo 'Rust 1.88+ is required to build SM. Install the Rust toolchain, then run ./sm init.' >&2
+        exit 1
     fi
-    "$sm_checkout/.venv/bin/python" -m pip install -e "$sm_checkout"
+    cargo build --release --locked --target-dir "$sm_checkout/target"
 fi
-if [ ! -x "$sm_checkout/.venv/bin/python" ]; then
+if [ ! -x "$sm_checkout/target/release/sm" ]; then
     echo 'Run ./sm init first.' >&2
     exit 1
 fi
-exec "$sm_checkout/.venv/bin/python" -m sm "$@"
+exec "$sm_checkout/target/release/sm" "$@"

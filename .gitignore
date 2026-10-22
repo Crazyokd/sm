@@ -9,3 +9,6 @@ __pycache__/
 .coverage
 dist/
 build/
+/target/
+/node_modules/
+/.browser-tests/

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="sm-csrf" content="{{ csrf_token }}">
+  <title>{% block title %}SM{% endblock %} · 资源管理</title>
+  <link rel="stylesheet" href="/static/style.css"><script type="module" src="/static/app.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">跳到主要内容</a>
+<aside class="sidebar">
+  <a class="brand" href="/resources"><span class="brand-mark">SM</span><span>资源管理<small>个人工作环境</small></span></a>
+  <nav aria-label="主要导航">
+    {% for path,label,symbol in [('resources','资源目录','▦'),('projects','作用域与项目','◫'),('activity','使用与改进','↗'),('jobs','运行状态','◷')] %}
+    <a href="/{{ path }}" {% if nav==path %}aria-current="page"{% endif %}><span aria-hidden="true">{{ symbol }}</span>{{ label }}</a>
+    {% endfor %}
+  </nav>
+  <div class="sidebar-foot"><span class="live-dot"></span>本地工作台<small>Linux · Codex / Kimi</small></div>
+</aside>
+<div class="workspace">
+  <header class="topbar"><span>工作环境 / {% block breadcrumb %}资源{% endblock %}</span><span class="quiet">自建经审核 · 上游直接跟随</span></header>
+  <main id="main" tabindex="-1">{% block content %}{% endblock %}</main>
+  <footer>SM <span>本地记录 · 定期改进 · 审核后应用</span></footer>
+</div>
+</body>
+</html>
