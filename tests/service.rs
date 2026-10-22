@@ -223,21 +223,26 @@ fn cli_routes_all_original_commands_with_typed_arguments() {
 #[test]
 fn native_service_units_pass_systemd_syntax_validation() {
     let repo = Repo::new();
-    let runtime = runtime(&repo);
-    initialize_with(&runtime, &FakeSystemd::default()).unwrap();
-    let directory = runtime.home.join(".config/systemd/user");
-    let output = Command::new("systemd-analyze")
-        .arg("verify")
-        .args([
-            directory.join("sm-web.service"),
-            directory.join("sm-cycle.service"),
-            directory.join("sm-cycle.timer"),
-        ])
-        .output()
-        .unwrap();
-    assert!(
-        output.status.success(),
-        "{}",
-        String::from_utf8_lossy(&output.stderr)
-    );
+    for home in ["home", "home with spaces"] {
+        let mut runtime = runtime(&repo);
+        runtime.home = repo.temp.path().join(home);
+        initialize_with(&runtime, &FakeSystemd::default()).unwrap();
+        let directory = runtime.home.join(".config/systemd/user");
+        let output = Command::new("systemd-analyze")
+            .arg("verify")
+            .args([
+                directory.join("sm-web.service"),
+                directory.join("sm-cycle.service"),
+                directory.join("sm-cycle.timer"),
+            ])
+            .output()
+            .unwrap();
+        assert!(
+            output.status.success(),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        let warnings = String::from_utf8_lossy(&output.stderr);
+        assert!(!warnings.contains("EnvironmentFile="), "{warnings}");
+    }
 }

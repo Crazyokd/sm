@@ -173,17 +173,8 @@ pub fn initialize_with(runtime: &Runtime, systemd: &dyn Systemd) -> Result<InitR
                 std::env::var("PATH").unwrap_or_else(|_| "/usr/bin:/bin".into())
             ))?,
         ),
-        (
-            "environment",
-            unit_quote(
-                &runtime
-                    .home
-                    .join(".config/sm/environment")
-                    .to_string_lossy(),
-            )?,
-        ),
     ]);
-    let tokens = regex::Regex::new(r"\{(executable|repo|path|environment)\}")?;
+    let tokens = regex::Regex::new(r"\{(executable|repo|path)\}")?;
     for (name, template) in [
         (
             "sm-web.service",
