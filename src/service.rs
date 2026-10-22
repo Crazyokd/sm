@@ -265,6 +265,12 @@ pub fn apply_source(
         ));
     }
     let report = apply_writes(&plan, state)?;
+    let mut previous_contents: BTreeMap<String, BTreeMap<String, String>> =
+        if sources.len() < catalog.resources.len() {
+            state.get("resource_contents")?
+        } else {
+            BTreeMap::new()
+        };
     let mut contents: BTreeMap<String, BTreeMap<String, String>> = BTreeMap::new();
     let mut hashes = BTreeMap::new();
     for resource in &catalog.resources {
@@ -283,6 +289,8 @@ pub fn apply_source(
                     }
                 }
             }
+        } else if let Some(previous) = previous_contents.remove(&resource.id) {
+            files = previous;
         }
         contents.insert(resource.id.clone(), files);
         if resource.source.is_self()

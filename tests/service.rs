@@ -114,6 +114,60 @@ fn synchronization_projects_only_approved_content_and_replaces_collector_once() 
     assert!(current.to_string().contains("native-sm-updated"));
 }
 #[test]
+fn failed_upstream_refresh_preserves_files_and_cached_content_until_retirement() {
+    let repo = Repo::new();
+    let mut catalog: serde_json::Value =
+        serde_json::from_slice(&fs::read(repo.work.join("catalog.json")).unwrap()).unwrap();
+    catalog["resources"].as_array_mut().unwrap().push(json!({
+        "id": "upstream", "kind": "skill", "origin": "upstream", "scope": "user",
+        "project": null, "payload": "resources/review",
+        "upstream": {"argv": ["cp", "-R", "resources"]}
+    }));
+    repo.catalog(catalog.clone());
+    repo.publish("Add upstream generator");
+    let runtime = runtime(&repo);
+    let state = runtime.state().unwrap();
+    assert!(synchronize(&runtime, &state).unwrap().ok());
+    let target = runtime.home.join(".agents/skills/upstream/SKILL.md");
+    assert_eq!(fs::read_to_string(&target).unwrap(), "Approved");
+    let contents: serde_json::Value = state.get("resource_contents").unwrap();
+    assert_eq!(
+        contents["upstream"]["resources/review/SKILL.md"],
+        "Approved"
+    );
+
+    catalog["resources"][1]["upstream"]["argv"] = json!(["false"]);
+    repo.catalog(catalog.clone());
+    fs::write(
+        repo.work.join("resources/review/SKILL.md"),
+        "New approved content",
+    )
+    .unwrap();
+    repo.publish("Fail upstream generator while updating self-owned content");
+    let report = synchronize(&runtime, &state).unwrap();
+    assert!(!report.ok());
+    assert_eq!(report.results["upstream"].status, ApplyStatus::Failed);
+    assert_eq!(report.results["review"].status, ApplyStatus::Applied);
+    assert_eq!(fs::read_to_string(&target).unwrap(), "Approved");
+    let contents: serde_json::Value = state.get("resource_contents").unwrap();
+    assert_eq!(
+        contents["upstream"]["resources/review/SKILL.md"],
+        "Approved"
+    );
+    assert_eq!(
+        contents["review"]["resources/review/SKILL.md"],
+        "New approved content"
+    );
+
+    catalog["resources"].as_array_mut().unwrap().pop();
+    repo.catalog(catalog);
+    repo.publish("Retire upstream resource");
+    assert!(synchronize(&runtime, &state).unwrap().ok());
+    assert!(!target.exists());
+    let contents: serde_json::Value = state.get("resource_contents").unwrap();
+    assert!(contents.get("upstream").is_none());
+}
+#[test]
 fn job_lock_rejects_overlap_and_releases_on_drop() {
     let root = tempfile::tempdir().unwrap();
     let first = JobGuard::acquire(root.path()).unwrap();
