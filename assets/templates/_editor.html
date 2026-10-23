@@ -1,7 +1,7 @@
 <form class="resource-editor" data-existing="{{ editing.id if editing else '' }}">
   <div class="form-grid">
     <label>资源名称<input name="resource_id" required pattern="[a-z0-9][a-z0-9_-]*" value="{{ editing.id if editing else '' }}" placeholder="例如 code-review"></label>
-    <label>类型<select name="kind" {% if editing %}disabled{% endif %}>{% for value,label in kind_labels %}{% if value!='script' or editing %}<option value="{{ value }}" {% if editing and editing.kind==value %}selected{% endif %}>{{ label }}</option>{% endif %}{% endfor %}</select></label>
+    <label>类型<select name="kind" {% if editing %}disabled{% endif %}>{% for value,label in kind_labels %}<option value="{{ value }}" {% if editing and editing.kind==value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
     <label>来源<select name="origin" {% if editing %}disabled{% endif %}><option value="self">自行维护</option><option value="upstream" {% if editing and editing.origin=='upstream' %}selected{% endif %}>上游拉取</option></select></label>
     <label>作用域<select name="scope" {% if editing and editing.installation %}disabled{% endif %}><option value="user">用户级</option><option value="project" {% if editing and editing.scope=='project' %}selected{% endif %}>项目级</option></select></label>
     <label>项目名<input name="project" {% if editing and editing.installation %}disabled{% endif %} list="project-names" value="{{ editing.project if editing and editing.project else '' }}" placeholder="项目级资源需要填写"></label>

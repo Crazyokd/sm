@@ -134,8 +134,8 @@ fn one_resource_cannot_mix_actual_kinds_or_multiple_skills() {
         json!([{"target":".codex/config.toml","toml":{"skills":{"config":[]}}}]),
     );
     resource(
-        "script",
-        "script",
+        "hook",
+        "runtime",
         json!([{"target":".claude/scripts/lib/utils.js","source":"utils.js"}]),
     );
 }
@@ -862,4 +862,92 @@ fn tree_selectors_require_one_skill_directory_and_a_safe_complete_payload() {
     )
     .unwrap();
     assert!(render(&projection, temp.path(), &temp.path().join("home")).is_err());
+}
+
+#[test]
+fn supporting_files_are_strict_internal_references_and_preserve_consumer_scope() {
+    let temp = tempfile::tempdir().unwrap();
+    let catalog_path = temp.path().join("catalog.json");
+    let support = json!({"origin":"self","files":{"root":"resources/dependencies/runtime/files","entries":[{"target":".claude/scripts/lib/runtime.js","source":"runtime.js"}]}});
+    let consumer = json!({"id":"consumer","kind":"hook","origin":"self","scope":"user","dependencies":["runtime"],"files":{"root":"resources/consumer","entries":[{"target":".codex/hooks.json","json":{"hooks":{"Stop":[]}}}]}});
+    let value = json!({"projects":{},"dependencies":{"runtime":support},"resources":[consumer]});
+    fs::write(&catalog_path, value.to_string()).unwrap();
+    let catalog = Catalog::load(temp.path()).unwrap();
+    assert_eq!(catalog.resources[0].dependencies, vec!["runtime"]);
+    assert_eq!(
+        serde_json::to_value(&catalog).unwrap()["dependencies"],
+        value["dependencies"]
+    );
+    let empty = serde_json::to_value(Catalog::default()).unwrap();
+    assert!(empty.get("dependencies").is_none());
+    assert!(
+        serde_json::to_value(rule(json!([{"target":"AGENTS.md","source":"rule.md"}])))
+            .unwrap()
+            .get("dependencies")
+            .is_none()
+    );
+    for change in [
+        "missing",
+        "duplicate",
+        "orphan",
+        "reserved",
+        "kind",
+        "scope",
+        "config",
+        "tree",
+        "outside",
+    ] {
+        let mut invalid = value.clone();
+        match change {
+            "missing" => invalid["resources"][0]["dependencies"] = json!(["absent"]),
+            "duplicate" => invalid["resources"][0]["dependencies"] = json!(["runtime", "runtime"]),
+            "orphan" => invalid["resources"][0]["dependencies"] = json!([]),
+            "reserved" => invalid["resources"][0]["id"] = json!("dependencies"),
+            "kind" => invalid["dependencies"]["runtime"]["kind"] = json!("hook"),
+            "scope" => invalid["dependencies"]["runtime"]["scope"] = json!("user"),
+            "config" => {
+                invalid["dependencies"]["runtime"]["files"]["entries"][0] =
+                    json!({"target":".codex/config.toml","source":"runtime.js"})
+            }
+            "tree" => {
+                invalid["dependencies"]["runtime"]["files"]["entries"][0] =
+                    json!({"target":".agents/skills/other","tree":"other"})
+            }
+            _ => {
+                invalid["dependencies"]["runtime"]["files"]["root"] =
+                    json!("resources/someone/files")
+            }
+        }
+        fs::write(&catalog_path, invalid.to_string()).unwrap();
+        assert!(Catalog::load(temp.path()).is_err(), "{change}");
+    }
+    let mut script = value.clone();
+    script["resources"][0]["kind"] = json!("script");
+    assert!(serde_json::from_value::<Catalog>(script).is_err());
+    let files = &catalog.dependencies["runtime"].files;
+    let payload = temp.path().join(&files.root);
+    fs::create_dir_all(&payload).unwrap();
+    fs::write(payload.join("runtime.js"), "support").unwrap();
+    fs::set_permissions(
+        payload.join("runtime.js"),
+        fs::Permissions::from_mode(0o750),
+    )
+    .unwrap();
+    let scope = temp.path().join("project");
+    let writes = sm::projections::render_support("consumer", files, &payload, &scope).unwrap();
+    assert_eq!(writes[0].resource_id, "consumer");
+    assert_eq!(writes[0].path, scope.join(".claude/scripts/lib/runtime.js"));
+    assert!(matches!(
+        writes[0].body,
+        WriteBody::File {
+            executable: true,
+            ..
+        }
+    ));
+    symlink("runtime.js", payload.join("alias")).unwrap();
+    let mut unsafe_files = files.clone();
+    if let sm::model::ProjectionEntry::File { source, .. } = &mut unsafe_files.entries[0] {
+        *source = "alias".into();
+    }
+    assert!(sm::projections::render_support("consumer", &unsafe_files, &payload, &scope).is_err());
 }

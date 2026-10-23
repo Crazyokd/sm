@@ -7,7 +7,7 @@ use common::{FakeMrApi, Repo};
 use http_body_util::BodyExt;
 use serde_json::{Value, json};
 use sm::{
-    model::{ApplyStatus, ResourceResult},
+    model::{ApplyStatus, OwnedWrite, ResourceResult, WriteBody},
     observe::{ingest_events, record_event},
     proposals::Proposal,
     service::{Finding, Runtime, Submitter, synchronize},
@@ -56,6 +56,48 @@ async fn inventory_page_detects_resources_added_since_last_sync_without_exposing
     assert_eq!(status, StatusCode::OK);
     assert!(named.contains("<strong>cavecrew</strong>"));
     assert!(!named.contains("<strong>review</strong>"));
+}
+
+#[tokio::test]
+async fn inventory_shared_file_has_one_row_and_searches_every_resource_owner() {
+    let f = Fixture::new();
+    let mut catalog: sm::model::Catalog = f.state.get("catalog").unwrap();
+    for id in ["alpha-hook", "omega-hook"] {
+        catalog.resources.push(
+            serde_json::from_value(json!({
+                "id":id,"kind":"hook","origin":"self","scope":"user","project":null,
+                "agents":["codex"],"payloads":{"codex":format!("resources/{id}")}
+            }))
+            .unwrap(),
+        );
+    }
+    f.state.set("catalog", &catalog).unwrap();
+    let path = f.runtime.home.join(".codex/hooks/shared-runtime.sh");
+    fs::create_dir_all(path.parent().unwrap()).unwrap();
+    let bytes = b"#!/bin/sh\n# shared support\n";
+    fs::write(&path, bytes).unwrap();
+    let writes = ["alpha-hook", "omega-hook"].map(|id| {
+        OwnedWrite::new(
+            id,
+            &path,
+            WriteBody::File {
+                bytes: bytes.to_vec(),
+                executable: false,
+            },
+        )
+    });
+    f.state.replace_owned(&path, &writes).unwrap();
+    for owner in ["alpha-hook", "omega-hook"] {
+        let (status, page) = f.get(&format!("/inventory?q={owner}")).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(
+            page.matches("<strong>shared-runtime.sh</strong>").count(),
+            1
+        );
+        assert!(page.contains("关联文件"));
+        assert!(page.contains("<a href=\"/resources/alpha-hook\">alpha-hook</a>"));
+        assert!(page.contains("<details><summary>另有1个资源使用</summary><div><a href=\"/resources/omega-hook\">omega-hook</a>"));
+    }
 }
 
 #[tokio::test]
@@ -467,6 +509,11 @@ async fn resource_types_statuses_and_project_groups_use_same_catalog() {
         assert!(page.contains(label), "{label}");
     }
     assert!(!page.contains("value=\"bundle\"") && !page.contains("资源集合"));
+    assert!(!page.contains("value=\"script\""));
+    assert_eq!(
+        f.get("/resources?kind=script").await.0,
+        StatusCode::BAD_REQUEST
+    );
     let page = f.get("/projects").await.1;
     assert!(page.contains("用户级") && page.contains("app"));
 }
@@ -768,4 +815,68 @@ async fn skill_tree_details_show_nested_helpers_under_their_target_paths() {
             .unwrap();
         assert!(table.contains("tree-skill") && table.contains("通用 Skill"));
     }
+}
+
+#[tokio::test]
+async fn complete_hook_details_show_owned_files_and_referenced_support_without_extra_resources() {
+    let f = Fixture::new();
+    let mut catalog: Value =
+        serde_json::to_value(f.state.get::<sm::model::Catalog>("catalog").unwrap()).unwrap();
+    catalog["upstreams"]["runtime-source"] = json!({"git":"https://example.invalid/runtime.git"});
+    catalog["dependencies"] = json!({
+        "shared-runtime":{"origin":"upstream","upstream":"runtime-source","files":{"root":"hooks","entries":[{"target":".codex/hooks/shared.sh","source":"shared.sh"}]}},
+        "owned-runtime":{"origin":"self","files":{"root":"resources/dependencies/owned-runtime/files","entries":[{"target":".codex/hooks/managed.sh","source":"managed.sh"}]}}
+    });
+    catalog["resources"].as_array_mut().unwrap().push(json!({
+        "id":"complete-hook","kind":"hook","origin":"self","scope":"user","project":null,
+        "dependencies":["shared-runtime","owned-runtime"],
+        "files":{"root":"resources/complete-hook/files","entries":[{"target":".codex/hooks.json","fragment":"hooks.json"},{"target":".codex/hooks/owned.sh","source":"owned.sh"}]}
+    }));
+    f.state
+        .set(
+            "catalog",
+            &serde_json::from_value::<sm::model::Catalog>(catalog).unwrap(),
+        )
+        .unwrap();
+    f.state.set("resource_contents", &BTreeMap::from([("complete-hook", BTreeMap::from([
+        ("resources/complete-hook/files/hooks.json", "{\"hooks\":{\"Stop\":[{\"hooks\":[{\"type\":\"command\",\"command\":\"owned.sh\"}]}]}}"),
+        ("resources/complete-hook/files/owned.sh", "#!/bin/sh\necho owned-hook-body\n"),
+    ]))])).unwrap();
+    let (status, page) = f.get("/resources/complete-hook").await;
+    assert_eq!(status, StatusCode::OK);
+    assert!(page.contains(".codex/hooks.json") && page.contains("owned-hook-body"));
+    let details = "<details class=\"article-section supporting-files\">";
+    assert!(page.find("owned-hook-body").unwrap() < page.find(details).unwrap());
+    let supporting = page
+        .split(details)
+        .nth(1)
+        .unwrap()
+        .split("</details>")
+        .next()
+        .unwrap();
+    assert!(supporting.starts_with("<summary>支持文件（2）</summary>"));
+    for path in [
+        ".codex/hooks/shared.sh",
+        "hooks/shared.sh",
+        ".codex/hooks/managed.sh",
+        "resources/dependencies/owned-runtime/files/managed.sh",
+    ] {
+        assert!(supporting.contains(&path.replace('/', "&#x2f;")), "{path}");
+    }
+    assert!(supporting.contains("上游拉取 · runtime-source") && supporting.contains("自行维护"));
+    let page = f.get("/resources?kind=hook").await.1;
+    let table = page
+        .split("<tbody>")
+        .nth(1)
+        .unwrap()
+        .split("</tbody>")
+        .next()
+        .unwrap();
+    assert!(table.contains("complete-hook"));
+    assert!(!table.contains("shared-runtime") && !table.contains("owned-runtime"));
+    assert!(!page.contains("value=\"script\""));
+    assert_eq!(
+        f.get("/resources/shared-runtime").await.0,
+        StatusCode::NOT_FOUND
+    );
 }

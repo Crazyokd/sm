@@ -38,6 +38,8 @@ pub struct InventoryEntry {
     pub scope: Scope,
     pub project: Option<String>,
     pub owner: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub other_owners: Vec<String>,
     pub status: String,
     pub enabled: Option<bool>,
     #[serde(default)]
@@ -55,6 +57,7 @@ impl Default for InventoryEntry {
             scope: Scope::User,
             project: None,
             owner: None,
+            other_owners: Vec::new(),
             status: String::new(),
             enabled: None,
             enabled_source: None,
@@ -126,14 +129,19 @@ pub fn scan(catalog: &Catalog, state: &State, home: &Path) -> Result<Inventory> 
     }
     // Retain missing projections as drift instead of silently dropping their ownership.
     for write in scanner.owned.clone() {
-        let represented = scanner.entries.values().any(|entry| {
+        let represented_owner = |entry: &InventoryEntry| {
             entry.owner.as_deref() == Some(&write.resource_id)
+                || (matches!(write.body, StoredBody::FileFingerprint { .. })
+                    && entry.path == write.path)
+        };
+        let represented = scanner.entries.values().any(|entry| {
+            represented_owner(entry)
                 && (entry.path == write.path
                     || (entry.kind == "skill" && write.path.starts_with(&entry.path)))
         });
         let missing_fragment = !scanner.matches(&write)
             && !scanner.entries.values().any(|entry| {
-                entry.owner.as_deref() == Some(&write.resource_id)
+                represented_owner(entry)
                     && entry.status == "drift"
                     && (entry.path == write.path
                         || (entry.kind == "skill" && write.path.starts_with(&entry.path)))
@@ -194,6 +202,20 @@ pub fn scan(catalog: &Catalog, state: &State, home: &Path) -> Result<Inventory> 
         .values_mut()
         .filter(|entry| entry.status != "native")
     {
+        entry.other_owners = scanner
+            .owned
+            .iter()
+            .filter(|write| {
+                write.path == entry.path
+                    && matches!(write.body, StoredBody::FileFingerprint { .. })
+                    && Some(&write.resource_id) != entry.owner.as_ref()
+            })
+            .map(|write| write.resource_id.clone())
+            .collect();
+        if !entry.other_owners.is_empty() {
+            entry.kind = "file".into();
+            continue;
+        }
         if let Some(resource) = entry.owner.as_ref().and_then(|owner| {
             catalog
                 .resources
@@ -208,7 +230,6 @@ pub fn scan(catalog: &Catalog, state: &State, home: &Path) -> Result<Inventory> 
                 crate::model::ResourceKind::Mcp => "mcp",
                 crate::model::ResourceKind::Prompt => "prompt",
                 crate::model::ResourceKind::Policy => "policy",
-                crate::model::ResourceKind::Script => "script",
             }
             .into();
         }
@@ -581,7 +602,7 @@ impl Scanner {
             } else {
                 self.matches(write)
             };
-            if owner.is_none() || !matches {
+            if owner.is_none() || (!matches && status != "drift") {
                 owner = Some(write.resource_id.clone());
             }
             if !matches {
@@ -623,6 +644,7 @@ impl Scanner {
                 scope,
                 project: project.map(str::to_owned),
                 owner,
+                other_owners: Vec::new(),
                 status: status.into(),
                 enabled,
                 enabled_source: None,

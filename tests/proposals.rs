@@ -20,6 +20,36 @@ fn change() -> ChangeSet {
 }
 
 #[test]
+fn shared_dependency_and_its_upstream_require_every_consumer_to_be_selected() {
+    let repo = Repo::new();
+    let mut original = json!({"projects":{},"upstreams":{"shared":{"git":"https://example.invalid/runtime"}},"dependencies":{"runtime":{"origin":"upstream","upstream":"shared","files":{"root":".","entries":[{"target":".codex/hooks/shared.py","source":"shared.py"}]}}},"resources":[]});
+    let resources = ["alpha", "beta"].into_iter().map(|id| json!({"id":id,"kind":"hook","origin":"self","scope":"user","project":null,"dependencies":["runtime"],"files":{"root":format!("resources/{id}"),"entries":[{"target":".codex/hooks.json","json":{"hooks":{"Stop":[{"hooks":[{"type":"command","command":id}]}]}}}]}})).collect::<Vec<_>>();
+    original["resources"] = json!(resources);
+    repo.catalog(original.clone());
+    repo.publish("Shared support");
+    for upstream in [false, true] {
+        let mut updated = original.clone();
+        if upstream {
+            updated["upstreams"]["shared"]["git"] = json!("https://example.invalid/changed");
+        } else {
+            updated["dependencies"]["runtime"]["files"]["entries"][0]["source"] =
+                json!("different.py");
+        }
+        let mut input = change();
+        input.resource_ids = vec!["alpha".into()];
+        input.writes = BTreeMap::from([("catalog.json".into(), updated.to_string())]);
+        let error = create_proposal(&repo.work, &input, &repo.state())
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("outside selected ids"), "{error}");
+        input.resource_ids.push("beta".into());
+        let proposal = create_proposal(&repo.work, &input, &repo.state()).unwrap();
+        let actual = sm::model::Catalog::load(&proposal.directory).unwrap();
+        assert_eq!(actual.resources.len(), 2);
+    }
+}
+
+#[test]
 fn shared_source_files_cannot_be_claimed_as_an_individual_resource() {
     let repo = Repo::new();
     let mut catalog = json!({"projects":{},"upstreams":{"shared":{"argv":["node","resources/source-providers/generate.js","resources/source-providers/shared.json"]}},"resources":[{"id":"upstream-item","kind":"skill","origin":"upstream","scope":"user","project":null,"payload":"upstream-item","upstream":"shared"}]});
@@ -50,7 +80,7 @@ fn shared_source_files_cannot_be_claimed_as_an_individual_resource() {
         create_proposal(&repo.work, &input, &repo.state()).unwrap_err()
     );
     assert!(
-        error.contains("reserved for shared source infrastructure"),
+        error.contains("reserved for shared infrastructure"),
         "{error}"
     );
     assert_eq!(

@@ -62,6 +62,26 @@ pub fn plan_apply(
                     }
                 }
             }
+            for name in &resource.dependencies {
+                let dependency = catalog
+                    .dependencies
+                    .get(name)
+                    .context("resource dependency unavailable")?;
+                let source = sources
+                    .get(&format!("@dependency/{name}"))
+                    .context("supporting file source unavailable")?;
+                let payload = contained(source, &dependency.files.root)?;
+                for write in crate::projections::render_support(
+                    &resource.id,
+                    &dependency.files,
+                    &payload,
+                    &scope,
+                )? {
+                    if !writes.contains(&write) {
+                        writes.push(write);
+                    }
+                }
+            }
             Ok(writes)
         };
         match build() {
@@ -286,11 +306,11 @@ fn prepare(path: &Path, new: &[OwnedWrite], old: &[StoredWrite]) -> Result<Conte
     };
     let result = match body {
         StoredBody::FileFingerprint { .. } => {
-            if old.len() > 1 {
-                return Err(conflict("multiple file owners"));
-            }
             if let Some(previous) = old.first() {
-                let StoredBody::FileFingerprint { sha256, .. } = &previous.body else {
+                if old.iter().any(|write| write.body != previous.body) {
+                    return Err(conflict("shared file ownership fingerprints differ"));
+                }
+                let StoredBody::FileFingerprint { sha256, executable } = &previous.body else {
                     return Err(conflict("invalid file ownership"));
                 };
                 if content
@@ -298,14 +318,22 @@ fn prepare(path: &Path, new: &[OwnedWrite], old: &[StoredWrite]) -> Result<Conte
                     .map(|bytes| <[u8; 32]>::from(Sha256::digest(bytes)))
                     .as_ref()
                     != Some(sha256)
+                    || fs::metadata(path)
+                        .map(|metadata| metadata.permissions().mode() & 0o111 != 0)
+                        .ok()
+                        != Some(*executable)
                 {
-                    return Err(conflict("managed file was changed locally"));
+                    return Err(conflict(
+                        "managed file content or executable mode was changed locally",
+                    ));
                 }
             } else if content.is_some() {
                 return Err(conflict("unmanaged file already exists"));
             }
-            if new.len() > 1 {
-                return Err(conflict("multiple resources target the same file"));
+            if let Some(first) = new.first() {
+                if new.iter().any(|write| write.body != first.body) {
+                    return Err(conflict("shared file writes differ"));
+                }
             }
             match new.first().map(|w| &w.body) {
                 Some(WriteBody::File { bytes, .. }) => Some(bytes.clone()),
@@ -402,6 +430,17 @@ pub fn apply_writes(plan: &ApplyPlan, state: &State) -> Result<ApplyReport> {
     for write in state.owned()? {
         previous.entry(write.path.clone()).or_default().push(write);
     }
+    let desired_owners: BTreeSet<_> = plan
+        .writes
+        .iter()
+        .map(|write| write.resource_id.clone())
+        .collect();
+    let retiring_owners: BTreeSet<_> = previous
+        .values()
+        .flatten()
+        .map(|write| write.resource_id.clone())
+        .filter(|owner| !desired_owners.contains(owner))
+        .collect();
     let paths: BTreeSet<_> = desired.keys().chain(previous.keys()).cloned().collect();
     let mut prepared = BTreeMap::new();
     let mut blocked: BTreeSet<_> = plan
@@ -464,6 +503,22 @@ pub fn apply_writes(plan: &ApplyPlan, state: &State) -> Result<ApplyReport> {
             for (_, entry) in &order {
                 if !entry.owners.is_disjoint(blocked) {
                     expanded.extend(entry.owners.iter().cloned());
+                }
+            }
+            if !expanded.is_disjoint(&desired_owners) {
+                // A failed replacement must not retire an independent path under its old identity.
+                for owner in &retiring_owners {
+                    if expanded.insert(owner.clone())
+                        && report
+                            .results
+                            .get(owner)
+                            .is_none_or(|result| result.status == ApplyStatus::Applied)
+                    {
+                        report.results.insert(
+                            owner.clone(),
+                            ResourceResult::new(ApplyStatus::Pending, "新投放完成后再清理旧投放"),
+                        );
+                    }
                 }
             }
             if expanded == *blocked {

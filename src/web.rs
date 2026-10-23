@@ -128,7 +128,6 @@ fn templates() -> Result<Environment<'static>> {
     env.add_function("inventory_kind", |kind: String| match kind.as_str() {
         "skill" => "Skill",
         "hook" => "Hook",
-        "script" => "脚本",
         "policy" => "执行策略",
         "rule" => "规则",
         "agent" => "Agent",
@@ -507,7 +506,6 @@ fn base(context: &WebContext, nav: &'static str, rows: &[ResourceView]) -> Resul
             ("mcp", "MCP 配置"),
             ("prompt", "提示词"),
             ("policy", "执行策略"),
-            ("script", "脚本"),
         ],
         total: rows.len(),
         self_count: rows.iter().filter(|r| r.resource.source.is_self()).count(),
@@ -623,11 +621,12 @@ async fn inventory(
                 (filters.status.is_empty() || e.status == filters.status)
                     && (filters.kind.is_empty() || e.kind == filters.kind)
                     && format!(
-                        "{} {} {} {}",
+                        "{} {} {} {} {}",
                         e.id,
                         e.name,
                         e.project.as_deref().unwrap_or(""),
-                        e.owner.as_deref().unwrap_or("")
+                        e.owner.as_deref().unwrap_or(""),
+                        e.other_owners.join(" ")
                     )
                     .to_lowercase()
                     .contains(&q)
@@ -781,12 +780,19 @@ fn proposals_for(state: &State, id: &str) -> Result<Vec<Proposal>> {
         .collect())
 }
 #[derive(Serialize)]
+struct SupportingFileView {
+    target: String,
+    source_path: String,
+    source_label: String,
+}
+#[derive(Serialize)]
 struct DetailPage {
     #[serde(flatten)]
     base: BaseContext,
     resource: ResourceView,
     files: BTreeMap<String, String>,
     articles: Vec<Article>,
+    supporting_files: Vec<SupportingFileView>,
     proposals: Vec<Proposal>,
 }
 async fn resource(
@@ -806,6 +812,31 @@ async fn resource(
         let mut contents: BTreeMap<String, BTreeMap<String, String>> =
             context.state.get("resource_contents")?;
         let files = contents.remove(&id).unwrap_or_default();
+        let mut supporting_files = Vec::new();
+        for name in &resource.resource.dependencies {
+            let dependency = base
+                .catalog
+                .dependencies
+                .get(name)
+                .context("supporting files missing from catalog")?;
+            for entry in &dependency.files.entries {
+                if let crate::model::ProjectionEntry::File { target, source } = entry {
+                    supporting_files.push(SupportingFileView {
+                        target: target.to_string_lossy().into_owned(),
+                        source_path: dependency
+                            .files
+                            .root
+                            .join(source)
+                            .to_string_lossy()
+                            .into_owned(),
+                        source_label: match &dependency.source {
+                            Source::SelfOwned => "自行维护".into(),
+                            Source::Upstream { upstream } => format!("上游拉取 · {upstream}"),
+                        },
+                    });
+                }
+            }
+        }
         let mut articles = Vec::new();
         for (name, text) in &files {
             let body = if name.ends_with(".md") && text.starts_with("---\n") {
@@ -888,6 +919,7 @@ async fn resource(
                 resource,
                 files,
                 articles,
+                supporting_files,
                 proposals,
             },
         )

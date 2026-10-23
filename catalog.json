@@ -1181,20 +1181,31 @@
             "target": ".codex/hooks/codex-hooks.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
-      "id": "user-script-codex-hooks-hindsight_codex-py",
-      "kind": "script",
+      "id": "user-hook-codex-hindsight",
+      "kind": "hook",
       "origin": "self",
       "scope": "user",
       "project": null,
       "files": {
-        "root": "resources/user-script-codex-hooks-hindsight_codex-py",
+        "root": "resources/user-hook-codex-hindsight",
         "entries": [
           {
-            "source": "files/.codex/hooks/hindsight_codex.py",
-            "target": ".codex/hooks/hindsight_codex.py"
+            "target": ".codex/hooks/hindsight_codex.py",
+            "source": "files/.codex/hooks/hindsight_codex.py"
+          },
+          {
+            "target": ".codex/config.toml",
+            "fragment": "config-codex-config-toml.json"
+          },
+          {
+            "target": ".codex/hooks.json",
+            "fragment": "config-codex-hooks-json.json"
           }
         ]
       }
@@ -1217,99 +1228,26 @@
             "target": ".codex/hooks/memory-persistence/hooks.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
-      "id": "user-script-kimi-code-hooks-hindsight_kimi-py",
-      "kind": "script",
-      "origin": "self",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": "resources/user-script-kimi-code-hooks-hindsight_kimi-py",
-        "entries": [
-          {
-            "source": "files/.kimi-code/hooks/hindsight_kimi.py",
-            "target": ".kimi-code/hooks/hindsight_kimi.py"
-          }
-        ]
-      }
-    },
-    {
-      "id": "user-hook-codex-config-toml-sessionend-1",
+      "id": "user-hook-kimi-hindsight",
       "kind": "hook",
       "origin": "self",
       "scope": "user",
       "project": null,
       "files": {
-        "root": "resources/user-hook-codex-config-toml-sessionend-1",
+        "root": "resources/user-hook-kimi-hindsight",
         "entries": [
           {
-            "target": ".codex/config.toml",
-            "fragment": "config.json"
-          }
-        ]
-      }
-    },
-    {
-      "id": "user-hook-codex-config-toml-sessionstart-1",
-      "kind": "hook",
-      "origin": "self",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": "resources/user-hook-codex-config-toml-sessionstart-1",
-        "entries": [
+            "target": ".kimi-code/hooks/hindsight_kimi.py",
+            "source": "files/.kimi-code/hooks/hindsight_kimi.py"
+          },
           {
-            "target": ".codex/config.toml",
-            "fragment": "config.json"
-          }
-        ]
-      }
-    },
-    {
-      "id": "user-hook-codex-config-toml-stop-1",
-      "kind": "hook",
-      "origin": "self",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": "resources/user-hook-codex-config-toml-stop-1",
-        "entries": [
-          {
-            "target": ".codex/config.toml",
-            "fragment": "config.json"
-          }
-        ]
-      }
-    },
-    {
-      "id": "user-hook-codex-config-toml-userpromptsubmit-1",
-      "kind": "hook",
-      "origin": "self",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": "resources/user-hook-codex-config-toml-userpromptsubmit-1",
-        "entries": [
-          {
-            "target": ".codex/config.toml",
-            "fragment": "config.json"
-          }
-        ]
-      }
-    },
-    {
-      "id": "user-hook-codex-config-toml-userpromptsubmit-2",
-      "kind": "hook",
-      "origin": "self",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": "resources/user-hook-codex-config-toml-userpromptsubmit-2",
-        "entries": [
-          {
-            "target": ".codex/config.toml",
+            "target": ".kimi-code/config.toml",
             "fragment": "config.json"
           }
         ]
@@ -1348,22 +1286,6 @@
       }
     },
     {
-      "id": "user-hook-codex-hooks-json-sessionend-1",
-      "kind": "hook",
-      "origin": "self",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": "resources/user-hook-codex-hooks-json-sessionend-1",
-        "entries": [
-          {
-            "target": ".codex/hooks.json",
-            "fragment": "config.json"
-          }
-        ]
-      }
-    },
-    {
       "id": "user-hook-codex-hooks-json-sessionend-2",
       "kind": "hook",
       "origin": "self",
@@ -1371,22 +1293,6 @@
       "project": null,
       "files": {
         "root": "resources/user-hook-codex-hooks-json-sessionend-2",
-        "entries": [
-          {
-            "target": ".codex/hooks.json",
-            "fragment": "config.json"
-          }
-        ]
-      }
-    },
-    {
-      "id": "user-hook-codex-hooks-json-sessionstart-1",
-      "kind": "hook",
-      "origin": "self",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": "resources/user-hook-codex-hooks-json-sessionstart-1",
         "entries": [
           {
             "target": ".codex/hooks.json",
@@ -1406,54 +1312,6 @@
         "entries": [
           {
             "target": ".codex/hooks.json",
-            "fragment": "config.json"
-          }
-        ]
-      }
-    },
-    {
-      "id": "user-hook-codex-hooks-json-userpromptsubmit-1",
-      "kind": "hook",
-      "origin": "self",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": "resources/user-hook-codex-hooks-json-userpromptsubmit-1",
-        "entries": [
-          {
-            "target": ".codex/hooks.json",
-            "fragment": "config.json"
-          }
-        ]
-      }
-    },
-    {
-      "id": "user-hook-kimi-code-config-toml-userpromptsubmit-1",
-      "kind": "hook",
-      "origin": "self",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": "resources/user-hook-kimi-code-config-toml-userpromptsubmit-1",
-        "entries": [
-          {
-            "target": ".kimi-code/config.toml",
-            "fragment": "config.json"
-          }
-        ]
-      }
-    },
-    {
-      "id": "user-hook-kimi-code-config-toml-stop-2",
-      "kind": "hook",
-      "origin": "self",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": "resources/user-hook-kimi-code-config-toml-stop-2",
-        "entries": [
-          {
-            "target": ".kimi-code/config.toml",
             "fragment": "config.json"
           }
         ]
@@ -1609,7 +1467,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-post-dispatcher-async",
@@ -1625,7 +1486,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-post-mcp-health-check",
@@ -1641,7 +1505,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-post-skill-track",
@@ -1657,7 +1524,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-pre-compact",
@@ -1673,7 +1543,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-pre-bash-dispatcher",
@@ -1689,7 +1562,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-pre-powershell-gateguard-fact-force",
@@ -1705,7 +1581,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-pre-write-doc-file-warning",
@@ -1721,7 +1600,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-pre-edit-write-suggest-compact",
@@ -1737,7 +1619,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-pre-observe-continuous-learning",
@@ -1753,7 +1638,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-pre-governance-capture",
@@ -1769,7 +1657,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-pre-config-protection",
@@ -1785,7 +1676,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-pre-mcp-health-check",
@@ -1801,7 +1695,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-pre-edit-write-gateguard-fact-force",
@@ -1817,16 +1714,19 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
-      "id": "user-hook-claude-settings-json-sessionend-1",
+      "id": "user-hook-claude-hindsight",
       "kind": "hook",
       "origin": "self",
       "scope": "user",
       "project": null,
       "files": {
-        "root": "resources/user-hook-claude-settings-json-sessionend-1",
+        "root": "resources/user-hook-claude-hindsight",
         "entries": [
           {
             "target": ".claude/settings.json",
@@ -1849,23 +1749,10 @@
             "fragment": "config.json"
           }
         ]
-      }
-    },
-    {
-      "id": "user-hook-claude-settings-json-sessionstart-1",
-      "kind": "hook",
-      "origin": "self",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": "resources/user-hook-claude-settings-json-sessionstart-1",
-        "entries": [
-          {
-            "target": ".claude/settings.json",
-            "fragment": "config.json"
-          }
-        ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-session-start",
@@ -1881,7 +1768,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-session-start-plan-canvas-sessions",
@@ -1897,23 +1787,10 @@
             "fragment": "config.json"
           }
         ]
-      }
-    },
-    {
-      "id": "user-hook-claude-settings-json-stop-1",
-      "kind": "hook",
-      "origin": "self",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": "resources/user-hook-claude-settings-json-stop-1",
-        "entries": [
-          {
-            "target": ".claude/settings.json",
-            "fragment": "config.json"
-          }
-        ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-stop-plan-canvas-pending",
@@ -1929,7 +1806,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-stop-format-typecheck",
@@ -1945,7 +1825,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-stop-check-console-log",
@@ -1961,7 +1844,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-stop-session-end",
@@ -1977,7 +1863,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-stop-evaluate-session",
@@ -1993,7 +1882,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-stop-cost-tracker",
@@ -2009,7 +1901,10 @@
             "fragment": "config.json"
           }
         ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "user-hook-claude-settings-json-stop-desktop-notify",
@@ -2025,23 +1920,10 @@
             "fragment": "config.json"
           }
         ]
-      }
-    },
-    {
-      "id": "user-hook-claude-settings-json-userpromptsubmit-1",
-      "kind": "hook",
-      "origin": "self",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": "resources/user-hook-claude-settings-json-userpromptsubmit-1",
-        "entries": [
-          {
-            "target": ".claude/settings.json",
-            "fragment": "config.json"
-          }
-        ]
-      }
+      },
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "iteration-cleanup",
@@ -6034,7 +5916,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-skill-context-budget",
@@ -6433,7 +6318,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-skill-dotnet-patterns",
@@ -8008,7 +7896,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-skill-tdd-workflow",
@@ -8029,7 +7920,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-skill-tinystruct-patterns",
@@ -8210,7 +8104,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-skill-source-command-build-fix",
@@ -9060,7 +8957,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-skill-source-command-skill-create",
@@ -9094,7 +8994,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-skill-source-command-test-coverage",
@@ -9813,7 +9716,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-agent-healthcare-reviewer",
@@ -10641,7 +10547,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-prompt-build-fix",
@@ -11117,7 +11026,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-prompt-hookify-configure",
@@ -11491,7 +11403,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-prompt-orch-add-feature",
@@ -11865,7 +11780,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-prompt-react-build",
@@ -12069,7 +11987,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-prompt-setup-pm",
@@ -12086,7 +12007,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-prompt-skill-create",
@@ -12120,7 +12044,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-prompt-test-coverage",
@@ -12205,7 +12132,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-hook-memory-persistence",
@@ -12226,7 +12156,10 @@
           }
         ]
       },
-      "upstream": "ecc"
+      "upstream": "ecc",
+      "dependencies": [
+        "ecc-runtime"
+      ]
     },
     {
       "id": "ecc-rule-rules-ecc-readme-md",
@@ -14286,2547 +14219,625 @@
       "upstream": "ecc"
     },
     {
-      "id": "ecc-script-auto-update",
-      "kind": "script",
-      "origin": "upstream",
+      "id": "easygo-app-checks",
+      "kind": "skill",
+      "origin": "self",
       "scope": "user",
       "project": null,
+      "files": {
+        "root": "resources/easygo-app-checks",
+        "entries": [
+          {
+            "target": ".codex/skills/easygo-app-checks",
+            "tree": "files/.codex/skills/easygo-app-checks"
+          }
+        ]
+      }
+    }
+  ],
+  "dependencies": {
+    "ecc-runtime": {
+      "origin": "upstream",
+      "upstream": "ecc",
       "files": {
         "root": ".",
         "entries": [
           {
             "target": ".claude/scripts/auto-update.js",
             "source": ".claude/scripts/auto-update.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-harness-audit",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/harness-audit.js",
             "source": ".claude/scripts/harness-audit.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-auto-tmux-dev",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/auto-tmux-dev.js",
             "source": ".claude/scripts/hooks/auto-tmux-dev.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-bash-hook-dispatcher",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/bash-hook-dispatcher.js",
             "source": ".claude/scripts/hooks/bash-hook-dispatcher.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-block-no-verify",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/block-no-verify.js",
             "source": ".claude/scripts/hooks/block-no-verify.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-check-console-log",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/check-console-log.js",
             "source": ".claude/scripts/hooks/check-console-log.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-check-hook-enabled",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/check-hook-enabled.js",
             "source": ".claude/scripts/hooks/check-hook-enabled.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-config-protection",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/config-protection.js",
             "source": ".claude/scripts/hooks/config-protection.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-cost-tracker",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/cost-tracker.js",
             "source": ".claude/scripts/hooks/cost-tracker.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-cursor-session-env",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/cursor-session-env.js",
             "source": ".claude/scripts/hooks/cursor-session-env.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-design-quality-check",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/design-quality-check.js",
             "source": ".claude/scripts/hooks/design-quality-check.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-desktop-notify",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/desktop-notify.js",
             "source": ".claude/scripts/hooks/desktop-notify.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-doc-file-warning",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/doc-file-warning.js",
             "source": ".claude/scripts/hooks/doc-file-warning.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-ecc-context-monitor",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/ecc-context-monitor.js",
             "source": ".claude/scripts/hooks/ecc-context-monitor.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-ecc-metrics-bridge",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/ecc-metrics-bridge.js",
             "source": ".claude/scripts/hooks/ecc-metrics-bridge.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-ecc-statusline",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/ecc-statusline.js",
             "source": ".claude/scripts/hooks/ecc-statusline.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-evaluate-session",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/evaluate-session.js",
             "source": ".claude/scripts/hooks/evaluate-session.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-gateguard-fact-force",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/gateguard-fact-force.js",
             "source": ".claude/scripts/hooks/gateguard-fact-force.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-gateguard-heredoc",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/gateguard-heredoc.js",
             "source": ".claude/scripts/hooks/gateguard-heredoc.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-governance-capture",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/governance-capture.js",
             "source": ".claude/scripts/hooks/governance-capture.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-insaits-security-monitor",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/insaits-security-monitor.py",
             "source": ".claude/scripts/hooks/insaits-security-monitor.py"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-insaits-security-wrapper",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/insaits-security-wrapper.js",
             "source": ".claude/scripts/hooks/insaits-security-wrapper.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-mcp-health-check",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/mcp-health-check.js",
             "source": ".claude/scripts/hooks/mcp-health-check.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-observe-runner",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/observe-runner.js",
             "source": ".claude/scripts/hooks/observe-runner.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-plan-canvas-pending",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/plan-canvas-pending.js",
             "source": ".claude/scripts/hooks/plan-canvas-pending.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-plan-canvas-sessions",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/plan-canvas-sessions.js",
             "source": ".claude/scripts/hooks/plan-canvas-sessions.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-plugin-hook-bootstrap",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/plugin-hook-bootstrap.js",
             "source": ".claude/scripts/hooks/plugin-hook-bootstrap.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-post-bash-build-complete",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/post-bash-build-complete.js",
             "source": ".claude/scripts/hooks/post-bash-build-complete.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-post-bash-command-log",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/post-bash-command-log.js",
             "source": ".claude/scripts/hooks/post-bash-command-log.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-post-bash-dispatcher",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/post-bash-dispatcher.js",
             "source": ".claude/scripts/hooks/post-bash-dispatcher.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-post-bash-pr-created",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/post-bash-pr-created.js",
             "source": ".claude/scripts/hooks/post-bash-pr-created.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-post-edit-accumulator",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/post-edit-accumulator.js",
             "source": ".claude/scripts/hooks/post-edit-accumulator.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-post-edit-console-warn",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/post-edit-console-warn.js",
             "source": ".claude/scripts/hooks/post-edit-console-warn.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-post-edit-format",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/post-edit-format.js",
             "source": ".claude/scripts/hooks/post-edit-format.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-post-edit-typecheck",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/post-edit-typecheck.js",
             "source": ".claude/scripts/hooks/post-edit-typecheck.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-posttooluse-dispatcher",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/posttooluse-dispatcher.js",
             "source": ".claude/scripts/hooks/posttooluse-dispatcher.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-pre-bash-commit-quality",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/pre-bash-commit-quality.js",
             "source": ".claude/scripts/hooks/pre-bash-commit-quality.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-pre-bash-dev-server-block",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/pre-bash-dev-server-block.js",
             "source": ".claude/scripts/hooks/pre-bash-dev-server-block.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-pre-bash-dispatcher",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/pre-bash-dispatcher.js",
             "source": ".claude/scripts/hooks/pre-bash-dispatcher.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-pre-bash-git-push-reminder",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/pre-bash-git-push-reminder.js",
             "source": ".claude/scripts/hooks/pre-bash-git-push-reminder.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-pre-bash-tmux-reminder",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/pre-bash-tmux-reminder.js",
             "source": ".claude/scripts/hooks/pre-bash-tmux-reminder.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-pre-compact",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/pre-compact.js",
             "source": ".claude/scripts/hooks/pre-compact.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-pre-write-doc-warn",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/pre-write-doc-warn.js",
             "source": ".claude/scripts/hooks/pre-write-doc-warn.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-pretooluse-visible-output",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/pretooluse-visible-output.js",
             "source": ".claude/scripts/hooks/pretooluse-visible-output.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-quality-gate",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/quality-gate.js",
             "source": ".claude/scripts/hooks/quality-gate.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-run-with-flags-shell",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/run-with-flags-shell.sh",
             "source": ".claude/scripts/hooks/run-with-flags-shell.sh"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-run-with-flags",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/run-with-flags.js",
             "source": ".claude/scripts/hooks/run-with-flags.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-session-activity-tracker",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/session-activity-tracker.js",
             "source": ".claude/scripts/hooks/session-activity-tracker.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-session-end-marker",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/session-end-marker.js",
             "source": ".claude/scripts/hooks/session-end-marker.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-session-end",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/session-end.js",
             "source": ".claude/scripts/hooks/session-end.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-session-start-bootstrap",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/session-start-bootstrap.js",
             "source": ".claude/scripts/hooks/session-start-bootstrap.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-session-start",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/session-start.js",
             "source": ".claude/scripts/hooks/session-start.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-skill-run-tracker",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/skill-run-tracker.js",
             "source": ".claude/scripts/hooks/skill-run-tracker.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-stop-format-typecheck",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/stop-format-typecheck.js",
             "source": ".claude/scripts/hooks/stop-format-typecheck.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-hooks-suggest-compact",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/hooks/suggest-compact.js",
             "source": ".claude/scripts/hooks/suggest-compact.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-agent-compress",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/agent-compress.js",
             "source": ".claude/scripts/lib/agent-compress.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-agent-data-home",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/agent-data-home.js",
             "source": ".claude/scripts/lib/agent-data-home.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-agent-proximity-distance",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/agent-proximity/distance.js",
             "source": ".claude/scripts/lib/agent-proximity/distance.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-agent-proximity-graph",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/agent-proximity/graph.js",
             "source": ".claude/scripts/lib/agent-proximity/graph.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-agent-proximity-index",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/agent-proximity/index.js",
             "source": ".claude/scripts/lib/agent-proximity/index.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-agent-tools",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/agent-tools.js",
             "source": ".claude/scripts/lib/agent-tools.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-atomic-write",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/atomic-write.js",
             "source": ".claude/scripts/lib/atomic-write.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-claude-commit-attribution",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/claude-commit-attribution.js",
             "source": ".claude/scripts/lib/claude-commit-attribution.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-claude-dry-run-sandbox",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/claude-dry-run-sandbox.js",
             "source": ".claude/scripts/lib/claude-dry-run-sandbox.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-claude-plugin-setup",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/claude-plugin-setup.js",
             "source": ".claude/scripts/lib/claude-plugin-setup.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-claude-scope-migration",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/claude-scope-migration.js",
             "source": ".claude/scripts/lib/claude-scope-migration.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-codex-legacy-sync",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/codex-legacy-sync.js",
             "source": ".claude/scripts/lib/codex-legacy-sync.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-codex-plugin-setup",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/codex-plugin-setup.js",
             "source": ".claude/scripts/lib/codex-plugin-setup.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-compute-sponsor",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/compute-sponsor.js",
             "source": ".claude/scripts/lib/compute-sponsor.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-control-pane-actions",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/control-pane/actions.js",
             "source": ".claude/scripts/lib/control-pane/actions.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-control-pane-message-sink",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/control-pane/message-sink.js",
             "source": ".claude/scripts/lib/control-pane/message-sink.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-control-pane-proximity-viz",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/control-pane/proximity-viz.js",
             "source": ".claude/scripts/lib/control-pane/proximity-viz.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-control-pane-proximity",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/control-pane/proximity.js",
             "source": ".claude/scripts/lib/control-pane/proximity.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-control-pane-server",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/control-pane/server.js",
             "source": ".claude/scripts/lib/control-pane/server.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-control-pane-state",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/control-pane/state.js",
             "source": ".claude/scripts/lib/control-pane/state.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-control-pane-ui",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/control-pane/ui.js",
             "source": ".claude/scripts/lib/control-pane/ui.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-control-pane-work-item-mutations",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/control-pane/work-item-mutations.js",
             "source": ".claude/scripts/lib/control-pane/work-item-mutations.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-cursor-agent-names",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/cursor-agent-names.js",
             "source": ".claude/scripts/lib/cursor-agent-names.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-ecc_dashboard_runtime",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/ecc_dashboard_runtime.py",
             "source": ".claude/scripts/lib/ecc_dashboard_runtime.py"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-feedback-links",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/feedback-links.js",
             "source": ".claude/scripts/lib/feedback-links.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-github-coordination",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/github-coordination.js",
             "source": ".claude/scripts/lib/github-coordination.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-github-coordination-actions",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/github-coordination/actions.js",
             "source": ".claude/scripts/lib/github-coordination/actions.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-github-coordination-gh-api",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/github-coordination/gh-api.js",
             "source": ".claude/scripts/lib/github-coordination/gh-api.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-github-coordination-parsing",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/github-coordination/parsing.js",
             "source": ".claude/scripts/lib/github-coordination/parsing.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-github-coordination-policy",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/github-coordination/policy.js",
             "source": ".claude/scripts/lib/github-coordination/policy.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-github-coordination-state",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/github-coordination/state.js",
             "source": ".claude/scripts/lib/github-coordination/state.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-github-coordination-store",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/github-coordination/store.js",
             "source": ".claude/scripts/lib/github-coordination/store.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-github-discussions",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/github-discussions.js",
             "source": ".claude/scripts/lib/github-discussions.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-github-origin",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/github-origin.js",
             "source": ".claude/scripts/lib/github-origin.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-harness-adapter-compliance",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/harness-adapter-compliance.js",
             "source": ".claude/scripts/lib/harness-adapter-compliance.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-harness-capabilities",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/harness-capabilities.js",
             "source": ".claude/scripts/lib/harness-capabilities.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-hook-flags",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/hook-flags.js",
             "source": ".claude/scripts/lib/hook-flags.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-inspection",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/inspection.js",
             "source": ".claude/scripts/lib/inspection.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-executor",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-executor.js",
             "source": ".claude/scripts/lib/install-executor.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-lifecycle",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-lifecycle.js",
             "source": ".claude/scripts/lib/install-lifecycle.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-manifests",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-manifests.js",
             "source": ".claude/scripts/lib/install-manifests.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-state-store-sync",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-state-store-sync.js",
             "source": ".claude/scripts/lib/install-state-store-sync.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-state",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-state.js",
             "source": ".claude/scripts/lib/install-state.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-adal-project",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/adal-project.js",
             "source": ".claude/scripts/lib/install-targets/adal-project.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-antigravity-project",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/antigravity-project.js",
             "source": ".claude/scripts/lib/install-targets/antigravity-project.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-claude-home",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/claude-home.js",
             "source": ".claude/scripts/lib/install-targets/claude-home.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-claude-project",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/claude-project.js",
             "source": ".claude/scripts/lib/install-targets/claude-project.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-codebuddy-project",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/codebuddy-project.js",
             "source": ".claude/scripts/lib/install-targets/codebuddy-project.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-codex-home",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/codex-home.js",
             "source": ".claude/scripts/lib/install-targets/codex-home.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-cursor-project",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/cursor-project.js",
             "source": ".claude/scripts/lib/install-targets/cursor-project.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-gemini-project",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/gemini-project.js",
             "source": ".claude/scripts/lib/install-targets/gemini-project.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-helpers",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/helpers.js",
             "source": ".claude/scripts/lib/install-targets/helpers.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-hermes-home",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/hermes-home.js",
             "source": ".claude/scripts/lib/install-targets/hermes-home.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-joycode-project",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/joycode-project.js",
             "source": ".claude/scripts/lib/install-targets/joycode-project.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-kimi-project",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/kimi-project.js",
             "source": ".claude/scripts/lib/install-targets/kimi-project.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-openclaw-home",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/openclaw-home.js",
             "source": ".claude/scripts/lib/install-targets/openclaw-home.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-opencode-home",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/opencode-home.js",
             "source": ".claude/scripts/lib/install-targets/opencode-home.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-qwen-home",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/qwen-home.js",
             "source": ".claude/scripts/lib/install-targets/qwen-home.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-registry",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/registry.js",
             "source": ".claude/scripts/lib/install-targets/registry.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-targets-zed-project",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install-targets/zed-project.js",
             "source": ".claude/scripts/lib/install-targets/zed-project.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-antigravity-agent",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install/antigravity-agent.js",
             "source": ".claude/scripts/lib/install/antigravity-agent.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-antigravity-legacy-migration",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install/antigravity-legacy-migration.js",
             "source": ".claude/scripts/lib/install/antigravity-legacy-migration.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-apply",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install/apply.js",
             "source": ".claude/scripts/lib/install/apply.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-claude-settings-lock",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install/claude-settings-lock.js",
             "source": ".claude/scripts/lib/install/claude-settings-lock.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-claude-settings",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install/claude-settings.js",
             "source": ".claude/scripts/lib/install/claude-settings.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-claude-skill-migration",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install/claude-skill-migration.js",
             "source": ".claude/scripts/lib/install/claude-skill-migration.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-config",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install/config.js",
             "source": ".claude/scripts/lib/install/config.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-hook-consent",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install/hook-consent.js",
             "source": ".claude/scripts/lib/install/hook-consent.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-inventory",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install/inventory.js",
             "source": ".claude/scripts/lib/install/inventory.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-link-rewrite",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install/link-rewrite.js",
             "source": ".claude/scripts/lib/install/link-rewrite.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-opencode-legacy-migration",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install/opencode-legacy-migration.js",
             "source": ".claude/scripts/lib/install/opencode-legacy-migration.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-ownership-guard",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install/ownership-guard.js",
             "source": ".claude/scripts/lib/install/ownership-guard.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-plan",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install/plan.js",
             "source": ".claude/scripts/lib/install/plan.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-request",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install/request.js",
             "source": ".claude/scripts/lib/install/request.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-install-runtime",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/install/runtime.js",
             "source": ".claude/scripts/lib/install/runtime.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-instinct-relevance",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/instinct-relevance.js",
             "source": ".claude/scripts/lib/instinct-relevance.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-invocation-environment",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/invocation-environment.js",
             "source": ".claude/scripts/lib/invocation-environment.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-ito-environment",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/ito-environment.js",
             "source": ".claude/scripts/lib/ito-environment.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-llm-summary",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/llm-summary.js",
             "source": ".claude/scripts/lib/llm-summary.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-loopback-guard",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/loopback-guard.js",
             "source": ".claude/scripts/lib/loopback-guard.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-mcp-config",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/mcp-config.js",
             "source": ".claude/scripts/lib/mcp-config.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-mcp-inventory-canonical-mcp",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/mcp-inventory/canonical-mcp.js",
             "source": ".claude/scripts/lib/mcp-inventory/canonical-mcp.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-mcp-inventory-collect",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/mcp-inventory/collect.js",
             "source": ".claude/scripts/lib/mcp-inventory/collect.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-mcp-inventory-readers-claude-code",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/mcp-inventory/readers/claude-code.js",
             "source": ".claude/scripts/lib/mcp-inventory/readers/claude-code.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-mcp-inventory-readers-codex",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/mcp-inventory/readers/codex.js",
             "source": ".claude/scripts/lib/mcp-inventory/readers/codex.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-mcp-inventory-readers-opencode",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/mcp-inventory/readers/opencode.js",
             "source": ".claude/scripts/lib/mcp-inventory/readers/opencode.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-memory-vault-format",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/memory-vault-format.js",
             "source": ".claude/scripts/lib/memory-vault-format.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-memory-vault",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/memory-vault.js",
             "source": ".claude/scripts/lib/memory-vault.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-missing-dependency",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/missing-dependency.js",
             "source": ".claude/scripts/lib/missing-dependency.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-multi-harness-setup",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/multi-harness-setup.js",
             "source": ".claude/scripts/lib/multi-harness-setup.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-nasiko-release",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/nasiko-release.js",
             "source": ".claude/scripts/lib/nasiko-release.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-observer-sessions",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/observer-sessions.js",
             "source": ".claude/scripts/lib/observer-sessions.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-opencode-paths",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/opencode-paths.js",
             "source": ".claude/scripts/lib/opencode-paths.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-orchestration-session",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/orchestration-session.js",
             "source": ".claude/scripts/lib/orchestration-session.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-package-manager",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/package-manager.d.ts",
             "source": ".claude/scripts/lib/package-manager.d.ts"
@@ -16834,292 +14845,71 @@
           {
             "target": ".claude/scripts/lib/package-manager.js",
             "source": ".claude/scripts/lib/package-manager.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-path-safety",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/path-safety.js",
             "source": ".claude/scripts/lib/path-safety.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-plan-canvas-markdown",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/plan-canvas/markdown.js",
             "source": ".claude/scripts/lib/plan-canvas/markdown.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-plan-canvas-sdk",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/plan-canvas/sdk.js",
             "source": ".claude/scripts/lib/plan-canvas/sdk.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-plan-canvas-server",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/plan-canvas/server.js",
             "source": ".claude/scripts/lib/plan-canvas/server.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-plan-canvas-sessions",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/plan-canvas/sessions.js",
             "source": ".claude/scripts/lib/plan-canvas/sessions.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-plan-canvas-ui",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/plan-canvas/ui.js",
             "source": ".claude/scripts/lib/plan-canvas/ui.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-powershell-destructive-command",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/powershell-destructive-command.js",
             "source": ".claude/scripts/lib/powershell-destructive-command.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-project-detect",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/project-detect.js",
             "source": ".claude/scripts/lib/project-detect.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-resolve-ecc-root",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/resolve-ecc-root.js",
             "source": ".claude/scripts/lib/resolve-ecc-root.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-resolve-formatter",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/resolve-formatter.js",
             "source": ".claude/scripts/lib/resolve-formatter.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-session-adapters-canonical-session",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/session-adapters/canonical-session.js",
             "source": ".claude/scripts/lib/session-adapters/canonical-session.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-session-adapters-claude-history",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/session-adapters/claude-history.js",
             "source": ".claude/scripts/lib/session-adapters/claude-history.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-session-adapters-codex-worktree",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/session-adapters/codex-worktree.js",
             "source": ".claude/scripts/lib/session-adapters/codex-worktree.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-session-adapters-dmux-tmux",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/session-adapters/dmux-tmux.js",
             "source": ".claude/scripts/lib/session-adapters/dmux-tmux.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-session-adapters-opencode",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/session-adapters/opencode.js",
             "source": ".claude/scripts/lib/session-adapters/opencode.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-session-adapters-registry",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/session-adapters/registry.js",
             "source": ".claude/scripts/lib/session-adapters/registry.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-session-aliases",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/session-aliases.d.ts",
             "source": ".claude/scripts/lib/session-aliases.d.ts"
@@ -17127,37 +14917,11 @@
           {
             "target": ".claude/scripts/lib/session-aliases.js",
             "source": ".claude/scripts/lib/session-aliases.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-session-bridge",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/session-bridge.js",
             "source": ".claude/scripts/lib/session-bridge.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-session-manager",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/session-manager.d.ts",
             "source": ".claude/scripts/lib/session-manager.d.ts"
@@ -17165,377 +14929,91 @@
           {
             "target": ".claude/scripts/lib/session-manager.js",
             "source": ".claude/scripts/lib/session-manager.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-shell-split",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/shell-split.js",
             "source": ".claude/scripts/lib/shell-split.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-shell-substitution",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/shell-substitution.js",
             "source": ".claude/scripts/lib/shell-substitution.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-skill-evolution-dashboard",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/skill-evolution/dashboard.js",
             "source": ".claude/scripts/lib/skill-evolution/dashboard.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-skill-evolution-health",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/skill-evolution/health.js",
             "source": ".claude/scripts/lib/skill-evolution/health.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-skill-evolution-index",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/skill-evolution/index.js",
             "source": ".claude/scripts/lib/skill-evolution/index.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-skill-evolution-provenance",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/skill-evolution/provenance.js",
             "source": ".claude/scripts/lib/skill-evolution/provenance.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-skill-evolution-tracker",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/skill-evolution/tracker.js",
             "source": ".claude/scripts/lib/skill-evolution/tracker.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-skill-evolution-versioning",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/skill-evolution/versioning.js",
             "source": ".claude/scripts/lib/skill-evolution/versioning.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-skill-improvement-amendify",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/skill-improvement/amendify.js",
             "source": ".claude/scripts/lib/skill-improvement/amendify.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-skill-improvement-evaluate",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/skill-improvement/evaluate.js",
             "source": ".claude/scripts/lib/skill-improvement/evaluate.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-skill-improvement-health",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/skill-improvement/health.js",
             "source": ".claude/scripts/lib/skill-improvement/health.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-skill-improvement-observations",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/skill-improvement/observations.js",
             "source": ".claude/scripts/lib/skill-improvement/observations.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-state-store-index",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/state-store/index.js",
             "source": ".claude/scripts/lib/state-store/index.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-state-store-install-state-projection",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/state-store/install-state-projection.js",
             "source": ".claude/scripts/lib/state-store/install-state-projection.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-state-store-migrations",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/state-store/migrations.js",
             "source": ".claude/scripts/lib/state-store/migrations.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-state-store-queries",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/state-store/queries.js",
             "source": ".claude/scripts/lib/state-store/queries.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-state-store-schema",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/state-store/schema.js",
             "source": ".claude/scripts/lib/state-store/schema.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-terminal-spinner",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/terminal-spinner.js",
             "source": ".claude/scripts/lib/terminal-spinner.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-terminal-welcome",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/terminal-welcome.js",
             "source": ".claude/scripts/lib/terminal-welcome.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-tmux-worktree-orchestrator",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/tmux-worktree-orchestrator.js",
             "source": ".claude/scripts/lib/tmux-worktree-orchestrator.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-transcript-context",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/transcript-context.js",
             "source": ".claude/scripts/lib/transcript-context.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-utils",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/utils.d.ts",
             "source": ".claude/scripts/lib/utils.d.ts"
@@ -17543,129 +15021,37 @@
           {
             "target": ".claude/scripts/lib/utils.js",
             "source": ".claude/scripts/lib/utils.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-worktree-lifecycle-git",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/worktree-lifecycle/git.js",
             "source": ".claude/scripts/lib/worktree-lifecycle/git.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-lib-worktree-lifecycle-lifecycle",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/lib/worktree-lifecycle/lifecycle.js",
             "source": ".claude/scripts/lib/worktree-lifecycle/lifecycle.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-orchestrate-codex-worker",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/orchestrate-codex-worker.sh",
             "source": ".claude/scripts/orchestrate-codex-worker.sh"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-orchestrate-worktrees",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/orchestrate-worktrees.js",
             "source": ".claude/scripts/orchestrate-worktrees.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-orchestration-status",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/orchestration-status.js",
             "source": ".claude/scripts/orchestration-status.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-setup-package-manager",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/setup-package-manager.js",
             "source": ".claude/scripts/setup-package-manager.js"
-          }
-        ]
-      },
-      "upstream": "ecc"
-    },
-    {
-      "id": "ecc-script-skills-health",
-      "kind": "script",
-      "origin": "upstream",
-      "scope": "user",
-      "project": null,
-      "files": {
-        "root": ".",
-        "entries": [
+          },
           {
             "target": ".claude/scripts/skills-health.js",
             "source": ".claude/scripts/skills-health.js"
           }
         ]
-      },
-      "upstream": "ecc"
+      }
     }
-  ]
+  }
 }

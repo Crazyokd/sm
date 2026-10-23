@@ -265,18 +265,43 @@ pub fn create_proposal(repo: &Path, change: &ChangeSet, state: &State) -> Result
         }
     }
     for id in original
+        .dependencies
+        .keys()
+        .chain(updated.dependencies.keys())
+        .collect::<BTreeSet<_>>()
+    {
+        if original.dependencies.get(id) != updated.dependencies.get(id) {
+            for resource in original.resources.iter().chain(&updated.resources) {
+                if resource.dependencies.contains(id) {
+                    ensure!(
+                        change.resource_ids.contains(&resource.id),
+                        "dependency edits affect resources outside selected ids"
+                    );
+                }
+            }
+        }
+    }
+    for id in original
         .upstreams
         .keys()
         .chain(updated.upstreams.keys())
         .collect::<BTreeSet<_>>()
     {
         if original.upstreams.get(id) != updated.upstreams.get(id) {
-            for resource in original.resources.iter().chain(&updated.resources) {
-                if matches!(&resource.source, Source::Upstream { upstream } if upstream == id) {
-                    ensure!(
-                        change.resource_ids.contains(&resource.id),
-                        "upstream edits affect resources outside selected ids"
-                    );
+            for catalog in [&original, &updated] {
+                for resource in &catalog.resources {
+                    let uses_source = matches!(&resource.source, Source::Upstream { upstream } if upstream == id)
+                        || resource.dependencies.iter().any(|name| {
+                            catalog.dependencies.get(name).is_some_and(|dependency| {
+                                matches!(&dependency.source, Source::Upstream { upstream } if upstream == id)
+                            })
+                        });
+                    if uses_source {
+                        ensure!(
+                            change.resource_ids.contains(&resource.id),
+                            "upstream edits affect resources outside selected ids"
+                        );
+                    }
                 }
             }
         }

@@ -266,12 +266,17 @@ fn apply_source_tracked(
     }
     let catalog = Catalog::load(source)?;
     // A reviewed existing resource stays governable while its network refresh is unavailable.
-    let local_sources = catalog
+    let mut local_sources: BTreeMap<_, _> = catalog
         .resources
         .iter()
         .filter(|r| r.source.is_self())
         .map(|r| (r.id.clone(), source.to_path_buf()))
         .collect();
+    for (name, dependency) in &catalog.dependencies {
+        if dependency.source.is_self() {
+            local_sources.insert(format!("@dependency/{name}"), source.to_path_buf());
+        }
+    }
     let clients: BTreeSet<_> = catalog
         .resources
         .iter()
@@ -279,7 +284,13 @@ fn apply_source_tracked(
         .flat_map(|r| r.targets().into_keys())
         .collect();
     let mut baseline = plan_apply(&catalog, &local_sources, &runtime.home);
-    for resource in catalog.resources.iter().filter(|r| !r.source.is_self()) {
+    for resource in catalog.resources.iter().filter(|resource| {
+        !resource.source.is_self()
+            || resource
+                .dependencies
+                .iter()
+                .any(|name| !catalog.dependencies[name].source.is_self())
+    }) {
         baseline.results.insert(
             resource.id.clone(),
             ResourceResult::new(ApplyStatus::Pending, "本轮上游刷新待完成；保留现有本地内容"),
@@ -337,6 +348,34 @@ fn apply_source_tracked(
     let mut sources = BTreeMap::new();
     let mut errors = BTreeMap::new();
     let mut fetched: BTreeMap<String, std::result::Result<PathBuf, String>> = BTreeMap::new();
+    let fetch_source =
+        |origin: &Source, fetched: &mut BTreeMap<String, std::result::Result<PathBuf, String>>| {
+            match origin {
+                Source::SelfOwned => Ok(source.to_path_buf()),
+                Source::Upstream { upstream } => fetched
+                    .entry(upstream.clone())
+                    .or_insert_with(|| {
+                        fetch_upstream(
+                            &catalog.upstreams[upstream],
+                            source,
+                            &temporary.path().join(upstream),
+                        )
+                        .map_err(|error| redact_text(&format!("{error:#}"), Some(1200)))
+                    })
+                    .clone(),
+            }
+        };
+    let mut dependency_errors = BTreeMap::new();
+    for (name, dependency) in &catalog.dependencies {
+        match fetch_source(&dependency.source, &mut fetched) {
+            Ok(path) => {
+                sources.insert(format!("@dependency/{name}"), path);
+            }
+            Err(error) => {
+                dependency_errors.insert(name.clone(), error);
+            }
+        }
+    }
     for (index, resource) in catalog.resources.iter().enumerate() {
         if let Some(run) = &mut run {
             run.stage(
@@ -346,20 +385,7 @@ fn apply_source_tracked(
                 catalog.resources.len(),
             )?;
         }
-        let result = match &resource.source {
-            Source::SelfOwned => Ok(source.to_path_buf()),
-            Source::Upstream { upstream } => fetched
-                .entry(upstream.clone())
-                .or_insert_with(|| {
-                    fetch_upstream(
-                        &catalog.upstreams[upstream],
-                        source,
-                        &temporary.path().join(upstream),
-                    )
-                    .map_err(|error| redact_text(&format!("{error:#}"), Some(1200)))
-                })
-                .clone(),
-        };
+        let result = fetch_source(&resource.source, &mut fetched);
         match result {
             Ok(path) => {
                 if let Some(run) = &run {
@@ -378,6 +404,16 @@ fn apply_source_tracked(
                         redact_text(&format!("{error:#}"), Some(1200)),
                     ),
                 );
+            }
+        }
+        for name in &resource.dependencies {
+            if let Some(error) = dependency_errors.get(name) {
+                errors.entry(resource.id.clone()).or_insert_with(|| {
+                    ResourceResult::new(
+                        ApplyStatus::Failed,
+                        format!("supporting files {name}: {error}"),
+                    )
+                });
             }
         }
         if let Some(run) = &mut run {
@@ -401,6 +437,43 @@ fn apply_source_tracked(
             &runtime.executable,
             state.directory()?,
         ));
+    }
+    if catalog
+        .resources
+        .iter()
+        .filter(|resource| {
+            !matches!(
+                resource.content,
+                crate::model::ResourceContent::Installation { .. }
+            )
+        })
+        .any(|resource| {
+            plan.results.get(&resource.id).is_some_and(|result| {
+                matches!(
+                    result.status,
+                    ApplyStatus::Pending
+                        | ApplyStatus::Failed
+                        | ApplyStatus::Unsupported
+                        | ApplyStatus::Conflict
+                )
+            })
+        })
+    {
+        let current: BTreeSet<_> = catalog
+            .resources
+            .iter()
+            .map(|resource| resource.id.as_str())
+            .chain(plan.writes.iter().map(|write| write.resource_id.as_str()))
+            .collect();
+        // A renamed consumer may still need its entire old installation while support is unavailable.
+        for owned in state.owned()? {
+            if !current.contains(owned.resource_id.as_str()) {
+                plan.results.insert(
+                    owned.resource_id,
+                    ResourceResult::new(ApplyStatus::Pending, "完整同步成功后再清理旧投放"),
+                );
+            }
+        }
     }
     crate::adoption::adopt(source, &catalog, &runtime.home, &plan, state)?;
     let mut report = apply_writes(&plan, state)?;
@@ -467,7 +540,7 @@ fn cache_resources(
         let readable = !report.results.get(&resource.id).is_some_and(|result| {
             matches!(
                 result.status,
-                ApplyStatus::Failed | ApplyStatus::Unsupported
+                ApplyStatus::Failed | ApplyStatus::Unsupported | ApplyStatus::Pending
             )
         });
         if let Some(root) = sources.get(&resource.id).filter(|_| readable) {

@@ -53,7 +53,6 @@ pub enum ResourceKind {
     Mcp,
     Prompt,
     Policy,
-    Script,
 }
 impl ResourceKind {
     pub fn label(self) -> &'static str {
@@ -65,7 +64,6 @@ impl ResourceKind {
             Self::Mcp => "MCP 配置",
             Self::Prompt => "提示词",
             Self::Policy => "执行策略",
-            Self::Script => "脚本",
         }
     }
 }
@@ -202,6 +200,8 @@ pub struct Resource {
     pub source: Source,
     pub scope: Scope,
     pub project: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub dependencies: Vec<String>,
     #[serde(skip)]
     pub root: PathBuf,
 }
@@ -222,6 +222,8 @@ struct RawResource {
     #[serde(default)]
     payloads: BTreeMap<Client, PathBuf>,
     upstream: Option<String>,
+    #[serde(default)]
+    dependencies: Vec<String>,
 }
 impl<'de> Deserialize<'de> for Resource {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> std::result::Result<Self, D::Error> {
@@ -240,8 +242,14 @@ impl TryFrom<RawResource> for Resource {
     fn try_from(raw: RawResource) -> Result<Self> {
         ensure!(valid_id(&raw.id), "invalid resource id");
         ensure!(
-            raw.id != "source-providers",
-            "source-providers is reserved for shared source infrastructure"
+            raw.id != "source-providers" && raw.id != "dependencies",
+            "resource id is reserved for shared infrastructure"
+        );
+        let dependencies: BTreeSet<_> = raw.dependencies.iter().collect();
+        ensure!(
+            dependencies.len() == raw.dependencies.len()
+                && dependencies.iter().all(|name| valid_id(name)),
+            "invalid or duplicate resource dependency"
         );
         ensure!(
             match raw.scope {
@@ -289,6 +297,10 @@ impl TryFrom<RawResource> for Resource {
             }
         } else if let Some(installation) = raw.installation {
             ensure!(
+                raw.dependencies.is_empty(),
+                "native installation policy cannot declare supporting files"
+            );
+            ensure!(
                 raw.kind == ResourceKind::Policy
                     && raw.origin == "self"
                     && raw.scope == Scope::User,
@@ -328,7 +340,7 @@ impl TryFrom<RawResource> for Resource {
                 ResourceKind::Rule => ResourceContent::Rule(native),
                 ResourceKind::Agent => ResourceContent::Agent(native),
                 ResourceKind::Mcp => ResourceContent::Mcp(native),
-                ResourceKind::Prompt | ResourceKind::Policy | ResourceKind::Script => {
+                ResourceKind::Prompt | ResourceKind::Policy => {
                     bail!("resource requires a file projection or installation policy")
                 }
                 ResourceKind::Skill => unreachable!("handled above"),
@@ -355,6 +367,7 @@ impl TryFrom<RawResource> for Resource {
             source,
             scope: raw.scope,
             project: raw.project,
+            dependencies: raw.dependencies,
             root: PathBuf::new(),
         };
         for path in resource.targets().values() {
@@ -406,12 +419,43 @@ impl Resource {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct SupportingFiles {
+    #[serde(flatten)]
+    pub source: Source,
+    pub files: FileProjection,
+}
+impl<'de> Deserialize<'de> for SupportingFiles {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> std::result::Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        #[serde(deny_unknown_fields)]
+        struct Raw {
+            origin: String,
+            upstream: Option<String>,
+            files: FileProjection,
+        }
+        let raw = Raw::deserialize(deserializer)?;
+        let source = match (raw.origin.as_str(), raw.upstream) {
+            ("self", None) => Source::SelfOwned,
+            ("upstream", Some(upstream)) if valid_id(&upstream) => Source::Upstream { upstream },
+            _ => return Err(de::Error::custom("invalid supporting file source")),
+        };
+        crate::projections::validate_support(&raw.files).map_err(de::Error::custom)?;
+        Ok(Self {
+            source,
+            files: raw.files,
+        })
+    }
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Catalog {
     pub projects: BTreeMap<String, String>,
     #[serde(default)]
     pub upstreams: BTreeMap<String, UpstreamSource>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub dependencies: BTreeMap<String, SupportingFiles>,
     pub resources: Vec<Resource>,
 }
 impl Catalog {
@@ -442,6 +486,37 @@ impl Catalog {
                         .any(|c| c == std::path::Component::ParentDir),
                 "invalid project directory"
             );
+        }
+        let mut referenced = BTreeSet::new();
+        for resource in &catalog.resources {
+            for dependency in &resource.dependencies {
+                ensure!(
+                    catalog.dependencies.contains_key(dependency),
+                    "unknown resource dependency: {dependency}"
+                );
+                referenced.insert(dependency.clone());
+            }
+        }
+        ensure!(
+            referenced.len() == catalog.dependencies.len(),
+            "unreferenced supporting file dependency"
+        );
+        for (name, dependency) in &catalog.dependencies {
+            ensure!(valid_id(name), "invalid dependency id");
+            crate::projections::validate_support(&dependency.files)?;
+            match &dependency.source {
+                Source::SelfOwned => ensure!(
+                    dependency
+                        .files
+                        .root
+                        .starts_with(Path::new("resources/dependencies").join(name).join("files")),
+                    "self dependency root must be resources/dependencies/<name>/files"
+                ),
+                Source::Upstream { upstream } => ensure!(
+                    catalog.upstreams.contains_key(upstream),
+                    "unknown dependency upstream source: {upstream}"
+                ),
+            }
         }
         for resource in &mut catalog.resources {
             ensure!(ids.insert(resource.id.clone()), "duplicate resource id");

@@ -4,6 +4,11 @@
       "command": "/home/standard/.kimi-code/hooks/hindsight_kimi.py recall",
       "event": "UserPromptSubmit",
       "timeout": 12
+    },
+    {
+      "command": "/home/standard/.kimi-code/hooks/hindsight_kimi.py retain",
+      "event": "Stop",
+      "timeout": 30
     }
   ]
 }

@@ -24,6 +24,9 @@ struct Adoption {
     sha256: String,
     executable: Option<bool>,
     previous_resource: Option<String>,
+    #[serde(default)]
+    previous_resources: Vec<String>,
+    shared_with: Option<String>,
 }
 
 pub fn fingerprint(bytes: &[u8]) -> String {
@@ -89,6 +92,21 @@ pub fn adopt(
             entry.previous_resource.as_deref().is_none_or(valid_id),
             "invalid previous owner"
         );
+        ensure!(
+            entry.shared_with.as_deref().is_none_or(valid_id)
+                && entry.previous_resources.iter().all(|id| valid_id(id))
+                && entry
+                    .previous_resources
+                    .iter()
+                    .collect::<BTreeSet<_>>()
+                    .len()
+                    == entry.previous_resources.len()
+                && usize::from(entry.previous_resource.is_some())
+                    + usize::from(!entry.previous_resources.is_empty())
+                    + usize::from(entry.shared_with.is_some())
+                    <= 1,
+            "shared adoption requires one valid named owner"
+        );
         let resource = catalog
             .resources
             .iter()
@@ -115,13 +133,27 @@ pub fn adopt(
         let baseline;
         let write = if let Some(write) = write {
             write
-        } else if !resource.source.is_self()
+        } else if (!resource.source.is_self()
+            || resource.dependencies.iter().any(|id| {
+                catalog.dependencies.get(id).is_some_and(|dependency| {
+                    !dependency.source.is_self()
+                        && dependency.files.entries.iter().any(|projection| {
+                            matches!(projection, crate::model::ProjectionEntry::File { target, .. } if target == &entry.target)
+                        })
+                })
+            }))
             && crate::projections::adoptable_file_target(&entry.target, resource.scope)
             && !entry
                 .target
                 .components()
                 .any(|part| part.as_os_str() == ".git")
-            && match &resource.content {
+            && (resource.dependencies.iter().any(|id| {
+                catalog.dependencies.get(id).is_some_and(|dependency| {
+                    dependency.files.entries.iter().any(|projection| {
+                        matches!(projection, crate::model::ProjectionEntry::File { target, .. } if target == &entry.target)
+                    })
+                })
+            }) || match &resource.content {
                 ResourceContent::Files { files, .. } => {
                     files.entries.iter().any(|projection| match projection {
                         crate::model::ProjectionEntry::File { target, .. } => {
@@ -137,7 +169,7 @@ pub fn adopt(
                     .target
                     .starts_with(Path::new(".agents/skills").join(&resource.id)),
                 _ => false,
-            }
+            })
         {
             baseline = crate::model::OwnedWrite::new(
                 &entry.resource,
@@ -184,7 +216,46 @@ pub fn adopt(
         if digest != entry.sha256 {
             continue;
         }
-        if let Some(previous) = entry.previous_resource {
+        if !entry.previous_resources.is_empty() {
+            let mut combined = Value::Object(Default::default());
+            let mut keys = Vec::new();
+            let mut valid = true;
+            for previous in entry.previous_resources {
+                let key = (previous, path.clone());
+                let Some(old) = owned.get(&key) else {
+                    valid = false;
+                    break;
+                };
+                let fragment = match (&old.body, &claim.body) {
+                    (StoredBody::Json(fragment), StoredBody::Json(_))
+                    | (StoredBody::Toml(fragment), StoredBody::Toml(_)) => fragment,
+                    _ => {
+                        valid = false;
+                        break;
+                    }
+                };
+                if !matches_current(&old.body, &bytes, executable)?
+                    || merge_entries(&mut combined, fragment, false).is_err()
+                {
+                    valid = false;
+                    break;
+                }
+                keys.push(key);
+            }
+            let expected = match &claim.body {
+                StoredBody::Json(fragment) | StoredBody::Toml(fragment) => {
+                    Value::Object(fragment.clone())
+                }
+                _ => continue,
+            };
+            if !valid || combined != expected {
+                continue;
+            }
+            for key in keys {
+                owned.remove(&key);
+                changed.insert(key);
+            }
+        } else if let Some(previous) = entry.previous_resource {
             let previous_key = (previous, path.clone());
             let Some(old) = owned.get(&previous_key) else {
                 continue;
@@ -233,6 +304,33 @@ pub fn adopt(
                 owned.remove(&previous_key);
             }
             changed.insert(previous_key);
+        } else if let Some(shared) = entry.shared_with {
+            let Some(other) = catalog.resources.iter().find(|r| r.id == shared) else {
+                continue;
+            };
+            let shared_dependency = resource.dependencies.iter().any(|id| {
+                other.dependencies.contains(id)
+                    && catalog.dependencies.get(id).is_some_and(|dependency| {
+                        dependency.files.entries.iter().any(|projection| {
+                            matches!(projection, crate::model::ProjectionEntry::File { target, .. } if target == &entry.target)
+                        })
+                    })
+            });
+            let Some(old) = owned.get(&(shared, path.clone())) else {
+                continue;
+            };
+            if entry.executable.is_none()
+                || !matches!(claim.body, StoredBody::FileFingerprint { .. })
+                || !shared_dependency
+                || catalog.scope_root(other, home)? != scope
+                || old.body != claim.body
+                || !matches_current(&old.body, &bytes, executable)?
+                || owned
+                    .values()
+                    .any(|w| w.path == path && w.body != claim.body)
+            {
+                continue;
+            }
         } else if matches!(&claim.body, StoredBody::FileFingerprint { .. })
             && owned.values().any(|w| w.path == path)
         {

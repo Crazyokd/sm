@@ -67,11 +67,28 @@ fn shipped_self_resources_apply_to_declared_scopes() {
         };
         fs::write(path, text).unwrap();
     }
-    let sources: BTreeMap<_, _> = catalog
+    let mut sources: BTreeMap<_, _> = catalog
         .resources
         .iter()
         .map(|r| (r.id.clone(), root.to_path_buf()))
         .collect();
+    for (name, dependency) in &catalog.dependencies {
+        let source = if dependency.source.is_self() {
+            root.to_path_buf()
+        } else {
+            let source = temp.path().join("dependency-sources").join(name);
+            for entry in &dependency.files.entries {
+                let ProjectionEntry::File { source: file, .. } = entry else {
+                    panic!("support file required")
+                };
+                let target = source.join(&dependency.files.root).join(file);
+                fs::create_dir_all(target.parent().unwrap()).unwrap();
+                fs::write(target, "fixture supporting runtime").unwrap();
+            }
+            source
+        };
+        sources.insert(format!("@dependency/{name}"), source);
+    }
     let state = State::open(temp.path().join("state.sqlite3")).unwrap();
     let plan = plan_apply(&catalog, &sources, &home);
     let mut initial = BTreeMap::<_, Vec<_>>::new();

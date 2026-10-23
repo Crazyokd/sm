@@ -129,6 +129,74 @@ fn allowed_target(target: &Path, scope: Scope) -> Result<()> {
     Ok(())
 }
 
+pub fn support_target(path: &Path) -> bool {
+    relative_path(path).is_ok()
+        && config_kind(path).is_none()
+        && [
+            ".claude/scripts",
+            ".claude/hooks",
+            ".codex/hooks",
+            ".kimi-code/hooks",
+        ]
+        .into_iter()
+        .any(|prefix| path.starts_with(prefix) && path != Path::new(prefix))
+}
+
+pub fn validate_support(files: &FileProjection) -> Result<()> {
+    relative_path(&files.root)?;
+    ensure!(
+        !files.entries.is_empty(),
+        "supporting files require entries"
+    );
+    let mut targets = BTreeSet::new();
+    for entry in &files.entries {
+        let ProjectionEntry::File { target, source } = entry else {
+            anyhow::bail!("supporting dependency permits only file entries");
+        };
+        ensure!(
+            support_target(target),
+            "unsupported supporting file target: {}",
+            target.display()
+        );
+        relative_path(source)?;
+        ensure!(
+            !source.components().any(|part| part.as_os_str() == ".git"),
+            "Git internals are not supporting files"
+        );
+        ensure!(targets.insert(target), "duplicate supporting file target");
+    }
+    Ok(())
+}
+
+pub fn render_support(
+    id: &str,
+    files: &FileProjection,
+    payload: &Path,
+    scope: &Path,
+) -> Result<Vec<OwnedWrite>> {
+    validate_support(files)?;
+    files
+        .entries
+        .iter()
+        .map(|entry| {
+            let ProjectionEntry::File { target, source } = entry else {
+                unreachable!("validated file entries")
+            };
+            let target = scope.join(target);
+            reject_symlink_path(&target)?;
+            let path = selected_file(payload, source)?;
+            Ok(OwnedWrite::new(
+                id,
+                target,
+                WriteBody::File {
+                    bytes: fs::read(&path)?,
+                    executable: fs::metadata(&path)?.permissions().mode() & 0o111 != 0,
+                },
+            ))
+        })
+        .collect()
+}
+
 pub(crate) fn adoptable_file_target(target: &Path, scope: Scope) -> bool {
     allowed_target(target, scope).is_ok() && config_kind(target).is_none()
 }
@@ -277,8 +345,8 @@ fn file_kind(target: &Path, scope: Scope) -> Option<ResourceKind> {
         ("rules", ResourceKind::Rule),
         ("prompts", ResourceKind::Prompt),
         ("commands", ResourceKind::Prompt),
-        ("hooks", ResourceKind::Script),
-        ("scripts", ResourceKind::Script),
+        ("hooks", ResourceKind::Hook),
+        ("scripts", ResourceKind::Hook),
     ] {
         for client in [".agents", ".codex", ".kimi-code", ".claude", ".cursor"] {
             let prefix = Path::new(client).join(directory);
@@ -375,9 +443,7 @@ pub fn validate(kind: ResourceKind, files: &FileProjection, scope: Scope) -> Res
                     "native configuration requires a resource fragment"
                 );
                 ensure!(
-                    file_kind(target, scope) == Some(kind)
-                        || (kind == ResourceKind::Hook
-                            && file_kind(target, scope) == Some(ResourceKind::Script)),
+                    file_kind(target, scope) == Some(kind),
                     "file projection mixes resource kinds"
                 );
                 if kind == ResourceKind::Skill {

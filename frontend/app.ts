@@ -73,7 +73,7 @@ for (const form of document.querySelectorAll<HTMLFormElement>(".resource-editor"
   const currentKind = (): Kind => {
     const kind = value("kind");
     switch (kind) {
-      case "skill": case "hook": case "rule": case "agent": case "mcp": case "prompt": case "policy": case "script": return kind;
+      case "skill": case "hook": case "rule": case "agent": case "mcp": case "prompt": case "policy": return kind;
       default: throw new Error("无效的资源类型。");
     }
   };
@@ -89,7 +89,6 @@ for (const form of document.querySelectorAll<HTMLFormElement>(".resource-editor"
   const templates = (kind: Kind, client: Client, id: string): [string, string] => {
     switch (kind) {
       case "skill": return ["SKILL.md", `---\nname: ${id}\ndescription: 说明何时应使用这项技能\n---\n\n# ${id}\n\n写下工作流程和完成标准。\n`];
-      case "script": throw new Error("请从已有脚本发起修改。");
       case "prompt": return ["prompt.md", "# 提示词\n\n写下提示词内容。\n"];
       case "policy": throw new Error("执行策略使用配置片段编辑器。");
       case "rule": return ["AGENTS.md", "# 工作约定\n\n在这里写下需要持续遵循的约定。\n"];
@@ -176,7 +175,7 @@ for (const form of document.querySelectorAll<HTMLFormElement>(".resource-editor"
     }
     label.append(select);
     const textLabel = document.createElement("label");
-    textLabel.textContent = `${{ skill: "Skill", hook: "Hook", rule: "规则", agent: "Agent", mcp: "MCP", prompt: "提示词", policy: "执行策略", script: "脚本" }[kind]}内容`;
+    textLabel.textContent = `${{ skill: "Skill", hook: "Hook", rule: "规则", agent: "Agent", mcp: "MCP", prompt: "提示词", policy: "执行策略" }[kind]}内容`;
     textarea = document.createElement("textarea"); textarea.rows = 10; textarea.readOnly = upstream;
     currentFile = select.value; textarea.value = drafts[currentFile] || "";
     textLabel.append(textarea); fields.append(label, textLabel);
@@ -232,7 +231,8 @@ for (const form of document.querySelectorAll<HTMLFormElement>(".resource-editor"
           if (!upstream) throw new Error("请填写上游 Git 地址或生成命令。");
           let reference = original?.origin === "upstream" ? original.upstream : id;
           if (JSON.stringify(upstream) !== JSON.stringify(catalog.upstreams[reference])) {
-            const shared = catalog.resources.some(resource => resource.id !== original?.id && resource.origin === "upstream" && resource.upstream === reference);
+            const shared = catalog.resources.some(resource => resource.id !== original?.id && resource.origin === "upstream" && resource.upstream === reference)
+              || Object.values(catalog.dependencies ?? {}).some(dependency => dependency.origin === "upstream" && dependency.upstream === reference);
             if (shared || !original) {
               reference = `${id}-source`;
               let suffix = 2;
@@ -264,8 +264,7 @@ for (const form of document.querySelectorAll<HTMLFormElement>(".resource-editor"
         } else if (kind === "prompt") {
           const root = payloadPath("codex", id, kind), filename = templates(kind, "codex", id)[0];
           definition = { kind, files: { root: origin === "self" ? root : value("upstream_path") || ".", entries: [{ target: `.codex/prompts/${id}.md`, source: filename }] } };
-        } else if (kind === "script") throw new Error("请从已有脚本发起修改。");
-        else {
+        } else {
           const payloads: Partial<Record<Client, string>> = {};
           const oldPath = original && "payload" in original ? original.payload : original && "payloads" in original ? Object.values(original.payloads)[0] : undefined;
           const changedPath = value("upstream_path") !== oldPath;
@@ -278,9 +277,14 @@ for (const form of document.querySelectorAll<HTMLFormElement>(".resource-editor"
           if (content !== undefined && content !== originalFiles[sourcePath(option.value, id)]) writes[option.value] = content;
         }
         catalog.resources = catalog.resources.filter(resource => resource.id !== (original?.id || id));
-        catalog.resources.push({ id, ...attribution, ...source, ...definition });
+        catalog.resources.push({ id, ...attribution, ...source, ...definition, ...(original?.dependencies?.length ? { dependencies: original.dependencies } : {}) });
       } else catalog.resources = catalog.resources.filter(resource => resource.id !== id);
-      const usedSources = new Set(catalog.resources.flatMap(resource => resource.origin === "upstream" ? [resource.upstream] : []));
+      const usedDependencies = new Set(catalog.resources.flatMap(resource => resource.dependencies ?? []));
+      if (catalog.dependencies) {
+        for (const reference of Object.keys(catalog.dependencies)) if (!usedDependencies.has(reference)) delete catalog.dependencies[reference];
+        if (!Object.keys(catalog.dependencies).length) delete catalog.dependencies;
+      }
+      const usedSources = new Set([...catalog.resources, ...Object.values(catalog.dependencies ?? {})].flatMap(source => source.origin === "upstream" ? [source.upstream] : []));
       for (const reference of Object.keys(catalog.upstreams)) if (!usedSources.has(reference)) delete catalog.upstreams[reference];
       writes["catalog.json"] = JSON.stringify(catalog, null, 2) + "\n";
       const renames: Record<string, string> = !retire && original && id !== original.id ? { [original.id]: id } : {};

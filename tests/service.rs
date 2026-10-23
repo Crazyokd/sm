@@ -570,3 +570,265 @@ fn upstream_skill_tree_follows_added_removed_helpers_and_isolates_unsafe_members
     let contents: serde_json::Value = state.get("resource_contents").unwrap();
     assert_eq!(contents["selected"], previous["selected"]);
 }
+
+#[test]
+fn complete_consumers_wait_for_shared_upstream_support_and_preserve_it_on_failure() {
+    let repo = Repo::new();
+    let runtime = runtime(&repo);
+    let state = runtime.state().unwrap();
+    let counter = repo.temp.path().join("fetch-count");
+    let generator = repo.work.join("resources/support.sh");
+    fs::write(&generator,"set -eu\nprintf 'fetch\\n' >> \"$1\"\nif [ \"$2\" != initial ]; then grep -q old-a \"$3\"; ! grep -q next-a \"$3\"; fi\nmkdir -p \"$4/.claude/scripts\" \"$4/.agents/skills/external\"\nprintf 'runtime' > \"$4/.claude/scripts/runtime.js\"\nprintf 'Upstream Skill' > \"$4/.agents/skills/external/SKILL.md\"\n").unwrap();
+    let mut catalog: serde_json::Value =
+        serde_json::from_slice(&fs::read(repo.work.join("catalog.json")).unwrap()).unwrap();
+    catalog["upstreams"] = json!({"shared":{"argv":["sh","resources/support.sh",counter,"initial",runtime.home.join(".codex/hooks.json")]}});
+    catalog["dependencies"] = json!({"runtime":{"origin":"upstream","upstream":"shared","files":{"root":".","entries":[{"target":".claude/scripts/runtime.js","source":".claude/scripts/runtime.js"}]}}});
+    for id in ["a", "b"] {
+        catalog["resources"].as_array_mut().unwrap().push(json!({
+            "id":id,"kind":"hook","origin":"self","scope":"user","dependencies":["runtime"],
+            "files":{"root":format!("resources/{id}"),"entries":[{"target":".codex/hooks.json","json":{"hooks":{"Stop":[{"hooks":[{"type":"command","command":format!("old-{id}")}]}]}}}]}
+        }));
+    }
+    catalog["resources"].as_array_mut().unwrap().push(json!({"id":"external","kind":"skill","origin":"upstream","upstream":"shared","scope":"user","files":{"root":".","entries":[{"target":".agents/skills/external","tree":".agents/skills/external"}]}}));
+    repo.catalog(catalog.clone());
+    repo.publish("Complete hooks with referenced upstream support");
+    let report = synchronize(&runtime, &state).unwrap();
+    assert!(report.ok(), "{report:?}");
+    assert_eq!(fs::read_to_string(&counter).unwrap(), "fetch\n");
+    let shared = runtime.home.join(".claude/scripts/runtime.js");
+    assert_eq!(fs::read(&shared).unwrap(), b"runtime");
+    assert_eq!(
+        state
+            .owned()
+            .unwrap()
+            .iter()
+            .filter(|write| write.path == shared)
+            .count(),
+        2
+    );
+    for id in ["a", "b"] {
+        assert!(
+            catalog["resources"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|resource| resource["id"] == id)
+                .unwrap()["origin"]
+                == "self"
+        );
+    }
+    let mut resources = catalog["resources"].as_array_mut().unwrap().iter_mut();
+    for resource in resources
+        .by_ref()
+        .filter(|resource| resource["id"] == "a" || resource["id"] == "b")
+    {
+        let id = resource["id"].as_str().unwrap().to_owned();
+        resource["files"]["entries"][0]["json"]["hooks"]["Stop"][0]["hooks"][0]["command"] =
+            json!(format!("next-{id}"));
+    }
+    catalog["upstreams"]["shared"]["argv"][3] = json!("updated");
+    repo.catalog(catalog.clone());
+    repo.publish("Update authored hook while dependency fetch verifies old body");
+    let report = synchronize(&runtime, &state).unwrap();
+    assert!(report.ok(), "{report:?}");
+    assert_eq!(fs::read_to_string(&counter).unwrap(), "fetch\nfetch\n");
+    let config = fs::read(runtime.home.join(".codex/hooks.json")).unwrap();
+    assert!(
+        String::from_utf8(config.clone())
+            .unwrap()
+            .contains("next-a")
+    );
+    let contents: serde_json::Value = state.get("resource_contents").unwrap();
+    assert!(!contents["a"].to_string().contains("runtime.js"));
+    catalog["upstreams"]["shared"]["argv"] = json!(["false"]);
+    for resource in catalog["resources"]
+        .as_array_mut()
+        .unwrap()
+        .iter_mut()
+        .filter(|resource| resource["id"] == "a" || resource["id"] == "b")
+    {
+        resource["files"]["entries"][0]["json"]["hooks"]["Stop"][0]["hooks"][0]["command"] =
+            json!("unavailable");
+    }
+    fs::write(
+        repo.work.join("resources/review/SKILL.md"),
+        "Independent update",
+    )
+    .unwrap();
+    repo.catalog(catalog);
+    repo.publish("Dependency source fails while independent resource updates");
+    let report = synchronize(&runtime, &state).unwrap();
+    assert_eq!(report.results["a"].status, ApplyStatus::Failed);
+    assert_eq!(report.results["b"].status, ApplyStatus::Failed);
+    assert_eq!(report.results["review"].status, ApplyStatus::Applied);
+    assert_eq!(fs::read(&shared).unwrap(), b"runtime");
+    assert_eq!(
+        fs::read(runtime.home.join(".codex/hooks.json")).unwrap(),
+        config
+    );
+    assert_eq!(
+        fs::read_to_string(runtime.home.join(".agents/skills/review/SKILL.md")).unwrap(),
+        "Independent update"
+    );
+}
+
+#[test]
+fn missing_support_payload_blocks_the_complete_consumer_and_keeps_previous_files() {
+    let repo = Repo::new();
+    let runtime = runtime(&repo);
+    let state = runtime.state().unwrap();
+    let support = repo.work.join("resources/dependencies/runtime/files");
+    fs::create_dir_all(&support).unwrap();
+    fs::write(support.join("runtime.js"), "runtime").unwrap();
+    let mut catalog: serde_json::Value =
+        serde_json::from_slice(&fs::read(repo.work.join("catalog.json")).unwrap()).unwrap();
+    catalog["dependencies"] = json!({"runtime":{"origin":"self","files":{"root":"resources/dependencies/runtime/files","entries":[{"target":".claude/scripts/runtime.js","source":"runtime.js"}]}}});
+    catalog["resources"].as_array_mut().unwrap().push(json!({"id":"hook","kind":"hook","origin":"self","scope":"user","dependencies":["runtime"],"files":{"root":"resources/hook","entries":[{"target":".codex/hooks.json","json":{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"before"}]}]}}}]}}));
+    repo.catalog(catalog.clone());
+    repo.publish("Self complete Hook");
+    assert!(synchronize(&runtime, &state).unwrap().ok());
+    let config = fs::read(runtime.home.join(".codex/hooks.json")).unwrap();
+    fs::remove_file(support.join("runtime.js")).unwrap();
+    catalog["resources"][1]["files"]["entries"][0]["json"]["hooks"]["Stop"][0]["hooks"][0]["command"] =
+        json!("after");
+    repo.catalog(catalog);
+    repo.publish("Missing dependency file");
+    let report = synchronize(&runtime, &state).unwrap();
+    assert_eq!(report.results["hook"].status, ApplyStatus::Failed);
+    assert_eq!(
+        fs::read(runtime.home.join(".codex/hooks.json")).unwrap(),
+        config
+    );
+    assert_eq!(
+        fs::read(runtime.home.join(".claude/scripts/runtime.js")).unwrap(),
+        b"runtime"
+    );
+}
+
+#[test]
+fn renamed_complete_hook_keeps_old_installation_until_dependency_retry_succeeds() {
+    let repo = Repo::new();
+    let runtime = runtime(&repo);
+    let state = runtime.state().unwrap();
+    let payload = repo.work.join("resources/old-hook");
+    fs::create_dir_all(payload.join("files")).unwrap();
+    fs::write(
+        payload.join("config.json"),
+        json!({"hooks":{"Stop":[{"hooks":[{"type":"command","command":"old-command"}]}]}})
+            .to_string(),
+    )
+    .unwrap();
+    fs::write(payload.join("files/hook.sh"), "old authored helper").unwrap();
+    fs::write(repo.work.join("resources/runtime.sh"),"set -eu\nmkdir -p \"$1/.claude/scripts\"\nprintf 'shared runtime' > \"$1/.claude/scripts/runtime.js\"\n").unwrap();
+    let mut catalog: serde_json::Value =
+        serde_json::from_slice(&fs::read(repo.work.join("catalog.json")).unwrap()).unwrap();
+    let upstream = json!({"argv":["sh","resources/runtime.sh"]});
+    catalog["upstreams"] = json!({"runtime":upstream});
+    catalog["dependencies"] = json!({"runtime":{"origin":"upstream","upstream":"runtime","files":{"root":".","entries":[{"target":".claude/scripts/runtime.js","source":".claude/scripts/runtime.js"}]}}});
+    catalog["resources"].as_array_mut().unwrap().push(json!({"id":"old-hook","kind":"hook","origin":"self","scope":"user","dependencies":["runtime"],"files":{"root":"resources/old-hook","entries":[{"target":".codex/hooks.json","fragment":"config.json"},{"target":".codex/hooks/complete.sh","source":"files/hook.sh"}]}}));
+    repo.catalog(catalog.clone());
+    repo.publish("Install complete Hook before rename");
+    assert!(synchronize(&runtime, &state).unwrap().ok());
+    let config = runtime.home.join(".codex/hooks.json");
+    let helper = runtime.home.join(".codex/hooks/complete.sh");
+    let shared = runtime.home.join(".claude/scripts/runtime.js");
+    let before_config = fs::read(&config).unwrap();
+    let before_helper = fs::read(&helper).unwrap();
+    let before_shared = fs::read(&shared).unwrap();
+    let before_owned = state.owned().unwrap();
+    fs::rename(&payload, repo.work.join("resources/new-hook")).unwrap();
+    fs::write(
+        repo.work.join("resources/new-hook/config.json"),
+        json!({"hooks":{"Stop":[{"hooks":[{"type":"command","command":"new-command"}]}]}})
+            .to_string(),
+    )
+    .unwrap();
+    fs::write(
+        repo.work.join("resources/new-hook/files/hook.sh"),
+        "new authored helper",
+    )
+    .unwrap();
+    catalog["resources"][1]["id"] = json!("new-hook");
+    catalog["resources"][1]["files"]["root"] = json!("resources/new-hook");
+    catalog["upstreams"]["runtime"] = json!({"argv":["false"]});
+    repo.catalog(catalog.clone());
+    repo.publish("Rename complete Hook while upstream dependency is unavailable");
+    let report = synchronize(&runtime, &state).unwrap();
+    assert_eq!(report.results["new-hook"].status, ApplyStatus::Failed);
+    assert_eq!(report.results["old-hook"].status, ApplyStatus::Pending);
+    assert_eq!(fs::read(&config).unwrap(), before_config);
+    assert_eq!(fs::read(&helper).unwrap(), before_helper);
+    assert_eq!(fs::read(&shared).unwrap(), before_shared);
+    assert_eq!(state.owned().unwrap(), before_owned);
+    catalog["upstreams"]["runtime"] = upstream;
+    repo.catalog(catalog);
+    repo.publish("Retry complete renamed Hook with available support");
+    let report = synchronize(&runtime, &state).unwrap();
+    assert!(report.ok(), "{report:?}");
+    assert_eq!(report.results["new-hook"].status, ApplyStatus::Applied);
+    assert!(fs::read_to_string(&config).unwrap().contains("new-command"));
+    assert!(!fs::read_to_string(&config).unwrap().contains("old-command"));
+    assert_eq!(fs::read(&helper).unwrap(), b"new authored helper");
+    assert_eq!(fs::read(&shared).unwrap(), before_shared);
+    let owned = state.owned().unwrap();
+    assert!(!owned.iter().any(|write| write.resource_id == "old-hook"));
+    for path in [&config, &helper, &shared] {
+        assert!(
+            owned
+                .iter()
+                .any(|write| write.resource_id == "new-hook" && &write.path == path)
+        );
+    }
+}
+
+#[test]
+fn native_installation_pending_does_not_defer_ready_payload_retirement() {
+    let repo = Repo::new();
+    let runtime = runtime(&repo);
+    let state = runtime.state().unwrap();
+    assert!(synchronize(&runtime, &state).unwrap().ok());
+    let old = runtime.home.join(".agents/skills/review/SKILL.md");
+    assert!(old.is_file());
+    fs::create_dir_all(runtime.home.join(".codex/cache/sample")).unwrap();
+    fs::write(runtime.home.join(".codex/config.toml"),"[marketplaces.market]\nsource_type='git'\nsource='https://example.invalid/plugins'\n[plugins.'sample@market']\nenabled=false\n").unwrap();
+    fs::rename(
+        repo.work.join("resources/review"),
+        repo.work.join("resources/replacement"),
+    )
+    .unwrap();
+    let mut catalog: serde_json::Value =
+        serde_json::from_slice(&fs::read(repo.work.join("catalog.json")).unwrap()).unwrap();
+    catalog["resources"][0]["id"] = json!("replacement");
+    catalog["resources"][0]["payload"] = json!("resources/replacement");
+    catalog["resources"].as_array_mut().unwrap().push(json!({"id":"native-policy","kind":"policy","origin":"self","scope":"user","installation":{"agent":"codex","source":"https://example.invalid/plugins","selector":"sample@market","enabled":false,"paths":["~/.codex/cache/sample"],"update":[["true"]]}}));
+    repo.catalog(catalog);
+    repo.publish("Replace payload while native policy awaits verification");
+    let loaded = sm::model::Catalog::load(&repo.work).unwrap();
+    let sources = loaded
+        .resources
+        .iter()
+        .map(|resource| (resource.id.clone(), repo.work.clone()))
+        .collect();
+    assert_eq!(
+        sm::apply::plan_apply(&loaded, &sources, &runtime.home).results["native-policy"].status,
+        ApplyStatus::Pending
+    );
+    let report = synchronize(&runtime, &state).unwrap();
+    assert!(report.ok(), "{report:?}");
+    assert_eq!(report.results["native-policy"].status, ApplyStatus::Applied);
+    assert_eq!(report.results["replacement"].status, ApplyStatus::Applied);
+    assert!(!old.exists());
+    assert!(
+        runtime
+            .home
+            .join(".agents/skills/replacement/SKILL.md")
+            .is_file()
+    );
+    assert!(
+        !state
+            .owned()
+            .unwrap()
+            .iter()
+            .any(|write| write.resource_id == "review")
+    );
+}

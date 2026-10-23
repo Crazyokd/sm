@@ -1,0 +1,59 @@
+{
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "command": "python3 \"/home/standard/.claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/session_end.py\"",
+            "timeout": 3,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "python3 \"/home/standard/.claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/session_start.py\"",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "/home/standard/.codex/hooks/hindsight_codex.py retain",
+            "statusMessage": "Retaining Hindsight memory",
+            "timeout": 30,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "/home/standard/.codex/hooks/hindsight_codex.py recall",
+            "statusMessage": "Recalling Hindsight memories",
+            "timeout": 12,
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "python3 \"/home/standard/.claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/recall.py\"",
+            "timeout": 12,
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -72,7 +72,28 @@ pub struct Candidate {
 pub fn content_hash(resource: &Resource) -> Result<String> {
     let mut hash = Sha256::new();
     hash.update(serde_json::to_vec(resource)?);
-    for path in resource_files(resource)? {
+    let mut files = resource_files(resource)?;
+    if !resource.dependencies.is_empty() {
+        let catalog = Catalog::load(&resource.root)?;
+        for name in &resource.dependencies {
+            let dependency = catalog
+                .dependencies
+                .get(name)
+                .context("dependency missing")?;
+            hash.update(serde_json::to_vec(dependency)?);
+            if dependency.source.is_self() {
+                for entry in &dependency.files.entries {
+                    if let crate::model::ProjectionEntry::File { source, .. } = entry {
+                        files.insert(contained(
+                            &resource.root,
+                            &dependency.files.root.join(source),
+                        )?);
+                    }
+                }
+            }
+        }
+    }
+    for path in files {
         hash.update(
             path.strip_prefix(&resource.root)?
                 .to_str()
@@ -301,6 +322,14 @@ pub fn to_changeset(candidate: &Candidate, report: &ValidationReport) -> Result<
             }
             CandidateOperation::Edit => {}
         }
+        let referenced: BTreeSet<_> = catalog
+            .resources
+            .iter()
+            .flat_map(|resource| &resource.dependencies)
+            .collect();
+        catalog
+            .dependencies
+            .retain(|name, _| referenced.contains(name));
         writes.insert(
             "catalog.json".into(),
             serde_json::to_string_pretty(&catalog)? + "\n",

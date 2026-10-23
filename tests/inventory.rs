@@ -49,6 +49,49 @@ fn at<'a>(inventory: &'a Inventory, path: &Path) -> &'a sm::inventory::Inventory
 }
 
 #[test]
+fn shared_support_file_is_one_inventory_entry_with_every_owner_and_drift() {
+    let (home, state) = fixture();
+    let path = put(
+        home.path(),
+        ".codex/hooks/shared.sh",
+        "#!/bin/sh\necho shared\n",
+    );
+    state
+        .replace_owned(
+            &path,
+            &["alpha", "beta"]
+                .into_iter()
+                .map(|id| {
+                    OwnedWrite::new(
+                        id,
+                        &path,
+                        WriteBody::File {
+                            bytes: fs::read(&path).unwrap(),
+                            executable: false,
+                        },
+                    )
+                })
+                .collect::<Vec<_>>(),
+        )
+        .unwrap();
+    for changed in [false, true] {
+        if changed {
+            fs::write(&path, "local edit").unwrap();
+        }
+        let inventory = scan(&Catalog::default(), &state, home.path()).unwrap();
+        let entries: Vec<_> = inventory
+            .entries
+            .iter()
+            .filter(|entry| entry.path == path)
+            .collect();
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].owner.as_deref(), Some("alpha"));
+        assert_eq!(entries[0].other_owners, vec!["beta"]);
+        assert_eq!(entries[0].status, if changed { "drift" } else { "managed" });
+    }
+}
+
+#[test]
 fn discovers_new_skills_and_aliases_without_reading_payloads() {
     let (home, state) = fixture();
     let marker = put(
@@ -343,6 +386,7 @@ fn scope_is_exact_and_missing_projects_and_unsafe_links_are_reported() {
         "not registered",
     );
     let catalog = Catalog {
+        dependencies: Default::default(),
         upstreams: Default::default(),
         projects: [
             ("registered".into(), "~/projects/registered".into()),
@@ -502,6 +546,7 @@ fn discovers_nested_rules_once_in_the_longest_registered_project_scope() {
     put(outside.path(), "hidden/AGENTS.md", "outside home");
     symlink(outside.path(), home.path().join("projects/app/alias")).unwrap();
     let catalog = Catalog {
+        dependencies: Default::default(),
         upstreams: Default::default(),
         projects: [
             ("app".into(), "~/projects/app".into()),
@@ -538,6 +583,7 @@ fn nested_rule_depth_limit_reports_incomplete_coverage() {
         "deep rule",
     );
     let catalog = Catalog {
+        dependencies: Default::default(),
         upstreams: Default::default(),
         projects: [("app".into(), "~/project".into())].into(),
         resources: vec![],

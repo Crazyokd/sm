@@ -7,15 +7,28 @@ type BrowserCommand = { type: "open" | "navigate"; url: string } | { type: "eval
 function browser<T>(command: BrowserCommand): T {
   const payload = Buffer.from(JSON.stringify(command), "utf-8").toString("base64");
   // Browser Harness owns the Python bridge; all regression logic below is type checked.
-  const bridge = `import base64,json,time
+  const bridge = String.raw`import base64,json,os,time
 request=json.loads(base64.b64decode("${payload}"))
 if request['type']=='open':
-    new_tab(request['url']);wait_for_load();cdp('Network.enable');cdp('Network.setCacheDisabled',cacheDisabled=True);result=None
+    tab_id=os.environ.get('SM_BROWSER_TAB_ID')
+    if tab_id: switch_tab(tab_id);goto_url(request['url'])
+    else: new_tab(request['url'])
+    wait_for_load();cdp('Network.enable');cdp('Network.setCacheDisabled',cacheDisabled=True);result=None
 elif request['type']=='navigate':
     previous=js('performance.timeOrigin');goto_url(request['url']);deadline=time.monotonic()+10
     while js('performance.timeOrigin')==previous and time.monotonic()<deadline: time.sleep(0.05)
     wait_for_load();result=None
-else: result=js(request['code'])
+else:
+    try:
+        js("globalThis.__smEditorTestCode='';globalThis.__smEditorTestResult='';null")
+        encoded=base64.b64encode(request['code'].encode('utf-8')).decode('ascii')
+        for offset in range(0,len(encoded),16384):
+            js('globalThis.__smEditorTestCode+='+json.dumps(encoded[offset:offset+16384])+';null')
+        js('''(async () => { const code = new TextDecoder().decode(Uint8Array.from(atob(globalThis.__smEditorTestCode), char => char.charCodeAt(0))); const value = await (0, eval)(code); globalThis.__smEditorTestResult = JSON.stringify(value === undefined ? null : value); return null; })()''')
+        length=js('globalThis.__smEditorTestResult.length')
+        result=json.loads(''.join(js(f'globalThis.__smEditorTestResult.slice({offset},{offset+16384})') for offset in range(0,length,16384)))
+    finally:
+        js('delete globalThis.__smEditorTestCode;delete globalThis.__smEditorTestResult;null')
 print(json.dumps(result))
 `;
   const output = execFileSync("browser-harness", [], { input: bridge, encoding: "utf-8", timeout: 30000 });
@@ -33,16 +46,21 @@ const existing = evaluate(() => {
   return data.catalog.resources.find(resource => resource.kind === "skill" && resource.origin === "self")?.id;
 }, null);
 assert.ok(existing, "An existing self Skill is required");
-function prepare(path: string): void {
+function prepare(path: string, catalog?: EditorData["catalog"]): void {
   browser<null>({ type: "navigate", url: base + path });
-  evaluate(() => {
+  evaluate(catalog => {
+    if (catalog) {
+      // Feed the prior intercepted catalog into the next proposal without changing the server.
+      const clone = window.structuredClone;
+      window.structuredClone = <T>(value: T): T => clone(typeof value === "object" && value !== null && "resources" in value ? catalog : value) as T;
+    }
     window.smTestRequest = null;
     window.fetch = async (_url: RequestInfo | URL, options?: RequestInit): Promise<Response> => {
       if (typeof options?.body !== "string") throw new Error("Expected a JSON proposal body");
       window.smTestRequest = JSON.parse(options.body) as ChangeSet;
       return new Response(JSON.stringify({ message: "Intercepted test proposal" }), { status: 200, headers: { "Content-Type": "application/json" } });
     };
-  }, null);
+  }, catalog);
 }
 prepare("/resources");
 evaluate(id => {
@@ -82,10 +100,10 @@ const resources = evaluate(() => {
   const text = form.querySelector(".editor-data")!.textContent!;
   const data: EditorData = JSON.parse(text);
   const options = [...form.querySelectorAll<HTMLOptionElement>("[name=kind] option")].map(option => option.value);
-  return { resources: data.catalog.resources, options };
+  return { resources: data.catalog.resources, catalog: data.catalog, options };
 }, null);
 assert.ok(!resources.options.includes("bundle"), "A collection is still offered as a resource type");
-assert.ok(resources.options.includes("prompt") && resources.options.includes("policy"));
+assert.deepEqual(resources.options, ["skill", "hook", "rule", "agent", "mcp", "prompt", "policy"], "Only complete resource types should be offered");
 const fileResources = resources.resources.filter(resource => resource.origin === "self" && "files" in resource && resource.files.entries.some(entry => "source" in entry || "tree" in entry));
 assert.ok(fileResources.length >= 2, "Two independent self file resources are required");
 const [first, second] = fileResources as [Resource, Resource, ...Resource[]];
@@ -124,6 +142,30 @@ assert.deepEqual(retirement.resource_ids, [second.id]);
 const retiredCatalog: EditorData["catalog"] = JSON.parse(retirement.writes["catalog.json"]!);
 assert.deepEqual(retiredCatalog.resources.find(resource => resource.id === first.id), first);
 assert.ok(!retiredCatalog.resources.some(resource => resource.id === second.id));
+
+const stagedCatalog = structuredClone(resources.catalog);
+const supportId = "ui-shared-runtime-probe", supportSource = "ui-support-source-probe";
+stagedCatalog.dependencies ??= {};
+stagedCatalog.dependencies[supportId] = { origin: "upstream", upstream: supportSource, files: { root: "hooks", entries: [{ target: ".codex/hooks/ui-shared-runtime.sh", source: "runtime.sh" }] } };
+stagedCatalog.upstreams[supportSource] = { git: "https://example.invalid/shared-runtime.git" };
+for (const id of [first.id, second.id]) {
+  const resource = stagedCatalog.resources.find(resource => resource.id === id)!;
+  resource.dependencies = [...(resource.dependencies ?? []), supportId];
+}
+let afterRetirement = stagedCatalog;
+for (const [index, resource] of [first, second].entries()) {
+  prepare("/resources/" + resource.id, afterRetirement);
+  evaluate(() => {
+    const form = document.querySelector<HTMLFormElement>(".resource-editor")!;
+    form.querySelector<HTMLTextAreaElement>("[name=reason]")!.value = "Retire a shared supporting file consumer";
+    form.querySelector<HTMLButtonElement>(".retire")!.click();
+  }, null);
+  const change = evaluate(() => window.smTestRequest, null);
+  assert.ok(change);
+  afterRetirement = JSON.parse(change.writes["catalog.json"]!) as EditorData["catalog"];
+  assert.equal(supportId in (afterRetirement.dependencies ?? {}), index === 0, "Supporting files must remain until the last consumer retires");
+  assert.equal(supportSource in afterRetirement.upstreams, index === 0, "A retained dependency must keep its upstream source registered");
+}
 
 const binaryResource = resources.resources.find(resource => resource.origin === "self" && "files" in resource && resource.files.entries.some(entry => "source" in entry && /\.(png|jpe?g|gif|webp|woff2?)$/i.test(entry.source)));
 if (binaryResource) {
@@ -218,6 +260,68 @@ assert.doesNotThrow(() => JSON.parse(configChange.writes[fragmentPath]!));
 const configCatalog: EditorData["catalog"] = JSON.parse(configChange.writes["catalog.json"]!);
 for (const resource of resources.resources) assert.deepEqual(configCatalog.resources.find(next => next.id === resource.id), resource);
 
+const completeHook = resources.resources.find(resource => resource.origin === "self" && resource.kind === "hook" && "files" in resource && resource.files.entries.some(entry => "fragment" in entry) && resource.files.entries.some(entry => "source" in entry));
+assert.ok(completeHook && "files" in completeHook, "A complete Hook with configuration and its script is required");
+prepare("/resources/" + completeHook.id);
+const hookEdit = evaluate(id => {
+  const form = document.querySelector<HTMLFormElement>(".resource-editor")!;
+  const data: EditorData = JSON.parse(form.querySelector(".editor-data")!.textContent!);
+  const resource = data.catalog.resources.find(resource => resource.id === id)!;
+  if (!("files" in resource)) throw new Error("Expected complete Hook files");
+  const paths: string[] = [];
+  const select = form.querySelector<HTMLSelectElement>(".payload-fields select")!;
+  for (const entry of resource.files.entries) {
+    if (!("fragment" in entry) && !("source" in entry)) continue;
+    const path = `${resource.files.root}/${"source" in entry ? entry.source : entry.fragment}`.split("/").filter(part => part && part !== ".").join("/");
+    if (!(path in data.files)) continue;
+    if (![...select.options].some(option => option.value === path)) throw new Error("A Hook configuration or script was omitted from the editor");
+    select.value = path; select.dispatchEvent(new Event("change"));
+    const editor = form.querySelector<HTMLTextAreaElement>(".payload-fields textarea")!;
+    if (editor.readOnly) throw new Error("A self Hook file is read only");
+    editor.value = "fragment" in entry ? "\n" + JSON.stringify(JSON.parse(editor.value), null, 2) + "\n" : editor.value + "\n# COMPLETE_HOOK_SCRIPT_EDIT\n";
+    paths.push(path.replace(`resources/${id}/`, "resources/renamed-complete-hook-probe/"));
+  }
+  const name = form.querySelector<HTMLInputElement>("[name=resource_id]")!;
+  name.value = "renamed-complete-hook-probe"; name.dispatchEvent(new Event("change"));
+  form.querySelector<HTMLTextAreaElement>("[name=reason]")!.value = "Edit and rename a complete Hook with its configuration and script";
+  form.requestSubmit();
+  return paths;
+}, completeHook.id);
+const hookChange = evaluate(() => window.smTestRequest, null);
+assert.ok(hookChange);
+assert.ok(hookEdit.length >= 2 && hookEdit.every(path => path in hookChange.writes), "A complete Hook edit omitted its configuration or script");
+assert.ok(Object.values(hookChange.writes).some(text => text.includes("# COMPLETE_HOOK_SCRIPT_EDIT")));
+const hookCatalog: EditorData["catalog"] = JSON.parse(hookChange.writes["catalog.json"]!);
+const renamedHook = hookCatalog.resources.find(resource => resource.id === "renamed-complete-hook-probe");
+assert.ok(renamedHook && "files" in renamedHook);
+assert.deepEqual(renamedHook.files.entries, completeHook.files.entries);
+assert.deepEqual(renamedHook.dependencies, completeHook.dependencies);
+assert.deepEqual(hookCatalog.dependencies, resources.catalog.dependencies);
+
+const dependent = resources.resources.find(resource => resource.dependencies?.length);
+assert.ok(dependent, "A resource referencing supporting files is required");
+prepare("/resources/" + dependent.id);
+const supportDetails = evaluate(() => {
+  const details = document.querySelector<HTMLDetailsElement>("details.supporting-files");
+  if (!details) throw new Error("Referenced supporting files are missing from the resource detail");
+  return { open: details.open, summary: details.querySelector("summary")!.textContent! };
+}, null);
+assert.equal(supportDetails.open, false, "Supporting files must start collapsed after the resource body");
+assert.match(supportDetails.summary, /^支持文件（\d+）$/);
+evaluate(() => {
+  const form = document.querySelector<HTMLFormElement>(".resource-editor")!;
+  const name = form.querySelector<HTMLInputElement>("[name=resource_id]")!;
+  name.value = "renamed-dependent-probe"; name.dispatchEvent(new Event("change"));
+  form.querySelector<HTMLTextAreaElement>("[name=reason]")!.value = "Retain supporting file references through resource rename";
+  form.requestSubmit();
+}, null);
+const dependencyChange = evaluate(() => window.smTestRequest, null);
+assert.ok(dependencyChange);
+const dependencyCatalog: EditorData["catalog"] = JSON.parse(dependencyChange.writes["catalog.json"]!);
+assert.deepEqual(dependencyCatalog.resources.find(resource => resource.id === "renamed-dependent-probe")?.dependencies, dependent.dependencies);
+assert.deepEqual(dependencyCatalog.dependencies, resources.catalog.dependencies);
+assert.deepEqual(dependencyCatalog.upstreams, resources.catalog.upstreams);
+
 const shared = resources.resources.find(resource => resource.origin === "upstream" && resources.resources.some(other => other.id !== resource.id && other.origin === "upstream" && other.upstream === resource.upstream));
 assert.ok(shared && shared.origin === "upstream", "Two resources sharing an upstream are required");
 prepare("/resources/" + shared.id);
@@ -292,4 +396,4 @@ assert.equal(renamedInstallation.scope, "user");
 assert.equal(renamedInstallation.project, null);
 for (const resource of resources.resources) if (resource.id !== installation.id) assert.deepEqual(installationCatalog.resources.find(next => next.id === resource.id), resource);
 browser<null>({ type: "navigate", url: base + "/resources" });
-console.log("Browser editor regressions passed: creation, rename, individual filter/edit/retire, resource-owned fragments, complete Skill tree editing/rename, shared source isolation and native policy toggle/rename; all submissions intercepted.");
+console.log("Browser editor regressions passed: seven types, creation, rename, individual filter/edit/retire, complete Hook and Skill editing, supporting file reference retention and last-consumer retirement, shared source isolation and native policy toggle/rename; all submissions intercepted.");

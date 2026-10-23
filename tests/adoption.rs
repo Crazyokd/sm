@@ -11,6 +11,145 @@ use std::os::unix::fs::PermissionsExt;
 use std::{collections::BTreeMap, fs};
 
 #[test]
+fn reviewed_shared_support_handoff_requires_a_named_consumer_and_keeps_last_owner() {
+    for (shared_with, expected_owners) in [("alpha", 2), ("unrelated", 1)] {
+        let repo = Repo::new();
+        let home = repo.temp.path().join("home");
+        let path = home.join(".codex/hooks/shared.py");
+        let state = repo.state();
+        let file = |id: &str| {
+            OwnedWrite::new(
+                id,
+                &path,
+                WriteBody::File {
+                    bytes: b"print('shared')".to_vec(),
+                    executable: true,
+                },
+            )
+        };
+        assert!(
+            apply_writes(
+                &sm::model::ApplyPlan {
+                    writes: vec![file("former-script")],
+                    ..Default::default()
+                },
+                &state
+            )
+            .unwrap()
+            .ok()
+        );
+        let resources: Vec<_> = ["alpha", "beta"].into_iter().map(|id| json!({"id":id,"kind":"hook","origin":"self","scope":"user","project":null,"dependencies":["runtime"],"files":{"root":format!("resources/{id}"),"entries":[{"target":".codex/hooks.json","json":{"hooks":{"Stop":[{"hooks":[{"type":"command","command":id}]}]}}}]}})).collect();
+        repo.catalog(json!({"projects":{},"upstreams":{"remote":{"git":"https://example.invalid/runtime"}},"dependencies":{"runtime":{"origin":"upstream","upstream":"remote","files":{"root":".","entries":[{"target":".codex/hooks/shared.py","source":"shared.py"}]}}},"resources":resources}));
+        let catalog = Catalog::load(&repo.work).unwrap();
+        let manifest = json!([
+            {"resource":"alpha","previous_resource":"former-script","target":".codex/hooks/shared.py","sha256":fingerprint(b"print('shared')"),"executable":true},
+            {"resource":"beta","shared_with":shared_with,"target":".codex/hooks/shared.py","sha256":fingerprint(b"print('shared')"),"executable":true}
+        ]);
+        fs::write(
+            repo.work.join("resources/adoption.json"),
+            manifest.to_string(),
+        )
+        .unwrap();
+        adopt(&repo.work, &catalog, &home, &Default::default(), &state).unwrap();
+        let owned = state.owned().unwrap();
+        assert_eq!(owned.len(), expected_owners);
+        assert!(
+            owned
+                .iter()
+                .all(|write| write.resource_id != "former-script")
+        );
+        assert_eq!(fs::read(&path).unwrap(), b"print('shared')");
+        if expected_owners == 2 {
+            assert!(
+                apply_writes(
+                    &sm::model::ApplyPlan {
+                        writes: vec![file("alpha"), file("beta")],
+                        ..Default::default()
+                    },
+                    &state
+                )
+                .unwrap()
+                .ok()
+            );
+            assert!(
+                apply_writes(
+                    &sm::model::ApplyPlan {
+                        writes: vec![file("beta")],
+                        ..Default::default()
+                    },
+                    &state
+                )
+                .unwrap()
+                .ok()
+            );
+            assert!(path.exists());
+            assert_eq!(state.owned().unwrap()[0].resource_id, "beta");
+            assert!(apply_writes(&Default::default(), &state).unwrap().ok());
+            assert!(!path.exists());
+        }
+    }
+}
+
+#[test]
+fn reviewed_config_consolidation_requires_the_exact_union_of_named_owners() {
+    for (prior, expected) in [
+        (vec!["first", "second"], true),
+        (vec!["first", "missing"], false),
+        (vec!["first"], false),
+    ] {
+        let repo = Repo::new();
+        let home = repo.temp.path().join("home");
+        fs::create_dir_all(home.join(".codex")).unwrap();
+        let path = home.join(".codex/hooks.json");
+        fs::write(&path, "{\"local\":true}").unwrap();
+        let state = repo.state();
+        let first =
+            json!({"hooks":{"SessionStart":[{"hooks":[{"type":"command","command":"recall"}]}]}})
+                .as_object()
+                .unwrap()
+                .clone();
+        let second = json!({"hooks":{"Stop":[{"hooks":[{"type":"command","command":"retain"}]}]}})
+            .as_object()
+            .unwrap()
+            .clone();
+        assert!(
+            apply_writes(
+                &sm::model::ApplyPlan {
+                    writes: vec![
+                        OwnedWrite::new("first", &path, WriteBody::Json(first.clone())),
+                        OwnedWrite::new("second", &path, WriteBody::Json(second.clone()))
+                    ],
+                    ..Default::default()
+                },
+                &state
+            )
+            .unwrap()
+            .ok()
+        );
+        let before = fs::read(&path).unwrap();
+        let mut combined = json!({});
+        sm::apply::merge_entries(&mut combined, &first, false).unwrap();
+        sm::apply::merge_entries(&mut combined, &second, false).unwrap();
+        repo.catalog(json!({"projects":{},"resources":[{"id":"memory","kind":"hook","origin":"self","scope":"user","project":null,"files":{"root":"resources/memory","entries":[{"target":".codex/hooks.json","json":combined}]}}]}));
+        let catalog = Catalog::load(&repo.work).unwrap();
+        let plan = plan_apply(
+            &catalog,
+            &BTreeMap::from([("memory".into(), repo.work.clone())]),
+            &home,
+        );
+        fs::write(repo.work.join("resources/adoption.json"), json!([{"resource":"memory","previous_resources":prior,"target":".codex/hooks.json","sha256":fingerprint(&serde_json::to_vec(combined.as_object().unwrap()).unwrap())}]).to_string()).unwrap();
+        adopt(&repo.work, &catalog, &home, &plan, &state).unwrap();
+        let owned = state.owned().unwrap();
+        assert_eq!(owned.len(), if expected { 1 } else { 2 });
+        assert_eq!(fs::read(&path).unwrap(), before);
+        if expected {
+            assert_eq!(owned[0].resource_id, "memory");
+            assert!(apply_writes(&plan, &state).unwrap().ok());
+        }
+    }
+}
+
+#[test]
 fn reviewed_handoff_moves_only_unchanged_named_file_ownership_without_writing() {
     for (previous, changed_mode, expected) in [
         ("former", false, true),

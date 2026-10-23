@@ -114,7 +114,7 @@ pub fn render(
         Client::Kimi => ".kimi-code",
     });
     match kind {
-        ResourceKind::Prompt | ResourceKind::Policy | ResourceKind::Script => {
+        ResourceKind::Prompt | ResourceKind::Policy => {
             anyhow::bail!("resource has no native payload adapter")
         }
         ResourceKind::Skill => {

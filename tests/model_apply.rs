@@ -194,6 +194,7 @@ fn skill_is_client_independent_and_installed_once() {
     let catalog = Catalog {
         projects: BTreeMap::new(),
         upstreams: BTreeMap::new(),
+        dependencies: BTreeMap::new(),
         resources: vec![entry],
     };
     let plan = plan_apply(
@@ -238,6 +239,7 @@ fn project_directory_expands_under_each_home() {
     let catalog = Catalog {
         projects: BTreeMap::from([("app".into(), "~/repo/app".into())]),
         upstreams: BTreeMap::new(),
+        dependencies: BTreeMap::new(),
         resources: vec![entry.clone()],
     };
     for home in [Path::new("/tmp/one"), Path::new("/tmp/two")] {
@@ -618,4 +620,213 @@ fn native_mcp_payloads_contain_one_server_identity() {
             sm::providers::render(&entry, client, temp.path(), &temp.path().join("home")).is_err()
         );
     }
+}
+
+#[test]
+fn identical_shared_files_keep_all_owners_and_retire_only_after_the_last_consumer() {
+    let temp = tempdir().unwrap();
+    let path = temp.path().join("runtime.js");
+    let state = State::open(temp.path().join("state.sqlite3")).unwrap();
+    let write = |id: &str, bytes: &[u8], executable| {
+        OwnedWrite::new(
+            id,
+            &path,
+            WriteBody::File {
+                bytes: bytes.to_vec(),
+                executable,
+            },
+        )
+    };
+    assert!(
+        apply(
+            vec![
+                write("first", b"shared", true),
+                write("second", b"shared", true)
+            ],
+            &state
+        )
+        .ok()
+    );
+    assert_eq!(state.owned().unwrap().len(), 2);
+    assert_eq!(fs::read(&path).unwrap(), b"shared");
+    assert!(apply(vec![write("second", b"shared", true)], &state).ok());
+    assert_eq!(state.owned().unwrap().len(), 1);
+    assert_eq!(fs::read(&path).unwrap(), b"shared");
+    assert!(
+        apply(
+            vec![
+                write("second", b"updated", false),
+                write("third", b"updated", false)
+            ],
+            &state
+        )
+        .ok()
+    );
+    assert_eq!(state.owned().unwrap().len(), 2);
+    assert_eq!(fs::read(&path).unwrap(), b"updated");
+    assert_eq!(fs::metadata(&path).unwrap().permissions().mode() & 0o111, 0);
+    assert!(apply(vec![], &state).ok());
+    assert!(!path.exists());
+    assert!(state.owned().unwrap().is_empty());
+}
+
+#[test]
+fn shared_file_conflicts_and_local_mode_edits_preserve_every_consumer() {
+    for conflict in [
+        "bytes",
+        "new-mode",
+        "old-fingerprint",
+        "old-mode",
+        "unknown",
+        "local-mode",
+        "local-bytes",
+    ] {
+        let temp = tempdir().unwrap();
+        let shared = temp.path().join("runtime.js");
+        let a = temp.path().join("a.txt");
+        let b = temp.path().join("b.txt");
+        let state = State::open(temp.path().join("state.sqlite3")).unwrap();
+        let file = |id: &str, path: &Path, bytes: &[u8], executable| {
+            OwnedWrite::new(
+                id,
+                path,
+                WriteBody::File {
+                    bytes: bytes.to_vec(),
+                    executable,
+                },
+            )
+        };
+        let old = vec![
+            file("a", &shared, b"shared", true),
+            file("b", &shared, b"shared", true),
+            file("a", &a, b"old-a", false),
+            file("b", &b, b"old-b", false),
+        ];
+        assert!(apply(old, &state).ok());
+        match conflict {
+            "old-fingerprint" => {
+                state
+                    .replace_owned(
+                        &shared,
+                        &[
+                            file("a", &shared, b"shared", true),
+                            file("b", &shared, b"different", true),
+                        ],
+                    )
+                    .unwrap();
+            }
+            "old-mode" => {
+                state
+                    .replace_owned(
+                        &shared,
+                        &[
+                            file("a", &shared, b"shared", true),
+                            file("b", &shared, b"shared", false),
+                        ],
+                    )
+                    .unwrap();
+            }
+            "unknown" => {
+                state.replace_owned(&shared, &[]).unwrap();
+            }
+            "local-mode" => {
+                fs::set_permissions(&shared, fs::Permissions::from_mode(0o600)).unwrap()
+            }
+            "local-bytes" => fs::write(&shared, "local edit").unwrap(),
+            _ => {}
+        }
+        let before = state.owned().unwrap();
+        let writes = vec![
+            file("a", &shared, b"next", false),
+            file(
+                "b",
+                &shared,
+                if conflict == "bytes" {
+                    b"different"
+                } else {
+                    b"next"
+                },
+                conflict == "new-mode",
+            ),
+            file("a", &a, b"new-a", false),
+            file("b", &b, b"new-b", false),
+        ];
+        let report = apply(writes, &state);
+        assert!(!report.ok(), "{conflict}");
+        assert_eq!(fs::read(&a).unwrap(), b"old-a", "{conflict}");
+        assert_eq!(fs::read(&b).unwrap(), b"old-b", "{conflict}");
+        assert_eq!(state.owned().unwrap(), before, "{conflict}");
+    }
+}
+
+#[test]
+fn renamed_skill_retirement_waits_for_preflight_and_runtime_replacement_success() {
+    for failure in ["unmanaged", "runtime-parent"] {
+        let temp = tempdir().unwrap();
+        let old = temp.path().join(".agents/skills/review/SKILL.md");
+        let replacement = temp.path().join(".agents/skills/replacement/SKILL.md");
+        let state = State::open(temp.path().join("state.sqlite3")).unwrap();
+        assert!(apply(vec![owned(&old, b"old Skill")], &state).ok());
+        let blocker = if failure == "unmanaged" {
+            fs::create_dir_all(replacement.parent().unwrap()).unwrap();
+            fs::write(&replacement, "unmanaged local Skill").unwrap();
+            replacement.clone()
+        } else {
+            let parent = replacement.parent().unwrap().to_path_buf();
+            fs::write(&parent, "local file in place of directory").unwrap();
+            parent
+        };
+        let before = state.owned().unwrap();
+        let mut next = owned(&replacement, b"replacement Skill");
+        next.resource_id = "replacement".into();
+        let report = apply(vec![next.clone()], &state);
+        assert!(!report.ok(), "{failure}");
+        assert_eq!(
+            report.results["review"].status,
+            sm::model::ApplyStatus::Pending,
+            "{failure}"
+        );
+        assert_eq!(fs::read(&old).unwrap(), b"old Skill", "{failure}");
+        assert_eq!(state.owned().unwrap(), before, "{failure}");
+        fs::remove_file(blocker).unwrap();
+        assert!(apply(vec![next], &state).ok(), "{failure}");
+        assert!(!old.exists(), "{failure}");
+        assert_eq!(
+            fs::read(&replacement).unwrap(),
+            b"replacement Skill",
+            "{failure}"
+        );
+        assert!(
+            state
+                .owned()
+                .unwrap()
+                .iter()
+                .all(|write| write.resource_id == "replacement")
+        );
+    }
+}
+
+#[test]
+fn ordinary_retirement_is_not_blocked_by_a_policy_without_desired_writes() {
+    let temp = tempdir().unwrap();
+    let old = temp.path().join(".agents/skills/review/SKILL.md");
+    let state = State::open(temp.path().join("state.sqlite3")).unwrap();
+    assert!(apply(vec![owned(&old, b"retired Skill")], &state).ok());
+    let report = apply_writes(
+        &sm::model::ApplyPlan {
+            writes: Vec::new(),
+            results: BTreeMap::from([(
+                "native-policy".into(),
+                sm::model::ResourceResult::new(
+                    sm::model::ApplyStatus::Pending,
+                    "Native verification pending",
+                ),
+            )]),
+        },
+        &state,
+    )
+    .unwrap();
+    assert!(report.ok());
+    assert!(!old.exists());
+    assert!(state.owned().unwrap().is_empty());
 }
