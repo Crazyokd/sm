@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 use std::{
+    cell::RefCell,
     collections::{BTreeMap, BTreeSet},
     fs,
     io::{Read, Take},
@@ -75,6 +76,8 @@ struct ExternalInstallation {
 struct Scanner {
     home: PathBuf,
     owned: Vec<StoredWrite>,
+    owned_paths: BTreeMap<PathBuf, Vec<usize>>,
+    fingerprints: RefCell<BTreeMap<PathBuf, Option<StoredBody>>>,
     native: Vec<(PathBuf, String)>,
     enabled: BTreeMap<PathBuf, bool>,
     skill_paths: BTreeMap<PathBuf, bool>,
@@ -87,9 +90,19 @@ struct Scanner {
 /// Reads resource locations and configuration identities without returning resource contents.
 pub fn scan(catalog: &Catalog, state: &State, home: &Path) -> Result<Inventory> {
     let home = home.canonicalize()?;
+    let owned = state.owned()?;
+    let mut owned_paths: BTreeMap<PathBuf, Vec<usize>> = BTreeMap::new();
+    for (index, write) in owned.iter().enumerate() {
+        owned_paths
+            .entry(write.path.clone())
+            .or_default()
+            .push(index);
+    }
     let mut scanner = Scanner {
         home: home.clone(),
-        owned: state.owned()?,
+        owned,
+        owned_paths,
+        fingerprints: RefCell::new(BTreeMap::new()),
         native: state
             .get::<Vec<ExternalInstallation>>("external_installations")?
             .into_iter()
@@ -203,8 +216,11 @@ pub fn scan(catalog: &Catalog, state: &State, home: &Path) -> Result<Inventory> 
         .filter(|entry| entry.status != "native")
     {
         entry.other_owners = scanner
-            .owned
-            .iter()
+            .owned_paths
+            .get(&entry.path)
+            .into_iter()
+            .flatten()
+            .map(|index| &scanner.owned[*index])
             .filter(|write| {
                 write.path == entry.path
                     && matches!(write.body, StoredBody::FileFingerprint { .. })
@@ -582,7 +598,22 @@ impl Scanner {
         }
         let mut owner = None;
         let mut status = "unmanaged";
-        for write in &self.owned {
+        let mut candidates = self.owned_paths.get(path).cloned().unwrap_or_default();
+        if kind == "skill" {
+            candidates.extend(
+                self.owned_paths
+                    .range(lookup.to_path_buf()..)
+                    .take_while(|(path, _)| path.starts_with(lookup))
+                    .flat_map(|(_, indices)| indices.iter().copied()),
+            );
+        } else if let Some(indices) = self.owned_paths.get(lookup) {
+            candidates.extend(indices);
+        }
+        // 保持原归属顺序，避免多个管理者的优先级因路径索引而改变。
+        candidates.sort_unstable();
+        candidates.dedup();
+        for index in candidates {
+            let write = &self.owned[index];
             let file = write.path == lookup || write.path == path;
             let skill = kind == "skill" && write.path.starts_with(lookup);
             if !file && !skill {
@@ -686,34 +717,16 @@ impl Scanner {
     }
 
     fn matches(&self, write: &StoredWrite) -> bool {
-        if write.path.ancestors().any(Path::is_symlink) {
-            return false;
-        }
         match &write.body {
-            StoredBody::FileFingerprint { sha256, executable } => {
-                let Ok(metadata) = fs::metadata(&write.path) else {
-                    return false;
-                };
-                if !metadata.is_file()
-                    || metadata.len() > MAX_HASH_BYTES
-                    || (metadata.permissions().mode() & 0o111 != 0) != *executable
-                {
-                    return false;
-                }
-                let Ok(file) = fs::File::open(&write.path) else {
-                    return false;
-                };
-                let mut hash = Sha256::new();
-                let mut reader = file.take(MAX_HASH_BYTES + 1);
-                let mut buffer = [0; 8192];
-                loop {
-                    match reader.read(&mut buffer) {
-                        Ok(0) => return <[u8; 32]>::from(hash.finalize()) == *sha256,
-                        Ok(count) => hash.update(&buffer[..count]),
-                        Err(_) => return false,
-                    }
-                }
+            StoredBody::FileFingerprint { .. } => {
+                self.fingerprints
+                    .borrow_mut()
+                    .entry(write.path.clone())
+                    .or_insert_with(|| file_fingerprint(&write.path))
+                    .as_ref()
+                    == Some(&write.body)
             }
+            _ if write.path.ancestors().any(Path::is_symlink) => false,
             StoredBody::Markdown(bytes) => {
                 let Some(text) = read_text(&write.path) else {
                     return false;
@@ -977,6 +990,29 @@ impl Scanner {
     }
 }
 
+fn file_fingerprint(path: &Path) -> Option<StoredBody> {
+    if path.ancestors().any(Path::is_symlink) {
+        return None;
+    }
+    let metadata = fs::metadata(path).ok()?;
+    if !metadata.is_file() || metadata.len() > MAX_HASH_BYTES {
+        return None;
+    }
+    let mut reader = fs::File::open(path).ok()?.take(MAX_HASH_BYTES + 1);
+    let mut hash = Sha256::new();
+    let mut buffer = [0; 8192];
+    loop {
+        let count = reader.read(&mut buffer).ok()?;
+        if count == 0 {
+            return Some(StoredBody::FileFingerprint {
+                sha256: hash.finalize().into(),
+                executable: metadata.permissions().mode() & 0o111 != 0,
+            });
+        }
+        hash.update(&buffer[..count]);
+    }
+}
+
 fn excluded(path: &Path) -> bool {
     path.file_name()
         .and_then(|name| name.to_str())
@@ -1059,5 +1095,55 @@ fn contains(value: &Value, owned: &Value) -> bool {
             owned.iter().all(|owned| value.contains(owned))
         }
         _ => value == owned,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::{OwnedWrite, WriteBody};
+
+    #[test]
+    fn shared_fingerprints_use_one_observation_and_next_scan_refreshes_it() {
+        let home = tempfile::tempdir().unwrap();
+        let path = home.path().join("shared.sh");
+        fs::write(&path, "original").unwrap();
+        let original = StoredWrite::from(&OwnedWrite::new(
+            "first",
+            &path,
+            WriteBody::File {
+                bytes: b"original".to_vec(),
+                executable: false,
+            },
+        ));
+        let changed = StoredWrite::from(&OwnedWrite::new(
+            "second",
+            &path,
+            WriteBody::File {
+                bytes: b"changed".to_vec(),
+                executable: false,
+            },
+        ));
+        let scanner = || Scanner {
+            home: home.path().into(),
+            owned: Vec::new(),
+            owned_paths: BTreeMap::new(),
+            fingerprints: RefCell::new(BTreeMap::new()),
+            native: Vec::new(),
+            enabled: BTreeMap::new(),
+            skill_paths: BTreeMap::new(),
+            skill_names: BTreeMap::new(),
+            entries: BTreeMap::new(),
+            errors: BTreeSet::new(),
+            visited: 0,
+        };
+        let first_scan = scanner();
+        assert!(first_scan.matches(&original));
+        fs::write(&path, "changed").unwrap();
+        assert!(!first_scan.matches(&changed));
+        assert!(first_scan.matches(&original));
+        let next_scan = scanner();
+        assert!(next_scan.matches(&changed));
+        assert!(!next_scan.matches(&original));
     }
 }
