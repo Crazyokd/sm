@@ -396,4 +396,54 @@ assert.equal(renamedInstallation.scope, "user");
 assert.equal(renamedInstallation.project, null);
 for (const resource of resources.resources) if (resource.id !== installation.id) assert.deepEqual(installationCatalog.resources.find(next => next.id === resource.id), resource);
 browser<null>({ type: "navigate", url: base + "/resources" });
-console.log("Browser editor regressions passed: seven types, creation, rename, individual filter/edit/retire, complete Hook and Skill editing, supporting file reference retention and last-consumer retirement, shared source isolation and native policy toggle/rename; all submissions intercepted.");
+const sourceView = evaluate(() => {
+  const data: EditorData = JSON.parse(document.querySelector(".editor-data")!.textContent!);
+  const byId = new Map(data.catalog.resources.map(resource => [resource.id, resource]));
+  const rows = [...document.querySelectorAll<HTMLTableRowElement>("tr[data-resource-id]")];
+  const ids = rows.map(row => row.dataset["resourceId"]!);
+  if (new Set(ids).size !== data.catalog.resources.length || ids.length !== data.catalog.resources.length) throw new Error("A source view dropped or duplicated resources");
+  const groups = [...document.querySelectorAll<HTMLDetailsElement>(".resource-group")];
+  if (groups.some(group => group.open)) throw new Error("The default source groups should be collapsed");
+  for (const group of groups) {
+    for (const row of group.querySelectorAll<HTMLTableRowElement>("tr[data-resource-id]")) {
+      const resource = byId.get(row.dataset["resourceId"]!)!;
+      if (group.dataset["origin"] === "upstream") {
+        if (resource.origin !== "upstream" || resource.upstream !== group.dataset["group"]) throw new Error("An upstream group contains another source or a self resource");
+      } else if (resource.origin !== "self") throw new Error("A self group contains an upstream resource");
+    }
+  }
+  const upstream = groups.find(group => group.dataset["origin"] === "upstream")!;
+  if (!upstream) throw new Error("An upstream group is required");
+  upstream.querySelector<HTMLElement>("summary")!.click();
+  if (!upstream.open) throw new Error("The upstream group did not expand");
+  const href = document.querySelector<HTMLAnchorElement>('.resource-view-switch a[href*="view=kind"]')!.href;
+  return { href, sources: groups.filter(group => group.dataset["origin"] === "upstream").length };
+}, null);
+assert.ok(sourceView.sources > 1);
+browser<null>({ type: "navigate", url: sourceView.href });
+const kindView = evaluate(() => {
+  const groups = [...document.querySelectorAll<HTMLDetailsElement>(".resource-group")];
+  for (const group of groups) {
+    const label = group.querySelector(".resource-group-title")!.textContent!;
+    const rows = [...group.querySelectorAll<HTMLTableRowElement>("tr[data-resource-id]")];
+    if (!rows.every(row => row.cells[1]!.textContent === label)) throw new Error("A type group mixes resource types");
+  }
+  return { groups: groups.length, rows: document.querySelectorAll("tr[data-resource-id]").length, active: document.querySelector('.resource-view-switch [aria-current="page"]')!.textContent };
+}, null);
+assert.equal(kindView.groups, new Set(resources.resources.map(resource => resource.kind)).size);
+assert.equal(kindView.rows, resources.resources.length);
+assert.equal(kindView.active, "按类型");
+const projectSkill = resources.resources.find(resource => resource.kind === "skill" && resource.scope === "project");
+assert.ok(projectSkill);
+browser<null>({ type: "navigate", url: base + "/resources?view=kind&kind=skill&scope=project&agent=codex&q=" + encodeURIComponent(projectSkill.id) });
+const filteredView = evaluate(() => {
+  const groups = [...document.querySelectorAll<HTMLDetailsElement>(".resource-group")];
+  if (!groups.length || groups.some(group => !group.open)) throw new Error("Matching groups did not expand after filtering");
+  return document.querySelector<HTMLAnchorElement>('.resource-view-switch a[href*="view=origin"]')!.href;
+}, null);
+const retained = new URL(filteredView);
+for (const [name, value] of Object.entries({ kind: "skill", scope: "project", agent: "codex", q: projectSkill.id, view: "origin" })) assert.equal(retained.searchParams.get(name), value);
+browser<null>({ type: "navigate", url: filteredView });
+assert.ok(evaluate(id => [...document.querySelectorAll<HTMLTableRowElement>("tr[data-resource-id]")].some(row => row.dataset["resourceId"] === id), projectSkill.id));
+browser<null>({ type: "navigate", url: base + "/resources" });
+console.log("Browser regressions passed: source/type browsing, expansion and filter retention, seven types, complete resource editing/rename/retire, shared support/source isolation and native policy proposals; all submissions intercepted.");

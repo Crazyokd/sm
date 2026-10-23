@@ -544,8 +544,17 @@ enum OriginFilter {
     #[serde(rename = "upstream")]
     Upstream,
 }
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+enum ResourceViewMode {
+    #[default]
+    Origin,
+    Kind,
+}
 #[derive(Debug, Default, Serialize, Deserialize)]
 struct Filters {
+    #[serde(default)]
+    view: ResourceViewMode,
     #[serde(default, deserialize_with = "optional")]
     origin: Option<OriginFilter>,
     #[serde(default, deserialize_with = "optional")]
@@ -561,8 +570,26 @@ struct Filters {
 struct ResourcePage {
     #[serde(flatten)]
     base: BaseContext,
-    resources: Vec<ResourceView>,
+    sections: Vec<ResourceSection>,
+    origin_url: String,
+    kind_url: String,
+    expand_groups: bool,
     filters: Filters,
+}
+#[derive(Serialize)]
+struct ResourceSection {
+    title: &'static str,
+    groups: Vec<ResourceGroup>,
+}
+#[derive(Serialize)]
+struct ResourceGroup {
+    key: String,
+    title: String,
+    origin: &'static str,
+    total: usize,
+    kinds: Vec<(&'static str, usize)>,
+    statuses: Vec<(&'static str, usize)>,
+    resources: Vec<ResourceView>,
 }
 #[derive(Serialize)]
 struct InventoryPage {
@@ -674,9 +701,55 @@ async fn resources(
     blocking(move || {
         let rows = resource_rows(&context.state)?;
         let base = base(&context, "resources", &rows)?;
-        let resources = rows
-            .into_iter()
-            .filter(|r| {
+        let mut grouped: BTreeMap<(usize, String), ResourceGroup> = BTreeMap::new();
+        for row in rows {
+            let kind_index = base
+                .kind_labels
+                .iter()
+                .position(|(_, label)| *label == row.kind_label)
+                .expect("known resource kind");
+            let (section, key, title, origin) = match (filters.view, &row.resource.source) {
+                (ResourceViewMode::Origin, Source::Upstream { upstream }) => {
+                    (1, upstream.clone(), upstream.clone(), "upstream")
+                }
+                (ResourceViewMode::Origin, Source::SelfOwned) => {
+                    (0, kind_index.to_string(), row.kind_label.into(), "self")
+                }
+                (ResourceViewMode::Kind, _) => {
+                    (0, kind_index.to_string(), row.kind_label.into(), "mixed")
+                }
+            };
+            let group = grouped.entry((section, key.clone())).or_insert_with(|| ResourceGroup {
+                key,
+                title,
+                origin,
+                total: 0,
+                kinds: Vec::new(),
+                statuses: Vec::new(),
+                resources: Vec::new(),
+            });
+            group.resources.push(row);
+        }
+        let mut sections = if filters.view == ResourceViewMode::Origin {
+            vec![
+                ResourceSection { title: "自行维护", groups: Vec::new() },
+                ResourceSection { title: "跟随上游", groups: Vec::new() },
+            ]
+        } else {
+            vec![ResourceSection { title: "全部资源", groups: Vec::new() }]
+        };
+        for ((section, _), mut group) in grouped {
+            group.total = group.resources.len();
+            group.kinds = base.kind_labels.iter().filter_map(|(_, label)| {
+                let count = group.resources.iter().filter(|r| r.kind_label == *label).count();
+                (count > 0).then_some((*label, count))
+            }).collect();
+            group.statuses = [ApplyStatus::Applied, ApplyStatus::Pending, ApplyStatus::Failed, ApplyStatus::Conflict, ApplyStatus::Unsupported, ApplyStatus::Unknown]
+                .into_iter().filter_map(|status| {
+                    let count = group.resources.iter().filter(|r| r.status == status).count();
+                    (count > 0).then_some((status.label(), count))
+                }).collect();
+            group.resources.retain(|r| {
                 filters.origin.is_none_or(|origin| {
                     r.resource.source.is_self() == matches!(origin, OriginFilter::SelfOwned)
                 }) && filters
@@ -686,18 +759,36 @@ async fn resources(
                     && filters
                         .agent
                         .is_none_or(|client| r.supported_clients.contains(&client))
-                    && r.resource
-                        .id
-                        .to_lowercase()
-                        .contains(&filters.q.to_lowercase())
-            })
-            .collect();
+                    && (r.resource.id.to_lowercase().contains(&filters.q.to_lowercase())
+                        || matches!(&r.resource.source, Source::Upstream { upstream } if upstream.to_lowercase().contains(&filters.q.to_lowercase())))
+            });
+            if !group.resources.is_empty() {
+                sections[section].groups.push(group);
+            }
+        }
+        sections.retain(|section| !section.groups.is_empty());
+        let link = |view: &str| -> Result<String> {
+            let fields = serde_json::to_value(&filters)?;
+            let mut query = url::form_urlencoded::Serializer::new(String::new());
+            for (key, value) in fields.as_object().context("invalid resource filters")? {
+                if key != "view" {
+                    if let Some(text) = value.as_str().filter(|text| !text.is_empty()) {
+                        query.append_pair(key, text);
+                    }
+                }
+            }
+            query.append_pair("view", view);
+            Ok(format!("/resources?{}", query.finish()))
+        };
         render(
             &context,
             "resources.html",
             &ResourcePage {
+                origin_url: link("origin")?,
+                kind_url: link("kind")?,
+                expand_groups: !filters.q.is_empty() || filters.kind.is_some() || filters.scope.is_some() || filters.agent.is_some(),
                 base,
-                resources,
+                sections,
                 filters,
             },
         )

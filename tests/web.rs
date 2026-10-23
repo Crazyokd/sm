@@ -28,6 +28,131 @@ struct Fixture {
     app: axum::Router,
 }
 #[tokio::test]
+async fn resource_views_group_upstreams_and_keep_filters_and_self_dependencies_independent() {
+    let f = Fixture::new();
+    let mut catalog: Value =
+        serde_json::to_value(f.state.get::<sm::model::Catalog>("catalog").unwrap()).unwrap();
+    catalog["projects"] = json!({"app":"~/repo/app"});
+    catalog["upstreams"] = json!({
+        "alpha-source":{"git":"https://example.invalid/alpha.git"},
+        "beta-source":{"git":"https://example.invalid/beta.git"}
+    });
+    catalog["dependencies"] = json!({"shared":{"origin":"upstream","upstream":"alpha-source","files":{"root":".","entries":[{"target":".codex/hooks/shared.sh","source":"shared.sh"}]}}});
+    catalog["resources"].as_array_mut().unwrap().extend([
+        json!({"id":"remote-skill","kind":"skill","origin":"upstream","upstream":"alpha-source","scope":"user","project":null,"payload":".agents/skills/remote-skill"}),
+        json!({"id":"remote-rule","kind":"rule","origin":"upstream","upstream":"alpha-source","scope":"user","project":null,"agents":["codex"],"payloads":{"codex":"rules"}}),
+        json!({"id":"project-skill","kind":"skill","origin":"upstream","upstream":"beta-source","scope":"project","project":"app","payload":".agents/skills/project-skill"}),
+        json!({"id":"own-hook","kind":"hook","origin":"self","scope":"user","project":null,"dependencies":["shared"],"agents":["codex"],"payloads":{"codex":"resources/own-hook"}}),
+    ]);
+    let catalog: sm::model::Catalog = serde_json::from_value(catalog).unwrap();
+    f.state.set("catalog", &catalog).unwrap();
+    let results = BTreeMap::from([
+        (
+            "remote-skill",
+            ResourceResult::new(ApplyStatus::Applied, "applied"),
+        ),
+        (
+            "remote-rule",
+            ResourceResult::new(ApplyStatus::Failed, "application failed"),
+        ),
+    ]);
+    f.state.set("resource_results", &results).unwrap();
+    let before = serde_json::to_value(&catalog).unwrap();
+    let (status, page) = f.get("/resources").await;
+    assert_eq!(status, StatusCode::OK);
+    let group = |page: &str, id: &str| -> String {
+        page.split(&format!("data-group=\"{id}\""))
+            .nth(1)
+            .unwrap()
+            .split("</details>")
+            .next()
+            .unwrap()
+            .to_owned()
+    };
+    let alpha = group(&page, "alpha-source");
+    assert!(!alpha.split('>').next().unwrap().contains("open"));
+    for text in [
+        "remote-skill",
+        "remote-rule",
+        "Skill 1",
+        "规则 1",
+        "文件已应用 1",
+        "应用失败 1",
+        "全组应用情况",
+    ] {
+        assert!(alpha.contains(text), "{text}");
+    }
+    assert!(!alpha.contains("own-hook") && !alpha.contains("project-skill"));
+    assert_eq!(page.matches("data-resource-id=\"own-hook\"").count(), 1);
+    assert!(page.contains("查看同步记录"));
+    let kinds = f.get("/resources?view=kind&kind=skill").await.1;
+    assert_eq!(
+        kinds.matches("<details class=\"resource-group\"").count(),
+        1
+    );
+    for id in ["review", "remote-skill", "project-skill"] {
+        assert_eq!(
+            kinds.matches(&format!("data-resource-id=\"{id}\"")).count(),
+            1
+        );
+    }
+    assert!(!kinds.contains("data-resource-id=\"remote-rule\""));
+    let filtered = f
+        .get("/resources?origin=upstream&kind=skill&scope=project&agent=kimi")
+        .await
+        .1;
+    assert!(
+        group(&filtered, "beta-source")
+            .split('>')
+            .next()
+            .unwrap()
+            .contains("open")
+    );
+    assert!(filtered.contains("data-resource-id=\"project-skill\""));
+    assert!(!filtered.contains("data-group=\"alpha-source\""));
+    for field in [
+        "agent=kimi",
+        "kind=skill",
+        "origin=upstream",
+        "scope=project",
+        "view=kind",
+    ] {
+        assert!(filtered.contains(field), "view link lost {field}");
+    }
+    let partial = f.get("/resources?view=origin&q=remote-skill").await.1;
+    let partial = group(&partial, "alpha-source");
+    assert!(partial.contains("匹配 1 / 2 项") && partial.contains("应用失败 1"));
+    assert!(!partial.contains("data-resource-id=\"remote-rule\""));
+    let by_source = f.get("/resources?q=alpha-source").await.1;
+    assert!(by_source.contains("data-resource-id=\"remote-rule\""));
+    assert!(!by_source.contains("data-resource-id=\"own-hook\""));
+    for path in [
+        "/resources?view=kind&origin=self",
+        "/resources?view=kind&q=space+%26+%E6%B5%8B%E8%AF%95",
+    ] {
+        let (status, _) = f.get(path).await;
+        assert_eq!(status, StatusCode::OK);
+    }
+    assert_eq!(
+        f.get("/resources?view=unexpected").await.0,
+        StatusCode::BAD_REQUEST
+    );
+    assert_eq!(
+        serde_json::to_value(f.state.get::<sm::model::Catalog>("catalog").unwrap()).unwrap(),
+        before
+    );
+    assert_eq!(
+        f.state
+            .get::<BTreeMap<String, ResourceResult>>("resource_results")
+            .unwrap(),
+        results
+            .into_iter()
+            .map(|(id, value)| (id.to_owned(), value))
+            .collect()
+    );
+}
+
+#[tokio::test]
 async fn inventory_page_detects_resources_added_since_last_sync_without_exposing_config() {
     let f = Fixture::new();
     let extra = f.runtime.home.join(".agents/skills/outside");
