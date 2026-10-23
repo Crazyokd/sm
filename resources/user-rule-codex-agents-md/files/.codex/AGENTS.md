@@ -109,3 +109,10 @@ The MCP server returns "not initialized." Ask the user: *"I notice this project 
 - 类图（UML class diagram / `classDiagram`）默认使用 `diagram-design`，读取其 `references/type-uml-class.md`，准确表达类、属性、方法和继承、实现、组合、关联、依赖关系。用户明确指定其他工具时遵循其选择。
 - 其他图按图型和展示需求选择。`archify` 适用于其支持的架构、工作流、时序、数据流和生命周期图；不要仅因请求含有“架构”或“设计”就用它承接类图。
 - `terminal-image-pane` 只负责已有图片的终端展示，不决定类图建模、布局或绘图 skill 的选择。
+
+## AI 资源管理
+
+- 用户级和项目级 Skill、Hook、规则、Agent、提示词、执行策略、MCP 和插件声明统一通过 SM 管理。先在 `~/repo/sm` 运行 `./sm inventory`，确认来源、作用域和现有管理者。
+- 新建或修改自维护资源应修改 SM 的源文件并提交 MR；不要直接修改已经生效的安装目录。审核合并后，再由下一次拉取和同步应用。
+- 上游资源使用登记的原生安装器跟随上游；调整订阅或启停声明走 MR，不直接改造上游副本，也不把上游内容纳入自维护优化。
+- 新发现的未纳管资源先建立接管提案，保留其现有作用域和禁用状态。凭据、原生信任状态、会话及运行数据留在本机。

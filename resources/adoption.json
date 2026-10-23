@@ -11730,12 +11730,6 @@
     "executable": false
   },
   {
-    "resource": "user-rule-agents-md",
-    "target": "AGENTS.md",
-    "sha256": "4ec70d13437b9f1db63c258998dd597d911bd9f3eef48978615107c27b524d6e",
-    "executable": false
-  },
-  {
     "resource": "user-rule-codex-agents-md",
     "target": ".codex/AGENTS.md",
     "sha256": "eb1845580e6e7fa9679bf34e5e1fea43782aabfd1d6ddb4d7e976e0daa4e1307",
