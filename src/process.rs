@@ -183,7 +183,7 @@ pub fn run_command(
             }
         }
     })();
-    if result.is_err() {
+    if !result.as_ref().is_ok_and(|output| output.status.success()) {
         let mut cleanup = || -> Result<()> {
             let pid = Pid::from_raw(i32::try_from(child.id()).context("invalid child process id")?);
             if let Err(error) = killpg(pid, Signal::SIGKILL) {

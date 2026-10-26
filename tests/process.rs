@@ -2,6 +2,42 @@ use sm::process::run_command;
 use std::{process::Command, time::Duration};
 
 #[test]
+fn nonzero_exit_cleans_up_detached_output_descendants() {
+    let directory = tempfile::tempdir().unwrap();
+    let pid_file = directory.path().join("child.pid");
+    let mut command = Command::new("sh");
+    command
+        .args([
+            "-c",
+            "sleep 30 >/dev/null 2>&1 & printf '%s' \"$!\" > \"$SM_TEST_CHILD_PID\"; exit 7",
+        ])
+        .env("SM_TEST_CHILD_PID", &pid_file);
+    let error = run_command(command, None, Duration::from_secs(2)).unwrap_err();
+    assert!(error.to_string().contains("7"));
+    let pid: i32 = std::fs::read_to_string(pid_file).unwrap().parse().unwrap();
+    let alive = || {
+        std::fs::read_to_string(format!("/proc/{pid}/stat"))
+            .is_ok_and(|stat| !stat.split_once(") ").unwrap().1.starts_with('Z'))
+    };
+    let deadline = std::time::Instant::now() + Duration::from_secs(1);
+    while alive() && std::time::Instant::now() < deadline {
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    let leaked = alive();
+    if leaked {
+        nix::sys::signal::kill(
+            nix::unistd::Pid::from_raw(pid),
+            nix::sys::signal::Signal::SIGKILL,
+        )
+        .unwrap();
+    }
+    assert!(
+        !leaked,
+        "failed installer left a background download running"
+    );
+}
+
+#[test]
 fn failing_command_keeps_stdout_diagnostics_and_redacts_secrets() {
     let mut command = Command::new("sh");
     command.args(["-c", "printf 'installer failed password=private-secret\\n'; printf 'stderr context\\n' >&2; exit 7"]);
