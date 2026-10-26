@@ -2201,38 +2201,6 @@
       "project": null
     },
     {
-      "id": "easygo-skill-gitlab-api",
-      "kind": "skill",
-      "files": {
-        "root": "resources/easygo-skill-gitlab-api",
-        "entries": [
-          {
-            "target": ".agents/skills/gitlab-api",
-            "tree": "files/.agents/skills/gitlab-api"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "easygo"
-    },
-    {
-      "id": "easygo-skill-ones",
-      "kind": "skill",
-      "files": {
-        "root": "resources/easygo-skill-ones",
-        "entries": [
-          {
-            "target": ".agents/skills/ones",
-            "tree": "files/.agents/skills/ones"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "easygo"
-    },
-    {
       "id": "easygo-rule-agents-md",
       "kind": "rule",
       "files": {
@@ -2569,22 +2537,6 @@
       "project": "sros-core"
     },
     {
-      "id": "sros-core-skill-gitlab-api",
-      "kind": "skill",
-      "files": {
-        "root": "resources/sros-core-skill-gitlab-api",
-        "entries": [
-          {
-            "target": ".agents/skills/gitlab-api",
-            "tree": "files/.agents/skills/gitlab-api"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "sros-core"
-    },
-    {
       "id": "sros-core-skill-ones",
       "kind": "skill",
       "files": {
@@ -2681,54 +2633,6 @@
       "project": "sros-core"
     },
     {
-      "id": "easygo-app-skill-feishu-notify",
-      "kind": "skill",
-      "files": {
-        "root": "resources/easygo-app-skill-feishu-notify",
-        "entries": [
-          {
-            "target": ".agents/skills/feishu-notify",
-            "tree": "files/.agents/skills/feishu-notify"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "easygo-app"
-    },
-    {
-      "id": "easygo-app-skill-gitlab-api",
-      "kind": "skill",
-      "files": {
-        "root": "resources/easygo-app-skill-gitlab-api",
-        "entries": [
-          {
-            "target": ".agents/skills/gitlab-api",
-            "tree": "files/.agents/skills/gitlab-api"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "easygo-app"
-    },
-    {
-      "id": "easygo-app-skill-ones",
-      "kind": "skill",
-      "files": {
-        "root": "resources/easygo-app-skill-ones",
-        "entries": [
-          {
-            "target": ".agents/skills/ones",
-            "tree": "files/.agents/skills/ones"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "easygo-app"
-    },
-    {
       "id": "easygo-app-skill-openspec-apply-change",
       "kind": "skill",
       "files": {
@@ -2736,10 +2640,6 @@
         "entries": [
           {
             "target": ".agents/skills/openspec-apply-change",
-            "tree": "files/.agents/skills/openspec-apply-change"
-          },
-          {
-            "target": ".codex/skills/openspec-apply-change",
             "tree": "files/.agents/skills/openspec-apply-change"
           }
         ]
@@ -2757,10 +2657,6 @@
           {
             "target": ".agents/skills/openspec-archive-change",
             "tree": "files/.agents/skills/openspec-archive-change"
-          },
-          {
-            "target": ".codex/skills/openspec-archive-change",
-            "tree": "files/.agents/skills/openspec-archive-change"
           }
         ]
       },
@@ -2777,10 +2673,6 @@
           {
             "target": ".agents/skills/openspec-explore",
             "tree": "files/.agents/skills/openspec-explore"
-          },
-          {
-            "target": ".codex/skills/openspec-explore",
-            "tree": "files/.agents/skills/openspec-explore"
           }
         ]
       },
@@ -2796,10 +2688,6 @@
         "entries": [
           {
             "target": ".agents/skills/openspec-propose",
-            "tree": "files/.agents/skills/openspec-propose"
-          },
-          {
-            "target": ".codex/skills/openspec-propose",
             "tree": "files/.agents/skills/openspec-propose"
           }
         ]

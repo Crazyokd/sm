@@ -18,8 +18,8 @@ description: 把批次汇总 / 通知卡片推送到飞书群,并自动 @ 涉及
 
 ```bash
 # summary.json 走 stdin 或文件
-python3 .agents/skills/feishu-notify/scripts/feishu_notify.py summary.json
-cat summary.json | python3 .agents/skills/feishu-notify/scripts/feishu_notify.py -
+python3 ~/.agents/skills/feishu-notify/scripts/feishu_notify.py summary.json
+cat summary.json | python3 ~/.agents/skills/feishu-notify/scripts/feishu_notify.py -
 ```
 
 成功 → stdout 每行一个 `message_id`(按问题解决人分桶各发一张),至少一桶成功即退出码 `0`。

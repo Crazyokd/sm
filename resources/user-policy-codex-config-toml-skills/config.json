@@ -132,6 +132,22 @@
       {
         "enabled": false,
         "name": "lark-workflow-standup-report"
+      },
+      {
+        "path": "~/.agents/skills/browser-harness/skills/browser-harness/SKILL.md",
+        "enabled": false
+      },
+      {
+        "path": "~/.agents/skills/browser-harness/src/browser_harness/SKILL.md",
+        "enabled": false
+      },
+      {
+        "path": "~/repo/sros-core/.agents/skills/ones/SKILL.md",
+        "enabled": false
+      },
+      {
+        "path": "~/repo/sros-core/.agents/skills/feishu-notify/SKILL.md",
+        "enabled": false
       }
     ]
   }

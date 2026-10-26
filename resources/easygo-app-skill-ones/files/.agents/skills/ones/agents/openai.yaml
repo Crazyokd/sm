@@ -1,7 +1,0 @@
-interface:
-  display_name: "ONES"
-  short_description: "处理 Standard Robots 的 ONES 工作项"
-  default_prompt: "使用 $ones 查看、创建、更新、评论或推进 Standard Robots 的 ONES 工作项。"
-
-policy:
-  allow_implicit_invocation: true

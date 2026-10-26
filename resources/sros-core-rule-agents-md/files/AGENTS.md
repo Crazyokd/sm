@@ -103,7 +103,7 @@ ccache/distcc 的串接由 `CMakeLists.txt` 烧进 `build.ninja`，不依赖 she
 
 ## GitLab API 访问
 
-查 CI 日志、操作 MR/Issue 等需求详见 [.agents/skills/gitlab-api/SKILL.md](./.agents/skills/gitlab-api/SKILL.md)。
+查 CI 日志、操作 MR/Issue 等需求详见 [用户级 gitlab-api Skill](~/.agents/skills/gitlab-api/SKILL.md)。
 
 ## MR 与提交规范
 

@@ -11888,120 +11888,6 @@
     "executable": false
   },
   {
-    "resource": "easygo-skill-gitlab-api",
-    "target": ".agents/skills/gitlab-api/SKILL.md",
-    "sha256": "108d97d54b7eee620dc82cc60d69abf9e07655ac9be3485c6ec56bcce1d4698f",
-    "executable": false
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/SKILL.md",
-    "sha256": "88bab8e2bfcc32f430acf8b70cdb016ecbfefa2709c751569f6a2c086a62f00f",
-    "executable": false
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/agents/openai.yaml",
-    "sha256": "7491e0c2e1c478d37ac51fd05eb0d1147e5f1804e304e25e73d29125b505aeef",
-    "executable": false
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/references/analyze.md",
-    "sha256": "a7b63e7b8a89aa259812616257fc748460dde1b567c9fec8e8afe0e72fc6f290",
-    "executable": false
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/references/bugfix.md",
-    "sha256": "aa35c05c481c9096b68d5a63697691d227b336e522f3044013d5f7124bf27ba3",
-    "executable": false
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/references/comment.md",
-    "sha256": "18448f91e3e6db15ee0b6124619d6ac428713bf3ac8f191533dc35e7ab52bd5c",
-    "executable": false
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/references/common.md",
-    "sha256": "bea00b9a93427bf4396e96359e976a662fbffc877164b562d79a7646b079c6ca",
-    "executable": false
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/references/create.md",
-    "sha256": "67d0a38517f732ea6ec12c2abeecee580aaad0cd8a5faf878af216c9bbe638ac",
-    "executable": false
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/references/implement.md",
-    "sha256": "00429a6351a0f4277a0e17a1a7015322191f26fb2bb31dc8a741e3a7e2875e92",
-    "executable": false
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/references/release.md",
-    "sha256": "8ee4830ef30c8ea6e3ad1526bf60c5d048211d177bec75b5a1161d430a0cfda7",
-    "executable": false
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/references/update.md",
-    "sha256": "b306abd2749f1c292726832833be79bc9e9758d852c4cdba8a5e95ddcc7eeee9",
-    "executable": false
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/references/view.md",
-    "sha256": "27bba6b7d9bbcf206b3803abeb793a75578398db82acbf26d222cea36da71550",
-    "executable": false
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/scripts/ones_api.py",
-    "sha256": "63552e36395551fc07a7dda277bf26e712077bd8e0e52d83182800a782fb7a75",
-    "executable": true
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/scripts/ones_api_test.py",
-    "sha256": "2d1f00280438a3240d78576aa423cd47187a9fcebd69bd08bce98a64d88bb719",
-    "executable": false
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/scripts/ones_create_task.py",
-    "sha256": "8bf1b72a68805192612f75dae07823a99874e11f01c5e93c1b65924f85ac8c40",
-    "executable": true
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/scripts/ones_gitlab_mr.py",
-    "sha256": "4326c511762e1cfa587791b6e549a64aae86646eb2cbdf9cd58fba46eb756f3a",
-    "executable": false
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/scripts/ones_list_releases.py",
-    "sha256": "b9a94e176443ce03c401e8aeca54dabd260c21170f5ecb2b71b94b7777d203da",
-    "executable": false
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/scripts/ones_list_releases_test.py",
-    "sha256": "52234cab773e8af12ffcf5a4c8fe6c0ea842cd834a227fbdded2a7a319db28ae",
-    "executable": false
-  },
-  {
-    "resource": "easygo-skill-ones",
-    "target": ".agents/skills/ones/scripts/ones_refresh_token.py",
-    "sha256": "f2b3b46b384780bfb365249cfcba20733dd071cbde1375c1d23992df210a11e8",
-    "executable": true
-  },
-  {
     "resource": "easygo-rule-agents-md",
     "target": "AGENTS.md",
     "sha256": "730b9d02ad5e1801ce05a8fa935ed6fac745d7666d9c1f167a64df22c9bd44e9",
@@ -12137,12 +12023,6 @@
     "resource": "sros-core-skill-feishu-notify",
     "target": ".agents/skills/feishu-notify/scripts/feishu_notify.py",
     "sha256": "4fdc200e0c03bf32b99fb46bf76fdd6a527100b0b871e33721b93a81a2626461",
-    "executable": false
-  },
-  {
-    "resource": "sros-core-skill-gitlab-api",
-    "target": ".agents/skills/gitlab-api/SKILL.md",
-    "sha256": "0b9969c1dd0a48e275d8a571f94e17a75371c70570090da391ddc54e5bc5089b",
     "executable": false
   },
   {
@@ -12290,146 +12170,8 @@
     "executable": false
   },
   {
-    "resource": "easygo-app-skill-feishu-notify",
-    "target": ".agents/skills/feishu-notify/SKILL.md",
-    "sha256": "0f80137bbc80a46a3bd54ff062f0fc0c658709f276f8454bf7d673b328a05bf7",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-feishu-notify",
-    "target": ".agents/skills/feishu-notify/scripts/feishu_lark.py",
-    "sha256": "2394e73f6fea3edf99e76e887d85f27ce2b8ba7046573f4f0ab962a33db20f2d",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-feishu-notify",
-    "target": ".agents/skills/feishu-notify/scripts/feishu_notify.py",
-    "sha256": "4fdc200e0c03bf32b99fb46bf76fdd6a527100b0b871e33721b93a81a2626461",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-gitlab-api",
-    "target": ".agents/skills/gitlab-api/SKILL.md",
-    "sha256": "0b9969c1dd0a48e275d8a571f94e17a75371c70570090da391ddc54e5bc5089b",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/SKILL.md",
-    "sha256": "88bab8e2bfcc32f430acf8b70cdb016ecbfefa2709c751569f6a2c086a62f00f",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/agents/openai.yaml",
-    "sha256": "7491e0c2e1c478d37ac51fd05eb0d1147e5f1804e304e25e73d29125b505aeef",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/references/analyze.md",
-    "sha256": "a7b63e7b8a89aa259812616257fc748460dde1b567c9fec8e8afe0e72fc6f290",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/references/bugfix.md",
-    "sha256": "aa35c05c481c9096b68d5a63697691d227b336e522f3044013d5f7124bf27ba3",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/references/comment.md",
-    "sha256": "18448f91e3e6db15ee0b6124619d6ac428713bf3ac8f191533dc35e7ab52bd5c",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/references/common.md",
-    "sha256": "bea00b9a93427bf4396e96359e976a662fbffc877164b562d79a7646b079c6ca",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/references/create.md",
-    "sha256": "67d0a38517f732ea6ec12c2abeecee580aaad0cd8a5faf878af216c9bbe638ac",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/references/implement.md",
-    "sha256": "00429a6351a0f4277a0e17a1a7015322191f26fb2bb31dc8a741e3a7e2875e92",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/references/release.md",
-    "sha256": "8ee4830ef30c8ea6e3ad1526bf60c5d048211d177bec75b5a1161d430a0cfda7",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/references/update.md",
-    "sha256": "b306abd2749f1c292726832833be79bc9e9758d852c4cdba8a5e95ddcc7eeee9",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/references/view.md",
-    "sha256": "27bba6b7d9bbcf206b3803abeb793a75578398db82acbf26d222cea36da71550",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/scripts/ones_api.py",
-    "sha256": "63552e36395551fc07a7dda277bf26e712077bd8e0e52d83182800a782fb7a75",
-    "executable": true
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/scripts/ones_api_test.py",
-    "sha256": "2d1f00280438a3240d78576aa423cd47187a9fcebd69bd08bce98a64d88bb719",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/scripts/ones_create_task.py",
-    "sha256": "8bf1b72a68805192612f75dae07823a99874e11f01c5e93c1b65924f85ac8c40",
-    "executable": true
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/scripts/ones_gitlab_mr.py",
-    "sha256": "4326c511762e1cfa587791b6e549a64aae86646eb2cbdf9cd58fba46eb756f3a",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/scripts/ones_list_releases.py",
-    "sha256": "b9a94e176443ce03c401e8aeca54dabd260c21170f5ecb2b71b94b7777d203da",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/scripts/ones_list_releases_test.py",
-    "sha256": "52234cab773e8af12ffcf5a4c8fe6c0ea842cd834a227fbdded2a7a319db28ae",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-ones",
-    "target": ".agents/skills/ones/scripts/ones_refresh_token.py",
-    "sha256": "f2b3b46b384780bfb365249cfcba20733dd071cbde1375c1d23992df210a11e8",
-    "executable": true
-  },
-  {
     "resource": "easygo-app-skill-openspec-apply-change",
     "target": ".agents/skills/openspec-apply-change/SKILL.md",
-    "sha256": "c30999a1477d6a8377d7aaa02a82ad322206ffa0cca1ddf7d95618c4577ba10f",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-openspec-apply-change",
-    "target": ".codex/skills/openspec-apply-change/SKILL.md",
     "sha256": "c30999a1477d6a8377d7aaa02a82ad322206ffa0cca1ddf7d95618c4577ba10f",
     "executable": false
   },
@@ -12440,32 +12182,14 @@
     "executable": false
   },
   {
-    "resource": "easygo-app-skill-openspec-archive-change",
-    "target": ".codex/skills/openspec-archive-change/SKILL.md",
-    "sha256": "dd8783f590c0488b2026bee9aae2adbc3cda1d7152ab04e9b9cf2ff3924fce50",
-    "executable": false
-  },
-  {
     "resource": "easygo-app-skill-openspec-explore",
     "target": ".agents/skills/openspec-explore/SKILL.md",
     "sha256": "4f534b22c2e04839f965186a9dd49129dcef318752260f5d67468d0a8d649826",
     "executable": false
   },
   {
-    "resource": "easygo-app-skill-openspec-explore",
-    "target": ".codex/skills/openspec-explore/SKILL.md",
-    "sha256": "4f534b22c2e04839f965186a9dd49129dcef318752260f5d67468d0a8d649826",
-    "executable": false
-  },
-  {
     "resource": "easygo-app-skill-openspec-propose",
     "target": ".agents/skills/openspec-propose/SKILL.md",
-    "sha256": "a41d8fda28db18ff9afd548fdc4076c89e492460ac3b8ee0fa4cb33b7034a3e0",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-openspec-propose",
-    "target": ".codex/skills/openspec-propose/SKILL.md",
     "sha256": "a41d8fda28db18ff9afd548fdc4076c89e492460ac3b8ee0fa4cb33b7034a3e0",
     "executable": false
   },
