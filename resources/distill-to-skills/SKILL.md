@@ -27,6 +27,12 @@ Resolve the loaded Skill package to its owning Git repository, then inventory th
 repository's active `SKILL.md` files before writing. Preserve unrelated working-tree
 changes.
 
+Reuse inventory results and authoring guidance already available in the active
+context for the same source and scope. Do not repeat an unchanged guide read or
+catalog scan for the same decision. After compaction, recover the selected owner,
+outcome, and required checks from existing task notes; read only missing details.
+Refresh when the source, scope, or relevant files change.
+
 When the owning repository cannot be identified unambiguously, do not write into
 `.agents`, `.codex`, `.claude`, `.hermes`, or other installation directories.
 Return a proposed package or patch and name the unresolved source-of-truth issue.
