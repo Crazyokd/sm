@@ -19,10 +19,10 @@ Do not reset directories under `src/` that are not their own Git repository root
 ## Workflow
 
 1. State that this is destructive for tracked files: local commits, branch position, and tracked edits in the listed repositories will be replaced by `origin/main`, or by the remote default branch when `origin/main` is absent.
-2. Run the existing project script:
+2. From the EasyGo workspace root, run the script bundled with this Skill:
 
 ```bash
-bash script/force-sync-origin-main.sh
+bash .agents/skills/easygo-force-sync/scripts/force-sync-origin-main.sh
 ```
 
 3. If a repository has no `origin/main`, the script uses the remote HEAD/default branch reported by Git. If neither target exists, stop.
@@ -47,5 +47,7 @@ done
 
 - This skill intentionally keeps untracked files and directories.
 - Never run `git clean` unless the user explicitly asks to delete untracked files too.
+- Block a repository when an untracked or ignored path overlaps a tracked path in the target branch; keep its local contents intact.
 - Prefer `origin/main`; use the remote default branch only when `origin/main` is absent.
 - Treat `src/easygo-app`, `src/easygo-music-resources`, and other `src/*` entries as independent repository boundaries.
+- This Skill directory is installed by SM. Keep `/.agents/skills/easygo-force-sync/` in this repository's `.git/info/exclude` so `git stash --include-untracked` leaves the installation in place. `git stash --all` also includes ignored files and can still remove it; restore the Skill through SM if that happens.
