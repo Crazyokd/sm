@@ -24,6 +24,14 @@ def main():
     )).resolve()
     if not music.is_file():
         parser.error("music manifest missing; set EASYGO_MUSIC_MANIFEST explicitly: " + str(music))
+    container_env = []
+    for name in (
+        "EASYGO_PARAM_DEFINITIONS_DIR",
+        "EASYGO_PARAM_MANAGER_BIN",
+        "EASYGO_PARAM_MANAGER_CFG_DIR",
+    ):
+        if name in os.environ:
+            container_env.extend(["--env", f"{name}={os.environ[name]}"])
     setup = '''set -e
 task_app=$1
 task_music=$2
@@ -38,7 +46,7 @@ cd "$task_app"
 exec "$@"
 '''
     return subprocess.run([
-        "docker", "exec", "easygo-dev-main", "bash", "-lc", setup,
+        "docker", "exec", *container_env, "easygo-dev-main", "bash", "-lc", setup,
         "easygo-app-checks", str(app), str(music), *command,
     ]).returncode
 
