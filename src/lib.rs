@@ -20,6 +20,7 @@ pub mod inventory;
 pub mod observe;
 pub mod privacy;
 pub mod process;
+pub mod project_git;
 pub mod proposals;
 pub mod repository;
 pub mod retention;

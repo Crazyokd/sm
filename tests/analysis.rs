@@ -266,6 +266,136 @@ fn full_supplied_content_is_retained_but_sensitive_sources_are_omitted() {
     assert!(prompt.contains("SOURCE_TAIL"));
     assert!(!prompt.contains("source-secret"));
 }
+
+#[test]
+fn serialized_analysis_batches_keep_all_evidence_and_source_within_the_input_limit() {
+    struct BoundedRunner(Mutex<Vec<Value>>);
+    impl AgentRunner for BoundedRunner {
+        fn run(&self, prompt: &str) -> Result<AnalysisResponse> {
+            assert!(prompt.len() <= 512_000, "{} prompt bytes", prompt.len());
+            let input: Value = serde_json::from_str(prompt.lines().last().unwrap())?;
+            assert_eq!(
+                input["resources"][0]["files"]["resources/review/SKILL.md"],
+                BEFORE
+            );
+            self.0.lock().unwrap().push(input);
+            Ok(AnalysisResponse {
+                candidates: Vec::new(),
+            })
+        }
+    }
+    let (_root, mut catalog, observation, _) = fixture();
+    for index in 0..292 {
+        let mut resource = catalog.resources[0].clone();
+        resource.id = format!("resource-{index}");
+        catalog.resources.push(resource);
+    }
+    let observations: Vec<_> = (0..1000)
+        .map(|index| {
+            let mut row = observation.clone();
+            row.id = format!("event-{index}");
+            row.resource_id = None;
+            row.facts.insert(
+                "text".into(),
+                json!(format!("{}tail-{index}", "\"\\\n".repeat(400))),
+            );
+            row
+        })
+        .collect();
+    let runner = BoundedRunner(Mutex::new(Vec::new()));
+    assert!(
+        analyze_observations(&catalog, &observations, &runner)
+            .unwrap()
+            .is_empty()
+    );
+    let inputs = runner.0.lock().unwrap();
+    assert!(inputs.len() > 1);
+    let ids: Vec<_> = inputs
+        .iter()
+        .flat_map(|input| input["observations"].as_array().unwrap())
+        .map(|row| {
+            let id = row["id"].as_str().unwrap();
+            assert!(
+                row["facts"]["text"]
+                    .as_str()
+                    .unwrap()
+                    .ends_with(&format!("tail-{}", id.strip_prefix("event-").unwrap()))
+            );
+            id.to_owned()
+        })
+        .collect();
+    assert_eq!(
+        ids,
+        observations
+            .iter()
+            .map(|row| row.id.clone())
+            .collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn oversized_single_evidence_is_not_silently_truncated_or_sent() {
+    let (_root, catalog, mut observation, _) = fixture();
+    observation
+        .facts
+        .insert("text".into(), json!("x".repeat(1_100_000)));
+    let runner = Runner::new(json!({"candidates":[]}));
+    let error = analyze_observations(&catalog, &[observation], &runner).unwrap_err();
+    assert!(format!("{error:#}").contains("event-1"));
+    assert_eq!(runner.calls.load(Ordering::SeqCst), 0);
+}
+
+#[test]
+fn resource_and_project_context_is_also_part_of_the_serialized_limit() {
+    let (_root, mut catalog, observation, _) = fixture();
+    catalog.projects.insert("large".into(), "x".repeat(600_000));
+    let runner = Runner::new(json!({"candidates":[]}));
+    let error = analyze_observations(&catalog, &[observation], &runner).unwrap_err();
+    assert!(format!("{error:#}").contains("resource context exceeds"));
+    assert_eq!(runner.calls.load(Ordering::SeqCst), 0);
+}
+
+#[test]
+fn each_batch_keeps_its_candidates_and_requires_evidence_from_that_batch() {
+    struct EvidenceRunner {
+        reply: AnalysisResponse,
+        reuse_first_evidence: bool,
+    }
+    impl AgentRunner for EvidenceRunner {
+        fn run(&self, prompt: &str) -> Result<AnalysisResponse> {
+            let input: Value = serde_json::from_str(prompt.lines().last().unwrap())?;
+            let mut reply = self.reply.clone();
+            if !self.reuse_first_evidence {
+                reply.candidates[0].evidence =
+                    vec![input["observations"][0]["id"].as_str().unwrap().to_owned()];
+            }
+            Ok(reply)
+        }
+    }
+    let (_root, catalog, observation, reply) = fixture();
+    let observations: Vec<_> = (0..3)
+        .map(|index| {
+            let mut row = observation.clone();
+            row.id = format!("event-{}", index + 1);
+            row.facts.insert("text".into(), json!("x".repeat(240_000)));
+            row
+        })
+        .collect();
+    let runner = EvidenceRunner {
+        reply: serde_json::from_value(reply).unwrap(),
+        reuse_first_evidence: false,
+    };
+    let candidates = analyze_observations(&catalog, &observations, &runner).unwrap();
+    assert_eq!(candidates.len(), 2);
+    assert_eq!(candidates[0].evidence, vec!["event-1"]);
+    assert_eq!(candidates[1].evidence, vec!["event-3"]);
+    let runner = EvidenceRunner {
+        reuse_first_evidence: true,
+        ..runner
+    };
+    let error = analyze_observations(&catalog, &observations, &runner).unwrap_err();
+    assert!(format!("{error:#}").contains("real evidence"));
+}
 #[test]
 fn retirement_and_scope_changes_are_catalog_proposals_only() {
     for operation in ["retire", "reclassify"] {

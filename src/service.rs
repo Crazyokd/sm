@@ -324,6 +324,7 @@ fn apply_source_tracked(
     }
     crate::adoption::adopt(source, &catalog, &runtime.home, &baseline, state)?;
     let mut local_report = apply_writes(&baseline, state)?;
+    crate::project_git::protect_owned(&catalog, &runtime.home, state)?;
     local_report
         .results
         .extend(crate::aliases::synchronize(source, &runtime.home, state)?);
@@ -477,6 +478,7 @@ fn apply_source_tracked(
     }
     crate::adoption::adopt(source, &catalog, &runtime.home, &plan, state)?;
     let mut report = apply_writes(&plan, state)?;
+    crate::project_git::protect_owned(&catalog, &runtime.home, state)?;
     report
         .results
         .extend(crate::aliases::synchronize(source, &runtime.home, state)?);

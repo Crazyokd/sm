@@ -3,8 +3,6 @@
   "skills": [
     "pnpm",
     "vite",
-    "vue",
-    "vue-best-practices",
-    "vueuse-functions"
+    "vue"
   ]
 }

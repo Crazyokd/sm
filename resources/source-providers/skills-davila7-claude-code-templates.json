@@ -1,5 +1,6 @@
 {
   "source": "https://github.com/davila7/claude-code-templates.git",
+  "subpath": "cli-tool/components/skills/creative-design/figma-implement-design",
   "skills": [
     "figma-implement-design"
   ]

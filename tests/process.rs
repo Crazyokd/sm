@@ -2,6 +2,19 @@ use sm::process::run_command;
 use std::{process::Command, time::Duration};
 
 #[test]
+fn failing_command_keeps_stdout_diagnostics_and_redacts_secrets() {
+    let mut command = Command::new("sh");
+    command.args(["-c", "printf 'installer failed password=private-secret\\n'; printf 'stderr context\\n' >&2; exit 7"]);
+    let error = run_command(command, None, Duration::from_secs(2))
+        .unwrap_err()
+        .to_string();
+    assert!(error.contains("installer failed"), "{error}");
+    assert!(error.contains("stderr context"), "{error}");
+    assert!(!error.contains("private-secret"), "{error}");
+    assert!(error.len() < 3000);
+}
+
+#[test]
 fn timeout_keeps_redacted_stderr_tail_and_deadline_context() {
     let mut command = Command::new("sh");
     command.args([

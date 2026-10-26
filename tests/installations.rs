@@ -244,6 +244,78 @@ fn manifest_is_strict_and_removed_declarations_do_not_remove_native_plugins() {
 }
 
 #[test]
+fn retiring_disabled_codex_policy_releases_ownership_and_preserves_native_state() {
+    let fixture = Fixture::new();
+    let executable = fixture.executable("exit 0");
+    fixture.manifest(json!([fixture.declaration(&executable)]));
+    assert_eq!(
+        fixture.synchronize()["codex-sample"].status,
+        ApplyStatus::Applied
+    );
+    assert_eq!(fixture.receipts().len(), 1);
+    let config_path = fixture.home.join(".codex/config.toml");
+    let config = fs::read(&config_path).unwrap();
+    let payload = fixture.home.join(".codex/cache/sample/plugin.json");
+    fs::write(&payload, "retired upstream payload").unwrap();
+    fixture.executable("touch invoked\nexit 1");
+    fixture.manifest(json!([]));
+
+    assert!(fixture.synchronize().is_empty());
+    assert!(fixture.receipts().is_empty());
+    assert_eq!(fs::read(config_path).unwrap(), config);
+    assert_eq!(
+        fs::read_to_string(payload).unwrap(),
+        "retired upstream payload"
+    );
+    assert!(!fixture.source.join("invoked").exists());
+}
+
+#[test]
+fn retiring_legacy_kimi_policy_preserves_plugins_and_only_claims_canonical_registration() {
+    let fixture = Fixture::new();
+    let executable = fixture.executable("exit 0");
+    let legacy_root = fixture.home.join(".kimi-code/plugins/managed/sample-codex");
+    let canonical_root = fixture.home.join(".kimi-code/plugins/managed/sample");
+    for (root, name) in [(&legacy_root, "sample-codex"), (&canonical_root, "sample")] {
+        fs::create_dir_all(root).unwrap();
+        fs::write(
+            root.join("kimi.plugin.json"),
+            json!({"name":name}).to_string(),
+        )
+        .unwrap();
+    }
+    let registry_path = fixture.home.join(".kimi-code/plugins/installed.json");
+    let registry = serde_json::to_vec(&json!({"version":1,"plugins":[
+        {"id":"sample-codex","root":legacy_root,"source":"local-path","enabled":true,"originalSource":"https://example.invalid/plugin"},
+        {"id":"sample","root":canonical_root,"source":"github","enabled":true,"originalSource":"https://example.invalid/plugin"}
+    ]})).unwrap();
+    fs::write(&registry_path, &registry).unwrap();
+    let declaration = |selector: &str| json!({"id":format!("kimi-{selector}"),"agent":"kimi","source":"https://example.invalid/plugin","selector":selector,"enabled":true,"paths":[format!("~/.kimi-code/plugins/managed/{selector}")],"update":[[executable]]});
+    fixture.manifest(json!([declaration("sample-codex"), declaration("sample")]));
+    assert!(
+        fixture
+            .synchronize()
+            .values()
+            .all(|result| result.status == ApplyStatus::Applied)
+    );
+    assert_eq!(fixture.receipts().len(), 2);
+    fixture.manifest(json!([declaration("sample")]));
+
+    let result = fixture.synchronize();
+    assert_eq!(result.len(), 1);
+    assert_eq!(result["kimi-sample"].status, ApplyStatus::Applied);
+    assert_eq!(
+        fixture.receipts(),
+        vec![json!({"id":"kimi-sample","paths":[canonical_root]})]
+    );
+    assert_eq!(fs::read(registry_path).unwrap(), registry);
+    assert_eq!(
+        fs::read_to_string(legacy_root.join("kimi.plugin.json")).unwrap(),
+        json!({"name":"sample-codex"}).to_string()
+    );
+}
+
+#[test]
 fn kimi_native_registry_is_verified_and_failed_update_restores_only_selected_enabled() {
     let fixture = Fixture::new();
     let root = fixture.home.join(".kimi-code/plugins/managed/sample");

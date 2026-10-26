@@ -77,6 +77,16 @@ fn stderr_tail(bytes: &[u8], truncated: bool) -> String {
     text[start..].to_owned()
 }
 
+fn failure_details(stdout: &[u8], stderr: &[u8], truncated: bool) -> String {
+    let stderr = stderr_tail(stderr, truncated);
+    let stdout = stderr_tail(stdout, false);
+    if stdout.trim().is_empty() {
+        stderr
+    } else {
+        format!("{stderr}\nstdout: {stdout}")
+    }
+}
+
 pub fn run_command(
     mut command: Command,
     input: Option<&[u8]>,
@@ -139,7 +149,7 @@ pub fn run_command(
                     "{program} timed out after {} ms (status: {}): {}",
                     timeout.as_millis(),
                     status.map_or_else(|| "still running".into(), |status| status.to_string()),
-                    stderr_tail(&err, err_truncated),
+                    failure_details(&out, &err, err_truncated),
                 );
             }
             if let Some(status) = status {
@@ -200,7 +210,7 @@ pub fn run_command(
         bail!(
             "{program} exited {}: {}",
             output.status,
-            redact_text(&String::from_utf8_lossy(&output.stderr), Some(1200))
+            failure_details(&output.stdout, &output.stderr, false)
         );
     }
     Ok(output)

@@ -1,5 +1,6 @@
 {
   "source": "https://github.com/github/awesome-copilot.git",
+  "subpath": "skills/git-commit",
   "skills": [
     "git-commit"
   ]

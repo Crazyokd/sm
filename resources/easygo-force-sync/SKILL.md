@@ -50,4 +50,4 @@ done
 - Block a repository when an untracked or ignored path overlaps a tracked path in the target branch; keep its local contents intact.
 - Prefer `origin/main`; use the remote default branch only when `origin/main` is absent.
 - Treat `src/easygo-app`, `src/easygo-music-resources`, and other `src/*` entries as independent repository boundaries.
-- This Skill directory is installed by SM. Keep `/.agents/skills/easygo-force-sync/` in this repository's `.git/info/exclude` so `git stash --include-untracked` leaves the installation in place. `git stash --all` also includes ignored files and can still remove it; restore the Skill through SM if that happens.
+- SM installs this Skill and maintains its local Git exclusion so `git stash --include-untracked` leaves it in place. `git stash --all` also includes ignored files and can still remove it; restore the Skill through SM if that happens.

@@ -317,6 +317,95 @@ fn model_failure_keeps_observations_pending_and_records_cycle_failure() {
 }
 
 #[test]
+fn later_analysis_batch_failure_keeps_the_selection_pending_for_a_complete_retry() {
+    struct BatchRunner {
+        fail_second: bool,
+        batches: Mutex<Vec<Vec<String>>>,
+    }
+    impl AgentRunner for BatchRunner {
+        fn run(&self, prompt: &str) -> Result<AnalysisResponse> {
+            assert!(prompt.len() <= 512_000);
+            let input: serde_json::Value = serde_json::from_str(prompt.lines().last().unwrap())?;
+            let mut batches = self.batches.lock().unwrap();
+            batches.push(
+                input["observations"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|row| row["id"].as_str().unwrap().to_owned())
+                    .collect(),
+            );
+            if self.fail_second && batches.len() == 2 {
+                bail!("second analysis batch unavailable");
+            }
+            Ok(AnalysisResponse {
+                candidates: Vec::new(),
+            })
+        }
+    }
+    let repo = Repo::new();
+    let runtime = runtime(&repo);
+    let state = runtime.state().unwrap();
+    let db = state.connect().unwrap();
+    let ids: Vec<_> = (0..8).map(|index| format!("batch-event-{index}")).collect();
+    for id in &ids {
+        let row = json!({"id":id,"agent":"codex","session_id":"session","cwd":"/repo","event":"PostToolUse","timestamp":"2026-10-26","resource_id":"review","facts":{"text":"x".repeat(180_000)},"coverage":"observed","evidence_kind":"execution"});
+        db.execute(
+            "INSERT INTO observations(id,value,processed) VALUES (?1,?2,0)",
+            [id, &row.to_string()],
+        )
+        .unwrap();
+    }
+    let failing = BatchRunner {
+        fail_second: true,
+        batches: Mutex::new(Vec::new()),
+    };
+    let report = cycle_with(
+        &runtime,
+        &state,
+        Some(&failing),
+        &FakeSubmitter(FakeMrApi::default()),
+    )
+    .unwrap();
+    assert!(!report.ok);
+    assert!(
+        report
+            .details
+            .error
+            .unwrap()
+            .contains("second analysis batch unavailable")
+    );
+    assert_eq!(report.details.observations_processed, 0);
+    assert_eq!(pending_observations(&state, 1000).unwrap().len(), ids.len());
+
+    let retry = BatchRunner {
+        fail_second: false,
+        batches: Mutex::new(Vec::new()),
+    };
+    let report = cycle_with(
+        &runtime,
+        &state,
+        Some(&retry),
+        &FakeSubmitter(FakeMrApi::default()),
+    )
+    .unwrap();
+    assert!(report.ok, "{report:?}");
+    assert_eq!(report.details.observations_processed, ids.len());
+    assert!(pending_observations(&state, 1000).unwrap().is_empty());
+    assert_eq!(
+        retry
+            .batches
+            .lock()
+            .unwrap()
+            .iter()
+            .flatten()
+            .cloned()
+            .collect::<Vec<_>>(),
+        ids
+    );
+}
+
+#[test]
 fn synchronization_fetch_error_is_recorded_with_its_failed_stage() {
     let repo = Repo::new();
     let mut runtime = runtime(&repo);

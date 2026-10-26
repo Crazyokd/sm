@@ -1,5 +1,5 @@
 use crate::{
-    files::{atomic_write, contained, payload_files, reject_symlink_path},
+    files::{atomic_write, contained, payload_files, reject_symlink_path, relative_path},
     model::valid_id,
     process::run_command,
 };
@@ -15,6 +15,8 @@ use std::{
 struct Selection {
     source: String,
     skills: Vec<String>,
+    #[serde(default)]
+    subpath: Option<String>,
 }
 
 /// Materialize selected upstream Skills with their native installer, never into the real home.
@@ -36,19 +38,92 @@ pub fn generate(selection: &Path, output: &Path) -> Result<()> {
             && selection.skills.iter().collect::<BTreeSet<_>>().len() == selection.skills.len(),
         "invalid upstream Skill selection"
     );
+    if let Some(subpath) = &selection.subpath {
+        relative_path(Path::new(subpath))?;
+        ensure!(
+            subpath
+                .split('/')
+                .all(|part| !matches!(part, "" | "." | ".."))
+                && !subpath
+                    .chars()
+                    .any(|c| c.is_control() || "*?[]\\".contains(c)),
+            "invalid upstream Skill subpath"
+        );
+    }
     let installed = tempfile::tempdir()?;
+    let local_source = if let Some(subpath) = &selection.subpath {
+        let checkout = installed.path().join("upstream");
+        let mut clone = Command::new("git");
+        clone
+            .args([
+                "clone",
+                "--filter=blob:none",
+                "--no-checkout",
+                "--depth",
+                "1",
+                "-c",
+                "filter.lfs.required=false",
+                "-c",
+                "filter.lfs.smudge=",
+                "-c",
+                "filter.lfs.clean=",
+                "-c",
+                "filter.lfs.process=",
+                "--",
+            ])
+            .arg(&selection.source)
+            .arg(&checkout)
+            .env_remove("GIT_DIR")
+            .env_remove("GIT_COMMON_DIR")
+            .env_remove("GIT_WORK_TREE")
+            .env_remove("GIT_INDEX_FILE")
+            .env("GIT_TERMINAL_PROMPT", "0");
+        run_command(clone, None, Duration::from_secs(480))?;
+        let mut sparse = Command::new("git");
+        sparse
+            .args(["sparse-checkout", "set", "--no-cone", "--"])
+            .arg(format!("/{subpath}/"))
+            .current_dir(&checkout)
+            .env_remove("GIT_DIR")
+            .env_remove("GIT_COMMON_DIR")
+            .env_remove("GIT_WORK_TREE")
+            .env_remove("GIT_INDEX_FILE");
+        run_command(sparse, None, Duration::from_secs(480))?;
+        let mut checkout_head = Command::new("git");
+        checkout_head
+            .args(["checkout", "HEAD"])
+            .current_dir(&checkout)
+            .env_remove("GIT_DIR")
+            .env_remove("GIT_COMMON_DIR")
+            .env_remove("GIT_WORK_TREE")
+            .env_remove("GIT_INDEX_FILE")
+            .env("GIT_TERMINAL_PROMPT", "0");
+        run_command(checkout_head, None, Duration::from_secs(480))?;
+        let root = contained(&checkout, Path::new(subpath))?;
+        payload_files(&root)?;
+        ensure!(
+            root.join("SKILL.md").is_file(),
+            "upstream Skill subpath marker missing"
+        );
+        Some(root)
+    } else {
+        None
+    };
     let mut command = Command::new("npx");
+    command.args(["--yes", "skills@1.7.2", "add"]);
+    if let Some(root) = &local_source {
+        command.arg(root);
+    } else {
+        command.arg(&selection.source);
+    }
     command
-        .args([
-            "--yes",
-            "skills@1.7.2",
-            "add",
-            &selection.source,
-            "--skill",
-            "*",
-        ])
+        .args(["--skill", "*"])
         .args(["--agent", "codex", "--yes", "--copy"])
         .current_dir(installed.path())
+        .env_remove("GIT_DIR")
+        .env_remove("GIT_COMMON_DIR")
+        .env_remove("GIT_WORK_TREE")
+        .env_remove("GIT_INDEX_FILE")
         .env("INSTALL_INTERNAL_SKILLS", "1")
         .env("DISABLE_TELEMETRY", "1")
         .env("DO_NOT_TRACK", "1")

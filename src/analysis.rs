@@ -141,6 +141,8 @@ struct AnalysisInput<'a> {
     projects: &'a BTreeMap<String, String>,
     observations: Vec<&'a Observation>,
 }
+// Leave room below the agent input limit for transport and client framing.
+const MAX_PROMPT_BYTES: usize = 512_000;
 pub fn analyze_observations(
     catalog: &Catalog,
     observations: &[Observation],
@@ -163,7 +165,6 @@ pub fn analyze_observations(
     if resources.is_empty() || observations.is_empty() {
         return Ok(Vec::new());
     }
-    let evidence: BTreeMap<_, _> = observations.iter().map(|o| (o.id.as_str(), *o)).collect();
     let mut descriptions = Vec::new();
     let mut hashes = BTreeMap::new();
     let mut supplied = BTreeSet::new();
@@ -199,107 +200,142 @@ pub fn analyze_observations(
     let input = AnalysisInput {
         resources: descriptions,
         projects: &catalog.projects,
-        observations,
+        observations: observations.clone(),
     };
-    let prompt = format!(
-        "{}\n{}",
-        include_str!("../assets/analyze.md"),
-        serde_json::to_string(&redact(&serde_json::to_value(input)?, None))?
+    let mut input = redact(&serde_json::to_value(input)?, None);
+    let rows = input["observations"]
+        .as_array_mut()
+        .context("analysis observations must be an array")?;
+    let rows = std::mem::take(rows);
+    let row_sizes = rows
+        .iter()
+        .map(|row| Ok(serde_json::to_vec(row)?.len()))
+        .collect::<Result<Vec<_>>>()?;
+    let instructions = include_str!("../assets/analyze.md");
+    let base_size = instructions.len() + 1 + serde_json::to_vec(&input)?.len();
+    ensure!(
+        base_size <= MAX_PROMPT_BYTES,
+        "analysis resource context exceeds {MAX_PROMPT_BYTES} bytes"
     );
-    let response = runner.run(&prompt)?;
     let mut candidates = Vec::new();
-    for draft in response.candidates {
-        let resource = resources
-            .get(draft.resource_id.as_str())
-            .context("candidate must select an existing self resource")?;
+    let mut start = 0;
+    while start < observations.len() {
+        let mut end = start;
+        let mut size = base_size;
+        while end < observations.len() {
+            let extra = row_sizes[end] + usize::from(end > start);
+            if size + extra > MAX_PROMPT_BYTES {
+                break;
+            }
+            size += extra;
+            end += 1;
+        }
         ensure!(
-            !draft.issue.trim().is_empty()
-                && !draft.evidence.is_empty()
-                && draft
-                    .evidence
-                    .iter()
-                    .all(|id| evidence.contains_key(id.as_str())),
-            "candidate needs a reason and real evidence"
+            end > start,
+            "analysis observation {} exceeds {MAX_PROMPT_BYTES} bytes with resource context",
+            observations[start].id
         );
-        for id in &draft.evidence {
-            let row = evidence[id.as_str()];
+        input["observations"] = Value::Array(rows[start..end].to_vec());
+        let prompt = format!("{instructions}\n{}", serde_json::to_string(&input)?);
+        let response = runner.run(&prompt)?;
+        let evidence: BTreeMap<_, _> = observations[start..end]
+            .iter()
+            .map(|o| (o.id.as_str(), *o))
+            .collect();
+        for draft in response.candidates {
+            let resource = resources
+                .get(draft.resource_id.as_str())
+                .context("candidate must select an existing self resource")?;
             ensure!(
-                row.resource_id
-                    .as_deref()
-                    .is_none_or(|id| id == draft.resource_id),
-                "candidate evidence belongs to a different resource"
+                !draft.issue.trim().is_empty()
+                    && !draft.evidence.is_empty()
+                    && draft
+                        .evidence
+                        .iter()
+                        .all(|id| evidence.contains_key(id.as_str())),
+                "candidate needs a reason and real evidence"
             );
+            for id in &draft.evidence {
+                let row = evidence[id.as_str()];
+                ensure!(
+                    row.resource_id
+                        .as_deref()
+                        .is_none_or(|id| id == draft.resource_id),
+                    "candidate evidence belongs to a different resource"
+                );
+            }
+            if draft.evidence.iter().any(|id| {
+                evidence[id.as_str()]
+                    .resource_content_hash
+                    .as_ref()
+                    .is_some_and(|hash| Some(hash) != hashes.get(&draft.resource_id))
+            }) {
+                continue;
+            }
+            let mut changes = BTreeMap::new();
+            for change in draft.changes {
+                ensure!(
+                    change
+                        .path
+                        .starts_with(&format!("resources/{}/", draft.resource_id)),
+                    "candidate path is outside selected resource"
+                );
+                let target = contained(&resource.root, Path::new(&change.path))?;
+                ensure!(
+                    !target.exists() || supplied.contains(&change.path),
+                    "candidate source was not fully supplied to model"
+                );
+                changes.insert(change.path, change.content);
+            }
+            if draft.operation == CandidateOperation::Edit && changes.is_empty() {
+                continue;
+            }
+            if draft.operation == CandidateOperation::Reclassify {
+                ensure!(
+                    match draft.scope {
+                        Some(Scope::User) => draft.project.is_none(),
+                        Some(Scope::Project) => draft
+                            .project
+                            .as_ref()
+                            .is_some_and(|p| catalog.projects.contains_key(p)),
+                        None => false,
+                    },
+                    "invalid proposed scope"
+                );
+            }
+            let mut details = Vec::new();
+            for id in &draft.evidence {
+                let row = evidence[id.as_str()];
+                let excerpt: BTreeMap<_, _> = ["tool_name", "tool_input", "prompt", "result_hash"]
+                    .into_iter()
+                    .filter_map(|key| row.facts.get(key).map(|value| (key, value)))
+                    .collect();
+                let excerpt = redact(&serde_json::to_value(excerpt)?, Some(4000));
+                details.push(format!(
+                    "{id} · {} · {} · {}: {}",
+                    row.agent,
+                    row.event,
+                    match row.coverage {
+                        crate::observe::Coverage::Observed => "observed",
+                        crate::observe::Coverage::Partial => "partial",
+                    },
+                    truncate(&serde_json::to_string(&excerpt)?, 800)
+                ));
+            }
+            candidates.push(Candidate {
+                resource_id: draft.resource_id,
+                issue: draft.issue,
+                evidence: draft.evidence,
+                changes,
+                expected_checks: draft.expected_checks,
+                operation: draft.operation,
+                scope: draft.scope,
+                project: draft.project,
+                root: resource.root.clone(),
+                evidence_details: details,
+            });
         }
-        if draft.evidence.iter().any(|id| {
-            evidence[id.as_str()]
-                .resource_content_hash
-                .as_ref()
-                .is_some_and(|hash| Some(hash) != hashes.get(&draft.resource_id))
-        }) {
-            continue;
-        }
-        let mut changes = BTreeMap::new();
-        for change in draft.changes {
-            ensure!(
-                change
-                    .path
-                    .starts_with(&format!("resources/{}/", draft.resource_id)),
-                "candidate path is outside selected resource"
-            );
-            let target = contained(&resource.root, Path::new(&change.path))?;
-            ensure!(
-                !target.exists() || supplied.contains(&change.path),
-                "candidate source was not fully supplied to model"
-            );
-            changes.insert(change.path, change.content);
-        }
-        if draft.operation == CandidateOperation::Edit && changes.is_empty() {
-            continue;
-        }
-        if draft.operation == CandidateOperation::Reclassify {
-            ensure!(
-                match draft.scope {
-                    Some(Scope::User) => draft.project.is_none(),
-                    Some(Scope::Project) => draft
-                        .project
-                        .as_ref()
-                        .is_some_and(|p| catalog.projects.contains_key(p)),
-                    None => false,
-                },
-                "invalid proposed scope"
-            );
-        }
-        let mut details = Vec::new();
-        for id in &draft.evidence {
-            let row = evidence[id.as_str()];
-            let excerpt: BTreeMap<_, _> = ["tool_name", "tool_input", "prompt", "result_hash"]
-                .into_iter()
-                .filter_map(|key| row.facts.get(key).map(|value| (key, value)))
-                .collect();
-            let excerpt = redact(&serde_json::to_value(excerpt)?, Some(4000));
-            details.push(format!(
-                "{id} · {} · {} · {}: {}",
-                row.agent,
-                row.event,
-                match row.coverage {
-                    crate::observe::Coverage::Observed => "observed",
-                    crate::observe::Coverage::Partial => "partial",
-                },
-                truncate(&serde_json::to_string(&excerpt)?, 800)
-            ));
-        }
-        candidates.push(Candidate {
-            resource_id: draft.resource_id,
-            issue: draft.issue,
-            evidence: draft.evidence,
-            changes,
-            expected_checks: draft.expected_checks,
-            operation: draft.operation,
-            scope: draft.scope,
-            project: draft.project,
-            root: resource.root.clone(),
-            evidence_details: details,
-        });
+        start = end;
     }
     Ok(candidates)
 }

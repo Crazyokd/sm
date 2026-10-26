@@ -177,3 +177,159 @@ fn upstream_installer_uses_disposable_staging_and_materializes_only_selected_ski
     );
     assert!(!output.join(".agents/skills/extra").exists());
 }
+
+#[test]
+fn upstream_subpath_installs_the_fresh_complete_tree_and_rejects_symlink_selection() {
+    let temp = tempfile::tempdir().unwrap();
+    let upstream = temp.path().join("upstream");
+    let skill = upstream.join("skills/demo");
+    fs::create_dir_all(&skill).unwrap();
+    fs::write(skill.join("SKILL.md"), "Selected Skill").unwrap();
+    fs::write(skill.join(".data"), [0, 255, 1]).unwrap();
+    fs::write(skill.join("run.sh"), "#!/bin/sh\nexit 0\n").unwrap();
+    fs::set_permissions(skill.join("run.sh"), fs::Permissions::from_mode(0o750)).unwrap();
+    fs::write(upstream.join("unrelated"), "must not be fetched").unwrap();
+    std::os::unix::fs::symlink("demo", upstream.join("skills/alias")).unwrap();
+    let outside = temp.path().join("outside");
+    fs::create_dir(&outside).unwrap();
+    fs::write(outside.join("private"), "external repository worktree").unwrap();
+    for root in [&upstream, &outside] {
+        for args in [
+            vec!["init", "-q"],
+            vec!["config", "uploadpack.allowFilter", "true"],
+            vec!["add", "."],
+            vec![
+                "-c",
+                "user.name=Test",
+                "-c",
+                "user.email=test@example.invalid",
+                "commit",
+                "-qm",
+                "fixture",
+            ],
+        ] {
+            assert!(
+                Command::new("git")
+                    .args(args)
+                    .current_dir(root)
+                    .status()
+                    .unwrap()
+                    .success()
+            );
+        }
+    }
+    let snapshot = || {
+        walkdir::WalkDir::new(&outside)
+            .into_iter()
+            .map(Result::unwrap)
+            .filter(|entry| entry.file_type().is_file())
+            .map(|entry| {
+                (
+                    entry.path().strip_prefix(&outside).unwrap().to_path_buf(),
+                    fs::read(entry.path()).unwrap(),
+                )
+            })
+            .collect::<BTreeMap<_, _>>()
+    };
+    let outside_before = snapshot();
+    let bin = temp.path().join("bin");
+    fs::create_dir(&bin).unwrap();
+    fs::write(
+        bin.join("git"),
+        "#!/bin/bash\nset -eu\nargs=(\"$@\")\nfor i in \"${!args[@]}\"; do\n  if [ \"${args[$i]}\" = https://example.invalid/source.git ]; then args[$i]=\"$SM_TEST_UPSTREAM\"; fi\ndone\nexec /usr/bin/git \"${args[@]}\"\n",
+    ).unwrap();
+    fs::write(
+        bin.join("npx"),
+        "#!/bin/sh\nset -eu\n[ -f \"$4/SKILL.md\" ]\n[ ! -e \"$4/../../unrelated\" ]\n[ -z \"${GIT_DIR+x}\" ]\n[ -z \"${GIT_COMMON_DIR+x}\" ]\n[ -z \"${GIT_WORK_TREE+x}\" ]\n[ -z \"${GIT_INDEX_FILE+x}\" ]\ngit -C \"$4\" config --local sm.native-install true\nprintf '%s' \"$4\" > \"$SM_TEST_RECORD\"\nmkdir -p .agents/skills\ncp -a \"$4\" .agents/skills/demo\n",
+    ).unwrap();
+    for program in ["git", "npx"] {
+        fs::set_permissions(bin.join(program), fs::Permissions::from_mode(0o700)).unwrap();
+    }
+    let selection = temp.path().join("selection.json");
+    let record = temp.path().join("native-source");
+    let routing = BTreeMap::from([
+        ("GIT_DIR", outside.join(".git")),
+        ("GIT_COMMON_DIR", outside.join(".git")),
+        ("GIT_WORK_TREE", outside.clone()),
+        ("GIT_INDEX_FILE", outside.join(".git/index")),
+    ]);
+    let all_routing = [
+        "GIT_DIR",
+        "GIT_COMMON_DIR",
+        "GIT_WORK_TREE",
+        "GIT_INDEX_FILE",
+    ];
+    for (index, (subpath, variables)) in [
+        ("skills/demo", &["GIT_DIR"][..]),
+        ("skills/demo", &all_routing[..]),
+        ("skills/alias", &all_routing[..]),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        fs::write(
+            &selection,
+            serde_json::to_vec(&serde_json::json!({
+                "source": "https://example.invalid/source.git",
+                "skills": ["demo"],
+                "subpath": subpath,
+            }))
+            .unwrap(),
+        )
+        .unwrap();
+        let output = temp.path().join(format!("output-{index}"));
+        let mut command = Command::new(env!("CARGO_BIN_EXE_sm"));
+        command
+            .args(["source-skills"])
+            .arg(&selection)
+            .arg(&output)
+            .env("PATH", format!("{}:/usr/bin:/bin", bin.display()))
+            .env("SM_TEST_UPSTREAM", format!("file://{}", upstream.display()))
+            .env("SM_TEST_RECORD", &record);
+        for variable in variables {
+            command.env(variable, &routing[variable]);
+        }
+        let result = command.output().unwrap();
+        let outside_after = snapshot();
+        let changed: Vec<_> = outside_after
+            .keys()
+            .chain(outside_before.keys())
+            .filter(|path| outside_after.get(*path) != outside_before.get(*path))
+            .collect();
+        assert!(
+            changed.is_empty(),
+            "source fetch changed external Git state: {changed:?}"
+        );
+        if subpath == "skills/alias" {
+            assert!(!result.status.success(), "{result:?}");
+            assert!(!output.exists());
+            assert!(
+                !record.exists(),
+                "invalid selection reached native installer"
+            );
+            continue;
+        }
+        assert!(result.status.success(), "{result:?}");
+        let native = fs::read_to_string(&record).unwrap();
+        assert_ne!(Path::new(&native), skill);
+        assert!(
+            !Path::new(&native).exists(),
+            "fresh staging was not cleaned"
+        );
+        for file in ["SKILL.md", ".data", "run.sh"] {
+            assert_eq!(
+                fs::read(output.join(".agents/skills/demo").join(file)).unwrap(),
+                fs::read(skill.join(file)).unwrap()
+            );
+        }
+        assert_ne!(
+            fs::metadata(output.join(".agents/skills/demo/run.sh"))
+                .unwrap()
+                .permissions()
+                .mode()
+                & 0o111,
+            0
+        );
+        fs::remove_file(&record).unwrap();
+    }
+}

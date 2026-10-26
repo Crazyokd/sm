@@ -5056,32 +5056,6 @@
       }
     },
     {
-      "id": "codex-hindsight-memory-hindsight",
-      "kind": "policy",
-      "origin": "self",
-      "scope": "user",
-      "project": null,
-      "installation": {
-        "agent": "codex",
-        "source": "https://github.com/vectorize-io/hindsight.git",
-        "selector": "hindsight-memory@hindsight",
-        "enabled": false,
-        "paths": [
-          "~/.codex/plugins/cache/hindsight/hindsight-memory"
-        ],
-        "update": [
-          [
-            "node",
-            "resources/source-providers/native-plugins.js",
-            "codex",
-            "https://github.com/vectorize-io/hindsight.git",
-            "hindsight-memory@hindsight",
-            "${SM_ENABLED}"
-          ]
-        ]
-      }
-    },
-    {
       "id": "kimi-superpowers",
       "kind": "policy",
       "origin": "self",
@@ -5128,32 +5102,6 @@
             "kimi",
             "https://github.com/DietrichGebert/ponytail",
             "ponytail",
-            "${SM_ENABLED}"
-          ]
-        ]
-      }
-    },
-    {
-      "id": "kimi-open-code-review-codex",
-      "kind": "policy",
-      "origin": "self",
-      "scope": "user",
-      "project": null,
-      "installation": {
-        "agent": "kimi",
-        "source": "https://github.com/alibaba/open-code-review",
-        "selector": "open-code-review-codex",
-        "enabled": true,
-        "paths": [
-          "~/.kimi-code/plugins/managed/open-code-review-codex"
-        ],
-        "update": [
-          [
-            "node",
-            "resources/source-providers/native-plugins.js",
-            "kimi",
-            "https://github.com/alibaba/open-code-review",
-            "open-code-review-codex",
             "${SM_ENABLED}"
           ]
         ]
@@ -5387,7 +5335,7 @@
           }
         ]
       },
-      "upstream": "skills-antfu-skills"
+      "upstream": "skills-vuejs-ai-skills"
     },
     {
       "id": "easygo-fe-skill-vueuse-functions",
@@ -5404,7 +5352,7 @@
           }
         ]
       },
-      "upstream": "skills-antfu-skills"
+      "upstream": "skills-vueuse-skills"
     },
     {
       "id": "easygo-fe-skill-reka-ui",
