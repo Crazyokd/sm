@@ -1,6 +1,7 @@
 use crate::{
     files::{atomic_write, reject_symlink_path, relative_path},
     model::{Catalog, ResourceKind, Scope},
+    privacy::redact_text,
     process::run_command,
     state::State,
 };
@@ -295,6 +296,7 @@ pub fn protect_owned(catalog: &Catalog, home: &Path, state: &State) -> Result<()
     for (path, patterns) in excludes {
         update_exclude(&path, &patterns)?;
     }
+    let mut warnings = BTreeMap::<PathBuf, Vec<PathBuf>>::new();
     for (root, (_, paths)) in repositories {
         if paths.is_empty() {
             continue;
@@ -304,10 +306,28 @@ pub fn protect_owned(catalog: &Catalog, home: &Path, state: &State) -> Result<()
             .args(["ls-files", "--others", "--exclude-standard", "-z", "--"])
             .args(paths.iter().map(|(path, _)| path));
         let output = run_command(command, None, Duration::from_secs(15))?;
-        ensure!(
-            output.stdout.is_empty(),
-            "project Git rules leave managed files exposed to stash -u"
+        if !output.stdout.is_empty() {
+            warnings.insert(
+                root,
+                String::from_utf8(output.stdout)?
+                    .split_terminator('\0')
+                    .map(PathBuf::from)
+                    .collect(),
+            );
+        }
+    }
+    if state.get::<BTreeMap<PathBuf, Vec<PathBuf>>>("project_git_protection_warnings")? != warnings
+    {
+        let report = serde_json::json!({
+            "warnings": warnings,
+            "reason": "Project Git rules may override local exclusions; listed files remain exposed to stash -u"
+        });
+        state.add_run("project-git-protection", &report)?;
+        eprintln!(
+            "SM project Git protection: {}",
+            redact_text(&report.to_string(), Some(1200))
         );
     }
+    state.set("project_git_protection_warnings", &warnings)?;
     state.set("project_git_protections", &retained)
 }

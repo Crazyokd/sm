@@ -119,6 +119,39 @@ fn configure(repo: &Repo, project: &std::path::Path) -> Runtime {
 }
 
 #[test]
+fn explicit_project_reinclusion_does_not_block_resource_application() {
+    for ignore in ["!AGENTS.md\n", "*\n!AGENTS.md\n"] {
+        let repo = Repo::new();
+        let project = project(&repo);
+        let runtime = configure(&repo, &project);
+        let state = runtime.state().unwrap();
+        fs::write(project.join(".gitignore"), ignore).unwrap();
+        let index = fs::read(project.join(".git/index")).unwrap();
+        assert!(apply_source(&repo.work, &runtime, &state).unwrap().1.ok());
+        assert_eq!(
+            fs::read_to_string(project.join("AGENTS.md")).unwrap(),
+            "Project rule\n"
+        );
+        assert_eq!(
+            fs::read_to_string(project.join(".gitignore")).unwrap(),
+            ignore
+        );
+        assert_eq!(fs::read(project.join(".git/index")).unwrap(), index);
+        let warnings: BTreeMap<PathBuf, Vec<PathBuf>> =
+            state.get("project_git_protection_warnings").unwrap();
+        assert_eq!(warnings[&project], vec![PathBuf::from("AGENTS.md")]);
+        fs::write(project.join(".gitignore"), "*\n").unwrap();
+        assert!(apply_source(&repo.work, &runtime, &state).unwrap().1.ok());
+        assert!(
+            state
+                .get::<BTreeMap<PathBuf, Vec<PathBuf>>>("project_git_protection_warnings")
+                .unwrap()
+                .is_empty()
+        );
+    }
+}
+
+#[test]
 fn unprotected_managed_skill_is_removed_by_git_stash_u() {
     let repo = Repo::new();
     let project = project(&repo);
@@ -384,23 +417,6 @@ fn unsafe_owned_paths_cannot_expand_exclusions() {
         assert_eq!(fs::read(&exclude).unwrap(), before);
         assert_eq!(fs::read_to_string(outside).unwrap(), "outside\n");
     }
-}
-
-#[test]
-fn higher_priority_gitignore_negation_is_reported_as_unprotected() {
-    let repo = Repo::new();
-    let project = project(&repo);
-    let runtime = configure(&repo, &project);
-    fs::write(project.join(".gitignore"), "!AGENTS.md\n").unwrap();
-    let error = apply_source(&repo.work, &runtime, &runtime.state().unwrap()).unwrap_err();
-    assert!(
-        error.to_string().contains("exposed to stash -u"),
-        "{error:#}"
-    );
-    assert_eq!(
-        fs::read_to_string(project.join(".gitignore")).unwrap(),
-        "!AGENTS.md\n"
-    );
 }
 
 #[test]
