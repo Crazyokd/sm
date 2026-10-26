@@ -3,8 +3,8 @@ use common::Repo;
 use serde_json::{Value, json};
 use std::{
     fs,
-    io::{BufRead, BufReader, Read, Write},
-    net::TcpStream,
+    io::{self, BufRead, BufReader, Read, Write},
+    net::{TcpListener, TcpStream},
     os::unix::fs::PermissionsExt,
     path::Path,
     process::{Child, Command, Stdio},
@@ -131,19 +131,55 @@ impl Drop for Running {
         let _ = self.0.wait();
     }
 }
-fn http(port: u16) -> String {
-    let mut stream = TcpStream::connect((std::net::Ipv4Addr::LOCALHOST, port)).unwrap();
-    stream
-        .set_read_timeout(Some(Duration::from_secs(2)))
-        .unwrap();
+fn http(port: u16, deadline: Instant) -> io::Result<String> {
+    let remaining = || {
+        deadline
+            .checked_duration_since(Instant::now())
+            .filter(|left| !left.is_zero())
+            .ok_or_else(|| {
+                io::Error::new(io::ErrorKind::TimedOut, "HTTP startup deadline exceeded")
+            })
+    };
+    let address = (std::net::Ipv4Addr::LOCALHOST, port).into();
+    let mut stream = TcpStream::connect_timeout(&address, remaining()?)?;
+    stream.set_write_timeout(Some(remaining()?))?;
     write!(
         stream,
         "GET /resources HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nConnection: close\r\n\r\n"
-    )
-    .unwrap();
-    let mut response = String::new();
-    stream.read_to_string(&mut response).unwrap();
-    response
+    )?;
+    let mut response = Vec::new();
+    let mut buffer = [0; 8192];
+    loop {
+        stream.set_read_timeout(Some(remaining()?))?;
+        match stream.read(&mut buffer) {
+            Ok(0) => break,
+            Ok(count) => response.extend_from_slice(&buffer[..count]),
+            Err(error) if error.kind() == io::ErrorKind::Interrupted => continue,
+            Err(error) => return Err(error),
+        }
+    }
+    String::from_utf8(response).map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))
+}
+#[test]
+fn http_response_can_take_longer_than_two_seconds_within_startup_budget() {
+    let listener = TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, 0)).unwrap();
+    let port = listener.local_addr().unwrap().port();
+    let server = std::thread::spawn(move || {
+        let (mut stream, _) = listener.accept().unwrap();
+        for line in BufReader::new(&mut stream).lines() {
+            if line.unwrap().is_empty() {
+                break;
+            }
+        }
+        std::thread::sleep(Duration::from_millis(2200));
+        let _ = stream
+            .write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok");
+    });
+    let response = http(port, Instant::now() + Duration::from_secs(10));
+    server.join().unwrap();
+    let response = response.unwrap();
+    assert!(response.starts_with("HTTP/1.1 200"));
+    assert!(response.ends_with("ok"));
 }
 #[test]
 fn actual_server_starts_first_sync_and_serves_embedded_views() {
@@ -176,7 +212,8 @@ fn actual_server_starts_first_sync_and_serves_embedded_views() {
     let port: u16 = line.rsplit(':').next().unwrap().parse().unwrap();
     let deadline = Instant::now() + Duration::from_secs(10);
     loop {
-        let response = http(port);
+        let response =
+            http(port, deadline).expect("native server did not answer within startup deadline");
         assert!(response.starts_with("HTTP/1.1 200"));
         if response.contains("class=\"resource-name\"")
             && home.join(".agents/skills/review/SKILL.md").is_file()
