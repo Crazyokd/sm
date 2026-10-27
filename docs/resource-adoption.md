@@ -32,7 +32,7 @@
 | easygo-motion-test-path-autotune | SM 自建 | easygo |
 | easygo-package-tag-mr | SM 自建 | easygo |
 | easygo-robot-ssh | SM 自建 | perception-platform |
-| feishu-notify | SM 自建 | 用户 |
+| feishu-notify | SM 自建 | 项目（sros-core） |
 | figma-implement-design | https://github.com/davila7/claude-code-templates.git | easygo-web |
 | find-skills | https://github.com/vercel-labs/skills.git | 用户 |
 | forge-current-session | SM 自建 | 用户 |

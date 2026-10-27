@@ -336,6 +336,118 @@ fn hooks_merge_without_adopting_other_handlers() {
 }
 
 #[test]
+fn unchanged_native_configs_preserve_interleaved_entries_and_formatting() {
+    for toml in [false, true] {
+        let temp = tempdir().unwrap();
+        let target = temp
+            .path()
+            .join(if toml { "config.toml" } else { "hooks.json" });
+        let state = State::open(temp.path().join("state.db")).unwrap();
+        let write = |owner: &str, command: &str| {
+            let value = if toml {
+                json!({"hooks":[{"event":"Stop","command":command}]})
+            } else {
+                json!({"hooks":{"Stop":[{"command":command}]}})
+            };
+            let fragment = value.as_object().unwrap().clone();
+            OwnedWrite::new(
+                owner,
+                &target,
+                if toml {
+                    WriteBody::Toml(fragment)
+                } else {
+                    WriteBody::Json(fragment)
+                },
+            )
+        };
+        let first = write("z-first", "first");
+        let second = write("a-second", "second");
+        assert!(apply(vec![first.clone(), second.clone()], &state).ok());
+        let before = if toml {
+            "# private comment\nprofile='local'\n[[hooks]]\nevent='Stop'\ncommand='first'\n[[hooks]]\nevent='Stop'\ncommand='local' # keep position\n[[hooks]]\nevent='Stop'\ncommand='second'\n"
+        } else {
+            "{\n  \"private\": \"local\",\n  \"hooks\": {\"Stop\": [{\"command\":\"first\"}, {\"command\":\"local\"}, {\"command\":\"second\"}]}\n}\n"
+        };
+        fs::write(&target, before).unwrap();
+        let ownership = state.owned().unwrap();
+        assert!(apply(vec![second.clone(), first.clone()], &state).ok());
+        assert_eq!(fs::read(&target).unwrap(), before.as_bytes());
+        assert_eq!(state.owned().unwrap(), ownership);
+
+        let missing = if toml {
+            before.replace("[[hooks]]\nevent='Stop'\ncommand='first'\n", "")
+        } else {
+            before.replace("{\"command\":\"first\"}, ", "")
+        };
+        fs::write(&target, &missing).unwrap();
+        assert!(!apply(vec![first.clone(), second.clone()], &state).ok());
+        assert_eq!(fs::read_to_string(&target).unwrap(), missing);
+        assert_eq!(state.owned().unwrap(), ownership);
+        fs::write(&target, before).unwrap();
+        let parse = || -> Value {
+            let text = fs::read_to_string(&target).unwrap();
+            if toml {
+                toml_edit::de::from_str(&text).unwrap()
+            } else {
+                serde_json::from_str(&text).unwrap()
+            }
+        };
+        let commands = |value: Value| {
+            let entries = if toml {
+                &value["hooks"]
+            } else {
+                &value["hooks"]["Stop"]
+            };
+            entries
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|entry| entry["command"].as_str().unwrap().to_owned())
+                .collect::<Vec<_>>()
+        };
+        assert!(apply(vec![write("z-first", "updated"), second], &state).ok());
+        assert_eq!(commands(parse()), ["local", "updated", "second"]);
+    }
+}
+
+#[test]
+fn unchanged_native_claims_still_reject_local_value_edits() {
+    for toml in [false, true] {
+        let temp = tempdir().unwrap();
+        let target = temp.path().join("config");
+        let state = State::open(temp.path().join("state.db")).unwrap();
+        let value = if toml {
+            json!({"mcp_servers":{"managed":{"command":"original"}}})
+        } else {
+            json!({"mcpServers":{"managed":{"command":"original"}}})
+        };
+        let fragment = value.as_object().unwrap().clone();
+        let write = OwnedWrite::new(
+            "owner",
+            &target,
+            if toml {
+                WriteBody::Toml(fragment)
+            } else {
+                WriteBody::Json(fragment)
+            },
+        );
+        assert!(apply(vec![write.clone()], &state).ok());
+        let edited = fs::read_to_string(&target)
+            .unwrap()
+            .replace("original", "local-edit");
+        fs::write(&target, &edited).unwrap();
+        let before = state.owned().unwrap();
+        let report = apply(vec![write], &state);
+        assert_eq!(
+            report.results["owner"].status,
+            sm::model::ApplyStatus::Conflict
+        );
+        assert_eq!(fs::read_to_string(&target).unwrap(), edited);
+        assert_eq!(state.owned().unwrap(), before);
+    }
+}
+
+#[test]
 fn local_edits_and_unmanaged_targets_are_preserved() {
     let temp = tempdir().unwrap();
     let target = temp.path().join("file");

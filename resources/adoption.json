@@ -4932,24 +4932,6 @@
     "executable": true
   },
   {
-    "resource": "feishu-notify",
-    "target": ".agents/skills/feishu-notify/SKILL.md",
-    "sha256": "0f80137bbc80a46a3bd54ff062f0fc0c658709f276f8454bf7d673b328a05bf7",
-    "executable": false
-  },
-  {
-    "resource": "feishu-notify",
-    "target": ".agents/skills/feishu-notify/scripts/feishu_lark.py",
-    "sha256": "2394e73f6fea3edf99e76e887d85f27ce2b8ba7046573f4f0ab962a33db20f2d",
-    "executable": false
-  },
-  {
-    "resource": "feishu-notify",
-    "target": ".agents/skills/feishu-notify/scripts/feishu_notify.py",
-    "sha256": "4fdc200e0c03bf32b99fb46bf76fdd6a527100b0b871e33721b93a81a2626461",
-    "executable": false
-  },
-  {
     "resource": "figma-implement-design",
     "target": ".agents/skills/figma-implement-design/LICENSE.txt",
     "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",

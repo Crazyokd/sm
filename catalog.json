@@ -1179,14 +1179,6 @@
       "project": "perception-platform"
     },
     {
-      "id": "feishu-notify",
-      "kind": "skill",
-      "payload": "resources/feishu-notify",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "figma-implement-design",
       "kind": "skill",
       "payload": ".agents/skills/figma-implement-design",

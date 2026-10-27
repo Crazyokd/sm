@@ -144,10 +144,6 @@
       {
         "path": "~/repo/sros-core/.agents/skills/ones/SKILL.md",
         "enabled": false
-      },
-      {
-        "path": "~/repo/sros-core/.agents/skills/feishu-notify/SKILL.md",
-        "enabled": false
       }
     ]
   }

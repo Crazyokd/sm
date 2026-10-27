@@ -390,6 +390,13 @@ fn prepare(path: &Path, new: &[OwnedWrite], old: &[StoredWrite]) -> Result<Conte
                     merge_entries(&mut document, fragment, remove)?;
                 }
             }
+            if content.is_some()
+                && next.len() == old.len()
+                && next.iter().all(|write| old.contains(write))
+            {
+                // Reapplying identical claims must not move handlers past local entries.
+                return Ok((content.clone(), content));
+            }
             if matches!(body, StoredBody::Toml(_)) {
                 let mut edited: DocumentMut = text.parse()?;
                 patch_table(
