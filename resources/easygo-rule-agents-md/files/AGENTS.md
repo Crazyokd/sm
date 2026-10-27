@@ -81,7 +81,6 @@ git -C src/<pkg> rev-parse --show-toplevel
 - 两者共用 launch、脚本、observe/webgz、端口与 topic 约定。**改共享路径时，必须确认两种入口都仍可用**；不能假设「只在单车里测过就没问题」或「多车只是 compose 包装、与 launch 无关」。
 - 交付前至少满足其一：**两种模式都跑过**；或 **用 launch 测试 / 代码审查明确证明** 变更只影响其中一种且不会波及另一种（例如改动被 `start_gazebo:=false` 或 `robot_count` 严格隔离）。
 - 常见互踩点（改到相关代码时必须双线核对）：全局 Gazebo / `pkill`、GZ topic 命名（全局 vs 命名空间）、`ROS_DOMAIN_ID` 与 DDS 域、`/clock` 与 TF 图、host 网络端口偏移、observe / 驾驶台 API 的 `robot_name`、多车共用 world 时的 GUI / `<camera_pose>`。
-- **Workspace 级 Cursor 规则**：模板在 `.cursor/workspace-rules/`；在 `Easygo_workspace` 多仓根目录打开 IDE 时，运行 `bash script/install-workspace-cursor-rules.sh` 安装到上级 `.cursor/rules/`（需对 workspace 根目录有写权限，必要时 sudo）。
 
 - AI / CI 自测不要启动 Gazebo GUI；需要 launch 仿真时显式使用 headless 参数，具体命令看 `src/easygo_sim_bringup/README.md`。
 - 仿真默认应限制 DDS / Gazebo 多播在本机。跨机器调试需要广播时，由用户显式设置环境变量。

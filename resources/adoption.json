@@ -11322,18 +11322,6 @@
     "executable": false
   },
   {
-    "resource": "automate",
-    "target": ".agents/skills/automate/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "automate",
-    "target": ".agents/skills/automate/SKILL.md",
-    "sha256": "8689e484fdc0f884d21a3c64da7dcba04c5f3d24600dfcb9a9d1bf66aa588c32",
-    "executable": false
-  },
-  {
     "resource": "autopilot",
     "target": ".agents/skills/autopilot/PROVENANCE.md",
     "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
@@ -11343,144 +11331,6 @@
     "resource": "autopilot",
     "target": ".agents/skills/autopilot/SKILL.md",
     "sha256": "2f0fd7aebbcacfa81afb8ead8107b44e4202e45e23ad20e3778c9123cadb9589",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/SKILL.md",
-    "sha256": "196c948fe09a94868074fbba5e6b35bd0d11af7753acca817eda1cb42e5039b9",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/sdk/callout-tone-icons.d.ts",
-    "sha256": "1963bc12709e22c33b035aa81d242942417b62926851ec5655084b631df76a87",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/sdk/canvas-tokens.d.ts",
-    "sha256": "81091bc215d4fca3a0f776da117e7615c3998963d2f775968f58141505d1e98b",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/sdk/chart-primitives.d.ts",
-    "sha256": "6c49a39e4e6847d7fa35c23af890333b479101fcf0241f6c6a5d700fb47d10a5",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/sdk/collapsible-section.d.ts",
-    "sha256": "b49546bc6308094e75ffc585dc62108bfba802d4759985873fbaf2e6e0815a9f",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/sdk/dag-layout.d.ts",
-    "sha256": "0dd2b9ee796cbddcd033b95c5c16d6c96e0d4fbfd71b088de96b120e90a84b1c",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/sdk/diff-view.d.ts",
-    "sha256": "1a87c37d87675a8785ce82ebf85784f875b27ca40d10a9a6ee9e5095a43e3afe",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/sdk/form-primitives.d.ts",
-    "sha256": "5edaf9d073d171c967da86cea500abc4a50f96c8ded867d5b0cd540b8295412e",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/sdk/hooks.d.ts",
-    "sha256": "46774473c388edd62aef364b262297bda144a43ac16c4a21f8b2381dc7f7feac",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/sdk/index.d.ts",
-    "sha256": "a9960dc7a724fd1ab2b4186599ada6cdba5214f11f83595c3ec027f2c8016dae",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/sdk/swatch.d.ts",
-    "sha256": "00d5c4380dfc77c4966f336a79c523009bea0bbc871e4c4ba2e5b3232223030b",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/sdk/theme.d.ts",
-    "sha256": "a9051f1b7e5da8869f9b5a65a463fcf6296f65908aa25f2a601677b7d75e363a",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/sdk/todo-list.d.ts",
-    "sha256": "220b80b0c5859938f3bfe9294c799c0e6dc43452aa5a785a4fe48c5ec4bd987f",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/sdk/ui-primitives.d.ts",
-    "sha256": "ac90c60664cf5a28223050cf0623c75547010dbfe4f8207fa28d9158a9bb440e",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/sdk/ui-primitives.test.d.ts",
-    "sha256": "08f8e060023c0cf71053064f115304aac75378b786f4d769ef74221ea52f27c7",
-    "executable": false
-  },
-  {
-    "resource": "canvas",
-    "target": ".agents/skills/canvas/sdk/usage-bar.d.ts",
-    "sha256": "d0796b9e62c5fc4c40e1355757f5c47e6f13e11561258f6bff3704ab8c22ff22",
-    "executable": false
-  },
-  {
-    "resource": "create-hook",
-    "target": ".agents/skills/create-hook/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "create-hook",
-    "target": ".agents/skills/create-hook/SKILL.md",
-    "sha256": "3c96a121123c06ec801c7354eee5b5b5247c6521d7bd7dd1b9018cccc74a1e9c",
-    "executable": false
-  },
-  {
-    "resource": "create-rule",
-    "target": ".agents/skills/create-rule/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "create-rule",
-    "target": ".agents/skills/create-rule/SKILL.md",
-    "sha256": "ff1de16edfb55f7190101ac2a8206a8bff1fef803c28a0b8a1943e9ffa175e4b",
-    "executable": false
-  },
-  {
-    "resource": "create-skill",
-    "target": ".agents/skills/create-skill/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "create-skill",
-    "target": ".agents/skills/create-skill/SKILL.md",
-    "sha256": "a49ef6dced91a1f929c54bc23a50d14134feaf8361bbc540047486f0879bfa2f",
     "executable": false
   },
   {
@@ -11496,18 +11346,6 @@
     "executable": false
   },
   {
-    "resource": "deploy-with-vercel",
-    "target": ".agents/skills/deploy-with-vercel/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "deploy-with-vercel",
-    "target": ".agents/skills/deploy-with-vercel/SKILL.md",
-    "sha256": "40b1e301415976ca2c982df3ac8c0d40410c0b448c09416b659c949c4203ecc3",
-    "executable": false
-  },
-  {
     "resource": "goal",
     "target": ".agents/skills/goal/PROVENANCE.md",
     "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
@@ -11517,138 +11355,6 @@
     "resource": "goal",
     "target": ".agents/skills/goal/SKILL.md",
     "sha256": "e3a2388ae11e0ff7cb74d98e5a7f325fc6839f24fd486aa7bbf25142ed50f135",
-    "executable": false
-  },
-  {
-    "resource": "loop",
-    "target": ".agents/skills/loop/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "loop",
-    "target": ".agents/skills/loop/SKILL.md",
-    "sha256": "fa195d01ca95def6f8e6ca1902d35470d153b49472ba4e60ea5224485f192a05",
-    "executable": false
-  },
-  {
-    "resource": "migrate-to-skills",
-    "target": ".agents/skills/migrate-to-skills/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "migrate-to-skills",
-    "target": ".agents/skills/migrate-to-skills/SKILL.md",
-    "sha256": "ba4e939aa72a2e955e1b481743ff1db171fa0db13f43385f1ea90a9e7117a283",
-    "executable": false
-  },
-  {
-    "resource": "new-repo",
-    "target": ".agents/skills/new-repo/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "new-repo",
-    "target": ".agents/skills/new-repo/SKILL.md",
-    "sha256": "f00ae3d0e231c35bb70ced3ae5dae7378aa5b43e6c8b5f2637a037638e67efde",
-    "executable": false
-  },
-  {
-    "resource": "onboard",
-    "target": ".agents/skills/onboard/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "onboard",
-    "target": ".agents/skills/onboard/SKILL.md",
-    "sha256": "e5df841cb32f593393acfa96bc3c4714cd6667a7104e1efda08692f41b5f0c55",
-    "executable": false
-  },
-  {
-    "resource": "origin",
-    "target": ".agents/skills/origin/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "origin",
-    "target": ".agents/skills/origin/SKILL.md",
-    "sha256": "cd515fe0d7037fb2907bff05f3c010f5643baf43b250592b882df84f8937fdcf",
-    "executable": false
-  },
-  {
-    "resource": "rename-chat",
-    "target": ".agents/skills/rename-chat/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "rename-chat",
-    "target": ".agents/skills/rename-chat/SKILL.md",
-    "sha256": "618b6d42cacec9b77ebadc5ca0f564f42e1e592499b01cfc22595a608f3ceb31",
-    "executable": false
-  },
-  {
-    "resource": "review",
-    "target": ".agents/skills/review/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "review",
-    "target": ".agents/skills/review/SKILL.md",
-    "sha256": "bd00601823f73cce6a20acc3996e7d2ea3c2a366143da12eafd0d94b98d88ece",
-    "executable": false
-  },
-  {
-    "resource": "review-bugbot",
-    "target": ".agents/skills/review-bugbot/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "review-bugbot",
-    "target": ".agents/skills/review-bugbot/SKILL.md",
-    "sha256": "24bb0b36844583c5a1ffe2dc11f861c85d68a281cc61ceda35966bbf60c08e7a",
-    "executable": false
-  },
-  {
-    "resource": "review-security",
-    "target": ".agents/skills/review-security/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "review-security",
-    "target": ".agents/skills/review-security/SKILL.md",
-    "sha256": "d007ec5a617e9caeef03055cd9c5dad762d80acb4ae1b20377bde4b3b41c46fd",
-    "executable": false
-  },
-  {
-    "resource": "sdk",
-    "target": ".agents/skills/sdk/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "sdk",
-    "target": ".agents/skills/sdk/SKILL.md",
-    "sha256": "baf963c116d4b0a4231748563ef0fc6ecc2589f9b36759d806c385004be854a4",
-    "executable": false
-  },
-  {
-    "resource": "share",
-    "target": ".agents/skills/share/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "share",
-    "target": ".agents/skills/share/SKILL.md",
-    "sha256": "7deb4c207da4fd8b32dd3f41c7a6a66c961f6e56ae0db85921ed77919e8bf1ba",
     "executable": false
   },
   {
@@ -11673,30 +11379,6 @@
     "resource": "split-to-prs",
     "target": ".agents/skills/split-to-prs/SKILL.md",
     "sha256": "796eb4bf3fd9a3cdde51a39979d14aed86f81aa3fd2c77bfeb33c0cc4456dd2f",
-    "executable": false
-  },
-  {
-    "resource": "statusline",
-    "target": ".agents/skills/statusline/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "statusline",
-    "target": ".agents/skills/statusline/SKILL.md",
-    "sha256": "9ce07cefc16faf737ad58fb8f09ac6d34ff457382daf90ff6a06d402f4688d73",
-    "executable": false
-  },
-  {
-    "resource": "update-cursor-settings",
-    "target": ".agents/skills/update-cursor-settings/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "update-cursor-settings",
-    "target": ".agents/skills/update-cursor-settings/SKILL.md",
-    "sha256": "cda7180339d1f03f9331915b20d835a5d414eac7f97f30faa530d3e485c9fbe5",
     "executable": false
   },
   {
@@ -11867,18 +11549,6 @@
     "resource": "easygo-agent-perception-commit-pusher",
     "target": ".codex/agents/perception-commit-pusher.toml",
     "sha256": "5359cffbbc4774fb138a671d87ab87ed467346e65da7ad5930422e86885fb149",
-    "executable": false
-  },
-  {
-    "resource": "easygo-rule-cursor-rules-codegraph-mdc",
-    "target": ".cursor/rules/codegraph.mdc",
-    "sha256": "b7113a7f7a9bcb9f4358e71eade32dec0cac8d4f31da9b00c8c41c77bee88d75",
-    "executable": false
-  },
-  {
-    "resource": "easygo-rule-cursor-rules-full-sim-single-multi-compat-mdc",
-    "target": ".cursor/rules/full-sim-single-multi-compat.mdc",
-    "sha256": "539062230375a7748a3c03e2ccdc61e98927c9e28619ae67dac697fc59c160d3",
     "executable": false
   },
   {
@@ -12224,18 +11894,6 @@
     "executable": false
   },
   {
-    "resource": "simenv-rule-cursor-rules-codegraph-mdc",
-    "target": ".cursor/rules/codegraph.mdc",
-    "sha256": "b7113a7f7a9bcb9f4358e71eade32dec0cac8d4f31da9b00c8c41c77bee88d75",
-    "executable": false
-  },
-  {
-    "resource": "simenv-rule-cursor-rules-git-land-main-mdc",
-    "target": ".cursor/rules/git-land-main.mdc",
-    "sha256": "eaa22b548f0a03ba39762e7fae83dfcf2bf5621a8b41e05127e744f572bdf9ea",
-    "executable": false
-  },
-  {
     "resource": "tp-skill-tp-run-case",
     "target": ".agents/skills/tp-run-case/SKILL.md",
     "sha256": "b694885855238357d48ef65c8dc958b3bbe743e7805c4029fbdb83671bcc8c62",
@@ -12257,24 +11915,6 @@
     "resource": "tp-rule-agents-md",
     "target": "AGENTS.md",
     "sha256": "0865a661a6f29063d29a4168ba0f2028237e235030a69103daf8845652b4ba3b",
-    "executable": false
-  },
-  {
-    "resource": "tp-rule-cursor-rules-codegraph-mdc",
-    "target": ".cursor/rules/codegraph.mdc",
-    "sha256": "b7113a7f7a9bcb9f4358e71eade32dec0cac8d4f31da9b00c8c41c77bee88d75",
-    "executable": false
-  },
-  {
-    "resource": "tp-rule-cursor-rules-git-land-main-mdc",
-    "target": ".cursor/rules/git-land-main.mdc",
-    "sha256": "6eff8fc408aca4058129ca1d4100a187c19e46adbf51aeb2e32725a01ebd9ec3",
-    "executable": false
-  },
-  {
-    "resource": "sm-rule-cursor-rules-codegraph-mdc",
-    "target": ".cursor/rules/codegraph.mdc",
-    "sha256": "b7113a7f7a9bcb9f4358e71eade32dec0cac8d4f31da9b00c8c41c77bee88d75",
     "executable": false
   },
   {

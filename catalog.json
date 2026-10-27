@@ -1650,49 +1650,9 @@
       "project": "easygo-web"
     },
     {
-      "id": "automate",
-      "kind": "skill",
-      "payload": "resources/automate",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "autopilot",
       "kind": "skill",
       "payload": "resources/autopilot",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "canvas",
-      "kind": "skill",
-      "payload": "resources/canvas",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "create-hook",
-      "kind": "skill",
-      "payload": "resources/create-hook",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "create-rule",
-      "kind": "skill",
-      "payload": "resources/create-rule",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "create-skill",
-      "kind": "skill",
-      "payload": "resources/create-skill",
       "origin": "self",
       "scope": "user",
       "project": null
@@ -1706,105 +1666,9 @@
       "project": null
     },
     {
-      "id": "deploy-with-vercel",
-      "kind": "skill",
-      "payload": "resources/deploy-with-vercel",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "goal",
       "kind": "skill",
       "payload": "resources/goal",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "loop",
-      "kind": "skill",
-      "payload": "resources/loop",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "migrate-to-skills",
-      "kind": "skill",
-      "payload": "resources/migrate-to-skills",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "new-repo",
-      "kind": "skill",
-      "payload": "resources/new-repo",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "onboard",
-      "kind": "skill",
-      "payload": "resources/onboard",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "origin",
-      "kind": "skill",
-      "payload": "resources/origin",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "rename-chat",
-      "kind": "skill",
-      "payload": "resources/rename-chat",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "review",
-      "kind": "skill",
-      "payload": "resources/review",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "review-bugbot",
-      "kind": "skill",
-      "payload": "resources/review-bugbot",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "review-security",
-      "kind": "skill",
-      "payload": "resources/review-security",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "sdk",
-      "kind": "skill",
-      "payload": "resources/sdk",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "share",
-      "kind": "skill",
-      "payload": "resources/share",
       "origin": "self",
       "scope": "user",
       "project": null
@@ -1821,22 +1685,6 @@
       "id": "split-to-prs",
       "kind": "skill",
       "payload": "resources/split-to-prs",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "statusline",
-      "kind": "skill",
-      "payload": "resources/statusline",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "update-cursor-settings",
-      "kind": "skill",
-      "payload": "resources/update-cursor-settings",
       "origin": "self",
       "scope": "user",
       "project": null
@@ -2216,38 +2064,6 @@
           {
             "target": ".codex/agents/perception-commit-pusher.toml",
             "source": "files/.codex/agents/perception-commit-pusher.toml"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "easygo"
-    },
-    {
-      "id": "easygo-rule-cursor-rules-codegraph-mdc",
-      "kind": "rule",
-      "files": {
-        "root": "resources/easygo-rule-cursor-rules-codegraph-mdc",
-        "entries": [
-          {
-            "target": ".cursor/rules/codegraph.mdc",
-            "source": "files/.cursor/rules/codegraph.mdc"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "easygo"
-    },
-    {
-      "id": "easygo-rule-cursor-rules-full-sim-single-multi-compat-mdc",
-      "kind": "rule",
-      "files": {
-        "root": "resources/easygo-rule-cursor-rules-full-sim-single-multi-compat-mdc",
-        "entries": [
-          {
-            "target": ".cursor/rules/full-sim-single-multi-compat.mdc",
-            "source": "files/.cursor/rules/full-sim-single-multi-compat.mdc"
           }
         ]
       },
@@ -2848,38 +2664,6 @@
       "project": "simenv"
     },
     {
-      "id": "simenv-rule-cursor-rules-codegraph-mdc",
-      "kind": "rule",
-      "files": {
-        "root": "resources/simenv-rule-cursor-rules-codegraph-mdc",
-        "entries": [
-          {
-            "target": ".cursor/rules/codegraph.mdc",
-            "source": "files/.cursor/rules/codegraph.mdc"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "simenv"
-    },
-    {
-      "id": "simenv-rule-cursor-rules-git-land-main-mdc",
-      "kind": "rule",
-      "files": {
-        "root": "resources/simenv-rule-cursor-rules-git-land-main-mdc",
-        "entries": [
-          {
-            "target": ".cursor/rules/git-land-main.mdc",
-            "source": "files/.cursor/rules/git-land-main.mdc"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "simenv"
-    },
-    {
       "id": "tp-skill-tp-run-case",
       "kind": "skill",
       "files": {
@@ -2942,54 +2726,6 @@
       "origin": "self",
       "scope": "project",
       "project": "tp"
-    },
-    {
-      "id": "tp-rule-cursor-rules-codegraph-mdc",
-      "kind": "rule",
-      "files": {
-        "root": "resources/tp-rule-cursor-rules-codegraph-mdc",
-        "entries": [
-          {
-            "target": ".cursor/rules/codegraph.mdc",
-            "source": "files/.cursor/rules/codegraph.mdc"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "tp"
-    },
-    {
-      "id": "tp-rule-cursor-rules-git-land-main-mdc",
-      "kind": "rule",
-      "files": {
-        "root": "resources/tp-rule-cursor-rules-git-land-main-mdc",
-        "entries": [
-          {
-            "target": ".cursor/rules/git-land-main.mdc",
-            "source": "files/.cursor/rules/git-land-main.mdc"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "tp"
-    },
-    {
-      "id": "sm-rule-cursor-rules-codegraph-mdc",
-      "kind": "rule",
-      "files": {
-        "root": "resources/sm-rule-cursor-rules-codegraph-mdc",
-        "entries": [
-          {
-            "target": ".cursor/rules/codegraph.mdc",
-            "source": "files/.cursor/rules/codegraph.mdc"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "sm"
     },
     {
       "id": "user-mcp-codex-config-toml-gitlab",
