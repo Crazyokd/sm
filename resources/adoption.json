@@ -11298,18 +11298,6 @@
     "executable": false
   },
   {
-    "resource": "autopilot",
-    "target": ".agents/skills/autopilot/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "autopilot",
-    "target": ".agents/skills/autopilot/SKILL.md",
-    "sha256": "2f0fd7aebbcacfa81afb8ead8107b44e4202e45e23ad20e3778c9123cadb9589",
-    "executable": false
-  },
-  {
     "resource": "create-subagent",
     "target": ".agents/skills/create-subagent/PROVENANCE.md",
     "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
@@ -11319,42 +11307,6 @@
     "resource": "create-subagent",
     "target": ".agents/skills/create-subagent/SKILL.md",
     "sha256": "8874e78acaa6ae74e4252ba63cb6374eb6bfa47a324ff0542d0e28f9c01fb56a",
-    "executable": false
-  },
-  {
-    "resource": "goal",
-    "target": ".agents/skills/goal/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "goal",
-    "target": ".agents/skills/goal/SKILL.md",
-    "sha256": "e3a2388ae11e0ff7cb74d98e5a7f325fc6839f24fd486aa7bbf25142ed50f135",
-    "executable": false
-  },
-  {
-    "resource": "shell",
-    "target": ".agents/skills/shell/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "shell",
-    "target": ".agents/skills/shell/SKILL.md",
-    "sha256": "b354ce28c70af1d5c05bb6bf070a1823fadd470530993ab271a1cfcbe57ad4fe",
-    "executable": false
-  },
-  {
-    "resource": "split-to-prs",
-    "target": ".agents/skills/split-to-prs/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "split-to-prs",
-    "target": ".agents/skills/split-to-prs/SKILL.md",
-    "sha256": "796eb4bf3fd9a3cdde51a39979d14aed86f81aa3fd2c77bfeb33c0cc4456dd2f",
     "executable": false
   },
   {

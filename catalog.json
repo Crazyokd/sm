@@ -1633,41 +1633,9 @@
       "project": "easygo-web"
     },
     {
-      "id": "autopilot",
-      "kind": "skill",
-      "payload": "resources/autopilot",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "create-subagent",
       "kind": "skill",
       "payload": "resources/create-subagent",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "goal",
-      "kind": "skill",
-      "payload": "resources/goal",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "shell",
-      "kind": "skill",
-      "payload": "resources/shell",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "split-to-prs",
-      "kind": "skill",
-      "payload": "resources/split-to-prs",
       "origin": "self",
       "scope": "user",
       "project": null
