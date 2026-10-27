@@ -1726,22 +1726,6 @@
       "project": null
     },
     {
-      "id": "user-rule-codex-rules-default-rules",
-      "kind": "rule",
-      "files": {
-        "root": "resources/user-rule-codex-rules-default-rules",
-        "entries": [
-          {
-            "target": ".codex/rules/default.rules",
-            "source": "files/.codex/rules/default.rules"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "user-hook-codex-reference",
       "kind": "hook",
       "files": {

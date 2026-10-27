@@ -11400,12 +11400,6 @@
     "executable": false
   },
   {
-    "resource": "user-rule-codex-rules-default-rules",
-    "target": ".codex/rules/default.rules",
-    "sha256": "433cf2e084d3def982eda2c2448d9e9703cb83434c73889f6f31fd743a2b9943",
-    "executable": false
-  },
-  {
     "resource": "user-hook-codex-reference",
     "target": ".codex/hooks/README.md",
     "sha256": "d01f9d0474014e089ebbb67a9b86384c9ea3dda5229df939e8c45e7d2e283170",
