@@ -8412,12 +8412,6 @@
     "executable": false
   },
   {
-    "resource": "lark-vc-agent",
-    "target": ".agents/skills/lark-vc-agent/SKILL.md",
-    "sha256": "ca7478c596f989999562099cf9c56650f3c2b4f13aead4817d18974ba861ab01",
-    "executable": false
-  },
-  {
     "resource": "lark-whiteboard",
     "target": ".agents/skills/lark-whiteboard/SKILL.md",
     "sha256": "78a3fbffa0da5c561b3e7035543fe1e80dbd7854c38d84e35e1392598b288f07",
@@ -11361,18 +11355,6 @@
     "resource": "split-to-prs",
     "target": ".agents/skills/split-to-prs/SKILL.md",
     "sha256": "796eb4bf3fd9a3cdde51a39979d14aed86f81aa3fd2c77bfeb33c0cc4456dd2f",
-    "executable": false
-  },
-  {
-    "resource": "browser-use",
-    "target": ".agents/skills/browser-use/SKILL.md",
-    "sha256": "6a2698e0d3062cb10fa83a8c40b86d2bcfd13de916cd236f7e46938e9db758c5",
-    "executable": false
-  },
-  {
-    "resource": "browser-use",
-    "target": ".agents/skills/browser-use/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
     "executable": false
   },
   {
@@ -16895,12 +16877,6 @@
     "executable": false
   },
   {
-    "resource": "ecc-skill-codehealth-mcp",
-    "target": ".agents/skills/codehealth-mcp/SKILL.md",
-    "sha256": "c5943c4c353b02dcd87b751de15bb087caae2f11c36e84a74e181fe2eadee394",
-    "executable": false
-  },
-  {
     "resource": "ecc-skill-coding-standards",
     "target": ".agents/skills/coding-standards/SKILL.md",
     "sha256": "e80544c3d1eac5b14f22022146bd91a6b0ecc30e099cf5181894853aeb81dee1",
@@ -16964,12 +16940,6 @@
     "resource": "ecc-skill-dev-team",
     "target": ".agents/skills/dev-team/SKILL.md",
     "sha256": "727b093c8f8284923e54619b9193e5dee9e9ae0ea87b5fb65e1e01e0206fe621",
-    "executable": false
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".agents/skills/dmux-workflows/SKILL.md",
-    "sha256": "6e4028d61a556d58fa2cdc6162d6837c082974a7161b2d703967bec472308c56",
     "executable": false
   },
   {
@@ -17255,48 +17225,6 @@
     "executable": false
   },
   {
-    "resource": "ecc-skill-source-command-epic-claim",
-    "target": ".agents/skills/source-command-epic-claim/SKILL.md",
-    "sha256": "2fa300f2d57495084f696102ee20f6ba1e8fe00840ede40d4846ffb1df678936",
-    "executable": false
-  },
-  {
-    "resource": "ecc-skill-source-command-epic-decompose",
-    "target": ".agents/skills/source-command-epic-decompose/SKILL.md",
-    "sha256": "f4049ba4d83bbc9f3b345c7cdd899da79e257ecec9bc4f3703475c60c523e65f",
-    "executable": false
-  },
-  {
-    "resource": "ecc-skill-source-command-epic-publish",
-    "target": ".agents/skills/source-command-epic-publish/SKILL.md",
-    "sha256": "4940e04ae3b2fe0c127a9195a783ecc427d8611a27abf5b2490a1cd89bccdbf0",
-    "executable": false
-  },
-  {
-    "resource": "ecc-skill-source-command-epic-review",
-    "target": ".agents/skills/source-command-epic-review/SKILL.md",
-    "sha256": "9155cb9beb03b5432cdd503f5e40579eeacaefa9ec120f3f9ee2c4562e73f667",
-    "executable": false
-  },
-  {
-    "resource": "ecc-skill-source-command-epic-sync",
-    "target": ".agents/skills/source-command-epic-sync/SKILL.md",
-    "sha256": "61547f3cbd63fdac6d1c7481a6a0d1455a94cf606348a19715b3231de3051a6d",
-    "executable": false
-  },
-  {
-    "resource": "ecc-skill-source-command-epic-unblock",
-    "target": ".agents/skills/source-command-epic-unblock/SKILL.md",
-    "sha256": "6ebd81e33ce973bea1a258a62016774996045cade79c0ffd6f9edc819ffd3ae5",
-    "executable": false
-  },
-  {
-    "resource": "ecc-skill-source-command-epic-validate",
-    "target": ".agents/skills/source-command-epic-validate/SKILL.md",
-    "sha256": "c9ae8bb27bb32139a69169d93c7e52fecc9b13bd713406f0022b8c1c260f7faa",
-    "executable": false
-  },
-  {
     "resource": "ecc-skill-source-command-feature-dev",
     "target": ".agents/skills/source-command-feature-dev/SKILL.md",
     "sha256": "02b1c23b2b2e6ce0793e021a789c9c59e950e653289e58bb638dc29f7921ede3",
@@ -17312,12 +17240,6 @@
     "resource": "ecc-skill-source-command-go-review",
     "target": ".agents/skills/source-command-go-review/SKILL.md",
     "sha256": "3dd195fbad76a131da20dec966b9e8b35aa84c925f1a15efdd57d26720cda617",
-    "executable": false
-  },
-  {
-    "resource": "ecc-skill-source-command-jira",
-    "target": ".agents/skills/source-command-jira/SKILL.md",
-    "sha256": "5d865e63bb0ef9226b3f0830a7d7f8f78c72c9478a662aa8d8be000eb0b84076",
     "executable": false
   },
   {
@@ -17822,13 +17744,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/auto-update.js",
-    "sha256": "86f6b3a9254a59d68e51c7066a8939c08e26f70a551dba6394a06fe4ddbc64e7",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/auto-update.js",
     "sha256": "86f6b3a9254a59d68e51c7066a8939c08e26f70a551dba6394a06fe4ddbc64e7",
@@ -17871,13 +17786,6 @@
     "shared_with": "ecc-agent-harness-optimizer"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/harness-audit.js",
-    "sha256": "cab3a6d0fa74a08fd484a929c1c769f723afbd01818f4ca549d2966d6458c1ea",
-    "executable": false,
-    "shared_with": "ecc-agent-harness-optimizer"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/harness-audit.js",
     "sha256": "cab3a6d0fa74a08fd484a929c1c769f723afbd01818f4ca549d2966d6458c1ea",
@@ -17900,13 +17808,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/auto-tmux-dev.js",
-    "sha256": "b9bba06d2b73495601a04a69ba1b907271220d967794eed613b0b3924a91ffd9",
-    "executable": true,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/auto-tmux-dev.js",
     "sha256": "b9bba06d2b73495601a04a69ba1b907271220d967794eed613b0b3924a91ffd9",
     "executable": true,
@@ -17948,13 +17849,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/bash-hook-dispatcher.js",
-    "sha256": "b6e4163536d8092b63cfca205372d699f38550d6dd0fe2e74abde2f029f6ecbe",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/bash-hook-dispatcher.js",
     "sha256": "b6e4163536d8092b63cfca205372d699f38550d6dd0fe2e74abde2f029f6ecbe",
@@ -17984,13 +17878,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/block-no-verify.js",
-    "sha256": "c4638e5ccd28b75f7a8ba3c9eab8351c8b11a914e59612edd635a50d6e8c1c9e",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/block-no-verify.js",
     "sha256": "c4638e5ccd28b75f7a8ba3c9eab8351c8b11a914e59612edd635a50d6e8c1c9e",
     "executable": false,
@@ -18032,13 +17919,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/check-console-log.js",
-    "sha256": "382623502ffe25ffc2cc7fe810bc79a181600a46c43595fe8de0da148998b7b1",
-    "executable": true,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/check-console-log.js",
     "sha256": "382623502ffe25ffc2cc7fe810bc79a181600a46c43595fe8de0da148998b7b1",
@@ -18068,13 +17948,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/check-hook-enabled.js",
-    "sha256": "1a16c203727a1471c700c0adc44c67fb7c29e78db24b61a2a46e469fb41d5fba",
-    "executable": true,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/check-hook-enabled.js",
     "sha256": "1a16c203727a1471c700c0adc44c67fb7c29e78db24b61a2a46e469fb41d5fba",
     "executable": true,
@@ -18116,13 +17989,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/config-protection.js",
-    "sha256": "b2f4accbba21e66ef440b12dade0aaa9f0f631f57453ef4b1d87f0b56e1b1f7b",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/config-protection.js",
     "sha256": "b2f4accbba21e66ef440b12dade0aaa9f0f631f57453ef4b1d87f0b56e1b1f7b",
@@ -18158,13 +18024,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/cost-tracker.js",
-    "sha256": "f9e811b4657dc250c2fd448cd21838aea1155a274b6803afafc87156009a720e",
-    "executable": true,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/cost-tracker.js",
     "sha256": "f9e811b4657dc250c2fd448cd21838aea1155a274b6803afafc87156009a720e",
@@ -18200,13 +18059,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/cursor-session-env.js",
-    "sha256": "7c64241f6be7abeb6e204eec2ace6ca9a519454a1f1d58d4a2b162cd7d6752de",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/cursor-session-env.js",
     "sha256": "7c64241f6be7abeb6e204eec2ace6ca9a519454a1f1d58d4a2b162cd7d6752de",
@@ -18236,13 +18088,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/design-quality-check.js",
-    "sha256": "ffac3f7c2b226e68c808b7e23d515727e0db32e166ed14d25674dfa9a407be33",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/design-quality-check.js",
     "sha256": "ffac3f7c2b226e68c808b7e23d515727e0db32e166ed14d25674dfa9a407be33",
     "executable": false,
@@ -18284,13 +18129,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/desktop-notify.js",
-    "sha256": "ee5c5c366958848683c17527d1572f10cf86f8ec52a9ba645202db8652d9c046",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/desktop-notify.js",
     "sha256": "ee5c5c366958848683c17527d1572f10cf86f8ec52a9ba645202db8652d9c046",
@@ -18326,13 +18164,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/doc-file-warning.js",
-    "sha256": "a91eea1e20c0affaf0460dd128afad46af5a0d71dc7f52d7e4b875c5607225d1",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/doc-file-warning.js",
     "sha256": "a91eea1e20c0affaf0460dd128afad46af5a0d71dc7f52d7e4b875c5607225d1",
@@ -18362,13 +18193,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/ecc-context-monitor.js",
-    "sha256": "6c9399ca4e1bd0162cf824fd4c94f5c05e580bb3146e6e365f38b6f7bd14e5ec",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/ecc-context-monitor.js",
     "sha256": "6c9399ca4e1bd0162cf824fd4c94f5c05e580bb3146e6e365f38b6f7bd14e5ec",
     "executable": false,
@@ -18410,13 +18234,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/ecc-metrics-bridge.js",
-    "sha256": "c78b8ba985fefbca95db970da8da50465f634895e0ea688b45d688f70d4abfdd",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/ecc-metrics-bridge.js",
     "sha256": "c78b8ba985fefbca95db970da8da50465f634895e0ea688b45d688f70d4abfdd",
@@ -18446,13 +18263,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/ecc-statusline.js",
-    "sha256": "9566bb42c6a6d0c89250a13f1d121c9ffd75a4626ae5988f69f40233fddd7c55",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/ecc-statusline.js",
     "sha256": "9566bb42c6a6d0c89250a13f1d121c9ffd75a4626ae5988f69f40233fddd7c55",
     "executable": false,
@@ -18494,13 +18304,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/evaluate-session.js",
-    "sha256": "d3bf18be2af61791b25bcb8fb7cc44b911bf9d59579fbcfc0c6af16579574db6",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/evaluate-session.js",
     "sha256": "d3bf18be2af61791b25bcb8fb7cc44b911bf9d59579fbcfc0c6af16579574db6",
@@ -18536,13 +18339,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/gateguard-fact-force.js",
-    "sha256": "9401ca31742946d3af10eacf49c122c46862491573c89cb3d5330d888aea06d8",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/gateguard-fact-force.js",
     "sha256": "9401ca31742946d3af10eacf49c122c46862491573c89cb3d5330d888aea06d8",
@@ -18572,13 +18368,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/gateguard-heredoc.js",
-    "sha256": "1482549cd44a02251d1b468afe79fc931fe1113fbcf7d08f3f7e3fc98d89171e",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/gateguard-heredoc.js",
     "sha256": "1482549cd44a02251d1b468afe79fc931fe1113fbcf7d08f3f7e3fc98d89171e",
     "executable": false,
@@ -18620,13 +18409,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/governance-capture.js",
-    "sha256": "8001160e9bc469dd57aa000ff483962c00841701973e9d1cf122105b88a839d8",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/governance-capture.js",
     "sha256": "8001160e9bc469dd57aa000ff483962c00841701973e9d1cf122105b88a839d8",
@@ -18662,13 +18444,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/insaits-security-monitor.py",
-    "sha256": "44e701c596b4fb006ab46c4f82984d8616da47bebd4ae5fb51b5263e5955ce59",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/insaits-security-monitor.py",
     "sha256": "44e701c596b4fb006ab46c4f82984d8616da47bebd4ae5fb51b5263e5955ce59",
@@ -18698,13 +18473,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/insaits-security-wrapper.js",
-    "sha256": "2090ee2cae5e6b35cf7c011b69cc99ef98f4f4a8eaf3c956493238729a0968f8",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/insaits-security-wrapper.js",
     "sha256": "2090ee2cae5e6b35cf7c011b69cc99ef98f4f4a8eaf3c956493238729a0968f8",
     "executable": false,
@@ -18740,13 +18508,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/mcp-health-check.js",
-    "sha256": "f553b83f754a8b024e53303200ae85aaec7abacc3f6ef703075081799288a459",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/mcp-health-check.js",
     "sha256": "f553b83f754a8b024e53303200ae85aaec7abacc3f6ef703075081799288a459",
     "executable": false,
@@ -18788,13 +18549,6 @@
     "shared_with": "user-hook-codex-memory-persistence-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/observe-runner.js",
-    "sha256": "0ac9f619f326a5465f04ddc4cdade192132b6a47d011067af00b7a5d17f5efed",
-    "executable": false,
-    "shared_with": "user-hook-codex-memory-persistence-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/observe-runner.js",
     "sha256": "0ac9f619f326a5465f04ddc4cdade192132b6a47d011067af00b7a5d17f5efed",
@@ -18824,13 +18578,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/plan-canvas-pending.js",
-    "sha256": "18feb739884b028791b432b8185888451fa27fe23f94adc96747c9b9c773f018",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/plan-canvas-pending.js",
     "sha256": "18feb739884b028791b432b8185888451fa27fe23f94adc96747c9b9c773f018",
     "executable": false,
@@ -18872,13 +18619,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/plan-canvas-sessions.js",
-    "sha256": "f894fdc9a38ba2c4b92035e026d58775dcec4679ea5035e7df0fe1d2b359445b",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/plan-canvas-sessions.js",
     "sha256": "f894fdc9a38ba2c4b92035e026d58775dcec4679ea5035e7df0fe1d2b359445b",
@@ -18914,13 +18654,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/plugin-hook-bootstrap.js",
-    "sha256": "0e27afc42c121e467bbd3c102d223acae98e7e6255710b75aeeef2add212d422",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/plugin-hook-bootstrap.js",
     "sha256": "0e27afc42c121e467bbd3c102d223acae98e7e6255710b75aeeef2add212d422",
@@ -18956,13 +18689,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/post-bash-build-complete.js",
-    "sha256": "f47e296e4536ba71572c27b6611919d1b350bc1f2d293b1c1ddb2c7662e506b4",
-    "executable": true,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/post-bash-build-complete.js",
     "sha256": "f47e296e4536ba71572c27b6611919d1b350bc1f2d293b1c1ddb2c7662e506b4",
@@ -18998,13 +18724,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/post-bash-command-log.js",
-    "sha256": "286bc8dc082ab9e23e228a744788b5bfce91fa3cb842dd2db3dfb96bd2eb464a",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/post-bash-command-log.js",
     "sha256": "286bc8dc082ab9e23e228a744788b5bfce91fa3cb842dd2db3dfb96bd2eb464a",
@@ -19040,13 +18759,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/post-bash-dispatcher.js",
-    "sha256": "bbcac5d8dbc983c0174455c624a98d66d9c54b13474409f9c0154d6d3567febe",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/post-bash-dispatcher.js",
     "sha256": "bbcac5d8dbc983c0174455c624a98d66d9c54b13474409f9c0154d6d3567febe",
@@ -19082,13 +18794,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/post-bash-pr-created.js",
-    "sha256": "360a4d5428801786fda5c03ebfa065033aa6382448d0035bd7c44904ee686e6a",
-    "executable": true,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/post-bash-pr-created.js",
     "sha256": "360a4d5428801786fda5c03ebfa065033aa6382448d0035bd7c44904ee686e6a",
@@ -19124,13 +18829,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/post-edit-accumulator.js",
-    "sha256": "b69e6128795c7d9a5db9af45e4f709a6192d427ac998962c3564926aaa9d35a4",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/post-edit-accumulator.js",
     "sha256": "b69e6128795c7d9a5db9af45e4f709a6192d427ac998962c3564926aaa9d35a4",
@@ -19160,13 +18858,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/post-edit-console-warn.js",
-    "sha256": "de72d89dc4cedb4ba0ba799edacad79b69165ec9aac5be6d65950cd0cd3b5c2d",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/post-edit-console-warn.js",
     "sha256": "de72d89dc4cedb4ba0ba799edacad79b69165ec9aac5be6d65950cd0cd3b5c2d",
     "executable": false,
@@ -19208,13 +18899,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/post-edit-format.js",
-    "sha256": "5b4c6fa4469697c40b2506a1a50838e53de3cb47e97eaa57929c2124245e4606",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/post-edit-format.js",
     "sha256": "5b4c6fa4469697c40b2506a1a50838e53de3cb47e97eaa57929c2124245e4606",
@@ -19244,13 +18928,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/post-edit-typecheck.js",
-    "sha256": "bc12d455ce3d7f316404d23aa9e070098a636a8f47cee2fcd702208ffff18385",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/post-edit-typecheck.js",
     "sha256": "bc12d455ce3d7f316404d23aa9e070098a636a8f47cee2fcd702208ffff18385",
     "executable": false,
@@ -19292,13 +18969,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/posttooluse-dispatcher.js",
-    "sha256": "4724276f27684b45dd05282fd8b1e2b7e1dcf76eb72952b8b491bc3da7c4f846",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/posttooluse-dispatcher.js",
     "sha256": "4724276f27684b45dd05282fd8b1e2b7e1dcf76eb72952b8b491bc3da7c4f846",
@@ -19334,13 +19004,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/pre-bash-commit-quality.js",
-    "sha256": "9fd28eb4123ac58253402658a2efc2d96c3625d4eef77980b17508a50395c012",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/pre-bash-commit-quality.js",
     "sha256": "9fd28eb4123ac58253402658a2efc2d96c3625d4eef77980b17508a50395c012",
@@ -19370,13 +19033,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/pre-bash-dev-server-block.js",
-    "sha256": "02a972a3d07d0fd809c8a773329c90981466e06ea289daaf2115a51f2a9a6aa1",
-    "executable": true,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/pre-bash-dev-server-block.js",
     "sha256": "02a972a3d07d0fd809c8a773329c90981466e06ea289daaf2115a51f2a9a6aa1",
     "executable": true,
@@ -19418,13 +19074,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/pre-bash-dispatcher.js",
-    "sha256": "5ddf5ec18c25272b5874f5fa5a19243ceb6fdf978b3c81fa04e337c59ed25716",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/pre-bash-dispatcher.js",
     "sha256": "5ddf5ec18c25272b5874f5fa5a19243ceb6fdf978b3c81fa04e337c59ed25716",
@@ -19460,13 +19109,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/pre-bash-git-push-reminder.js",
-    "sha256": "171a7b03e588059aabab78cf64e10fa8170af112b1ceb6fa3d749df503c7fa72",
-    "executable": true,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/pre-bash-git-push-reminder.js",
     "sha256": "171a7b03e588059aabab78cf64e10fa8170af112b1ceb6fa3d749df503c7fa72",
@@ -19496,13 +19138,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/pre-bash-tmux-reminder.js",
-    "sha256": "df1d631016eb98d0fd53787572d76ecc65be180f91e38f05adb76a964e824a4c",
-    "executable": true,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/pre-bash-tmux-reminder.js",
     "sha256": "df1d631016eb98d0fd53787572d76ecc65be180f91e38f05adb76a964e824a4c",
     "executable": true,
@@ -19544,13 +19179,6 @@
     "shared_with": "user-hook-codex-memory-persistence-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/pre-compact.js",
-    "sha256": "98eee132c60edc683066233b227e65f0a4e752683efe97384509577bbbfb8bd6",
-    "executable": false,
-    "shared_with": "user-hook-codex-memory-persistence-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/pre-compact.js",
     "sha256": "98eee132c60edc683066233b227e65f0a4e752683efe97384509577bbbfb8bd6",
@@ -19586,13 +19214,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/pre-write-doc-warn.js",
-    "sha256": "97c9f33bd4e7dac13d6ed27b551f25fa275a30448d32e626000c34c9c4329661",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/pre-write-doc-warn.js",
     "sha256": "97c9f33bd4e7dac13d6ed27b551f25fa275a30448d32e626000c34c9c4329661",
@@ -19622,13 +19243,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/pretooluse-visible-output.js",
-    "sha256": "0508766aad2ff7540a717bacacc6e23e2452c65d75d0485039ec1a3eae7e6018",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/pretooluse-visible-output.js",
     "sha256": "0508766aad2ff7540a717bacacc6e23e2452c65d75d0485039ec1a3eae7e6018",
     "executable": false,
@@ -19670,13 +19284,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/quality-gate.js",
-    "sha256": "66874c9ff75bf74483b17a699b217865ae6a47cfe1462fd2b1f037511aecb582",
-    "executable": true,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/quality-gate.js",
     "sha256": "66874c9ff75bf74483b17a699b217865ae6a47cfe1462fd2b1f037511aecb582",
@@ -19706,13 +19313,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/run-with-flags-shell.sh",
-    "sha256": "a928085325e32f821a2a89be85bb26cab40e67c24c9869782d85e0b22b50173b",
-    "executable": true,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/run-with-flags-shell.sh",
     "sha256": "a928085325e32f821a2a89be85bb26cab40e67c24c9869782d85e0b22b50173b",
     "executable": true,
@@ -19754,13 +19354,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/run-with-flags.js",
-    "sha256": "a5b3c3f4ed27f1d9d9c607d6819aab9985ad446239ea7d2825d4b040d2d8d87e",
-    "executable": true,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/run-with-flags.js",
     "sha256": "a5b3c3f4ed27f1d9d9c607d6819aab9985ad446239ea7d2825d4b040d2d8d87e",
@@ -19790,13 +19383,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/session-activity-tracker.js",
-    "sha256": "51c2110a507c7f545f9040cb0bb5cf23c935b1f05018aea15bf4685bfb17a53a",
-    "executable": false,
-    "shared_with": "user-hook-codex-memory-persistence-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/session-activity-tracker.js",
     "sha256": "51c2110a507c7f545f9040cb0bb5cf23c935b1f05018aea15bf4685bfb17a53a",
     "executable": false,
@@ -19838,13 +19424,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/session-end-marker.js",
-    "sha256": "dd24fbec816a9dc738e45c5b126f3823365410c3d0e0fde52ea8ee8e1384a234",
-    "executable": true,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/session-end-marker.js",
     "sha256": "dd24fbec816a9dc738e45c5b126f3823365410c3d0e0fde52ea8ee8e1384a234",
@@ -19874,13 +19453,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/session-end.js",
-    "sha256": "dad58b43af2ea3ed46ec802334d65c5cf327998b6ce818b5a3e6c482088e2730",
-    "executable": false,
-    "shared_with": "user-hook-codex-memory-persistence-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/session-end.js",
     "sha256": "dad58b43af2ea3ed46ec802334d65c5cf327998b6ce818b5a3e6c482088e2730",
     "executable": false,
@@ -19922,13 +19494,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/session-start-bootstrap.js",
-    "sha256": "e1f2495e0846fdb8378b0d794e39134d52c01f8242c445faf0265227dfcddd50",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/session-start-bootstrap.js",
     "sha256": "e1f2495e0846fdb8378b0d794e39134d52c01f8242c445faf0265227dfcddd50",
@@ -19958,13 +19523,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/session-start.js",
-    "sha256": "7e26a5f0812a3717d053367d9b4db2f70e9d40434b7a05c849051266e8c1e75c",
-    "executable": false,
-    "shared_with": "user-hook-codex-memory-persistence-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/session-start.js",
     "sha256": "7e26a5f0812a3717d053367d9b4db2f70e9d40434b7a05c849051266e8c1e75c",
     "executable": false,
@@ -20006,13 +19564,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/skill-run-tracker.js",
-    "sha256": "1dbb93800818af03798c4775f1fa4997d6c68b603b4b0837df0a38b4e54dfe32",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/skill-run-tracker.js",
     "sha256": "1dbb93800818af03798c4775f1fa4997d6c68b603b4b0837df0a38b4e54dfe32",
@@ -20042,13 +19593,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/hooks/stop-format-typecheck.js",
-    "sha256": "a02d73b611527ba5816781893ea347b646fa7ddce7bcb50820d8c9079c798f0d",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/hooks/stop-format-typecheck.js",
     "sha256": "a02d73b611527ba5816781893ea347b646fa7ddce7bcb50820d8c9079c798f0d",
     "executable": false,
@@ -20090,13 +19634,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/hooks/suggest-compact.js",
-    "sha256": "e031a96b7d05b689a457eb4c2c02dd8e1171cd5e68633f30b60a3f0f6ce4471a",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/hooks/suggest-compact.js",
     "sha256": "e031a96b7d05b689a457eb4c2c02dd8e1171cd5e68633f30b60a3f0f6ce4471a",
@@ -20132,13 +19669,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/agent-compress.js",
-    "sha256": "566facf7e79cbfab9be863b5a5370822eda6430a16d22d81d264a422296f6d08",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/agent-compress.js",
     "sha256": "566facf7e79cbfab9be863b5a5370822eda6430a16d22d81d264a422296f6d08",
@@ -20174,13 +19704,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/agent-data-home.js",
-    "sha256": "0a39212f81838cd9756ade0048c296a6f79acf6dc8416ded6b15cd8c5be07ae8",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/agent-data-home.js",
     "sha256": "0a39212f81838cd9756ade0048c296a6f79acf6dc8416ded6b15cd8c5be07ae8",
@@ -20216,13 +19739,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/agent-proximity/distance.js",
-    "sha256": "ad0a5d45a69afcb5af7057bf287d00de1a1b7d435c5c31d6796dd93f4eac03d7",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/agent-proximity/distance.js",
     "sha256": "ad0a5d45a69afcb5af7057bf287d00de1a1b7d435c5c31d6796dd93f4eac03d7",
@@ -20258,13 +19774,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/agent-proximity/graph.js",
-    "sha256": "c1d3522ddd2c0154f47e347957f9ec71bd10c3e6ded39c427444f5afc8935aa2",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/agent-proximity/graph.js",
     "sha256": "c1d3522ddd2c0154f47e347957f9ec71bd10c3e6ded39c427444f5afc8935aa2",
@@ -20300,13 +19809,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/agent-proximity/index.js",
-    "sha256": "cbc0a5565ba366eb2577ef69a3a07b138026d7fa62fcb446e19c2d02c11de058",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/agent-proximity/index.js",
     "sha256": "cbc0a5565ba366eb2577ef69a3a07b138026d7fa62fcb446e19c2d02c11de058",
@@ -20342,13 +19844,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/agent-tools.js",
-    "sha256": "a6294088a8b539f3529db6253170734983a4b8e7247adfd176b2066a39249b2e",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/agent-tools.js",
     "sha256": "a6294088a8b539f3529db6253170734983a4b8e7247adfd176b2066a39249b2e",
@@ -20384,13 +19879,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/atomic-write.js",
-    "sha256": "06091a88ce114082b2801a9ad621c8905157a874748bfe7a131665a1c7fa0d7b",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/atomic-write.js",
     "sha256": "06091a88ce114082b2801a9ad621c8905157a874748bfe7a131665a1c7fa0d7b",
@@ -20426,13 +19914,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/claude-commit-attribution.js",
-    "sha256": "0ad2d300e52a1d13aebcfb2ccc4339c3a8fa1aba86934ab47ff0a9b384b107a3",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/claude-commit-attribution.js",
     "sha256": "0ad2d300e52a1d13aebcfb2ccc4339c3a8fa1aba86934ab47ff0a9b384b107a3",
@@ -20468,13 +19949,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/claude-dry-run-sandbox.js",
-    "sha256": "67ef6fd8c5d17c1e9e9e7a8cea3e069c787eef7bdab71d7e6f70b8319a343310",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/claude-dry-run-sandbox.js",
     "sha256": "67ef6fd8c5d17c1e9e9e7a8cea3e069c787eef7bdab71d7e6f70b8319a343310",
@@ -20510,13 +19984,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/claude-plugin-setup.js",
-    "sha256": "694ab90a7398a5f7832a4d875e34a2071a0ff1096c5c707b5390bfb843b2cd2b",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/claude-plugin-setup.js",
     "sha256": "694ab90a7398a5f7832a4d875e34a2071a0ff1096c5c707b5390bfb843b2cd2b",
@@ -20552,13 +20019,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/claude-scope-migration.js",
-    "sha256": "84da8bf9f77501ff4b02b40013fbd24db729ecd4bd2835c83db4a36d107e9144",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/claude-scope-migration.js",
     "sha256": "84da8bf9f77501ff4b02b40013fbd24db729ecd4bd2835c83db4a36d107e9144",
@@ -20594,13 +20054,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/codex-legacy-sync.js",
-    "sha256": "48122e73cc260f420d913930300a2ee0660898c1462ae6eb35a248017bd29cde",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/codex-legacy-sync.js",
     "sha256": "48122e73cc260f420d913930300a2ee0660898c1462ae6eb35a248017bd29cde",
@@ -20636,13 +20089,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/codex-plugin-setup.js",
-    "sha256": "3c605cf5a1d21a9aa5b0d98701f6c6b1a399fa29f7c01fb6d9240aa507f17065",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/codex-plugin-setup.js",
     "sha256": "3c605cf5a1d21a9aa5b0d98701f6c6b1a399fa29f7c01fb6d9240aa507f17065",
@@ -20678,13 +20124,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/compute-sponsor.js",
-    "sha256": "556d13d5f7a34aae3260592e6d8be6a41114b1f88a04762eb315045fadf04947",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/compute-sponsor.js",
     "sha256": "556d13d5f7a34aae3260592e6d8be6a41114b1f88a04762eb315045fadf04947",
@@ -20720,13 +20159,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/control-pane/actions.js",
-    "sha256": "1ad71814702e9bcfeb87c49e61fd30173b628d61f1a852506c1ec295772f6509",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/control-pane/actions.js",
     "sha256": "1ad71814702e9bcfeb87c49e61fd30173b628d61f1a852506c1ec295772f6509",
@@ -20762,13 +20194,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/control-pane/message-sink.js",
-    "sha256": "54b5fae76d5456f81292013c0da1756b41cf8a9c09d248717b1a988e4b593bf2",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/control-pane/message-sink.js",
     "sha256": "54b5fae76d5456f81292013c0da1756b41cf8a9c09d248717b1a988e4b593bf2",
@@ -20804,13 +20229,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/control-pane/proximity-viz.js",
-    "sha256": "457b763d15db626af5cbae795a5369b161dc992fe0b9e10fb39519b780de70ab",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/control-pane/proximity-viz.js",
     "sha256": "457b763d15db626af5cbae795a5369b161dc992fe0b9e10fb39519b780de70ab",
@@ -20846,13 +20264,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/control-pane/proximity.js",
-    "sha256": "d26b12a896d361e27411910bb40e423cb1e84fc6b3b8ba3227f00b6d84ae9b4f",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/control-pane/proximity.js",
     "sha256": "d26b12a896d361e27411910bb40e423cb1e84fc6b3b8ba3227f00b6d84ae9b4f",
@@ -20888,13 +20299,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/control-pane/server.js",
-    "sha256": "8b743a1b80d9adbeb273c4ea67b5823a432d7c3855d648a9ba641c4dcb113ec8",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/control-pane/server.js",
     "sha256": "8b743a1b80d9adbeb273c4ea67b5823a432d7c3855d648a9ba641c4dcb113ec8",
@@ -20930,13 +20334,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/control-pane/state.js",
-    "sha256": "0ecf96121ebf4da473f9f24010c29d4daaecb926bd597605fdec68814a3bc61a",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/control-pane/state.js",
     "sha256": "0ecf96121ebf4da473f9f24010c29d4daaecb926bd597605fdec68814a3bc61a",
@@ -20972,13 +20369,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/control-pane/ui.js",
-    "sha256": "91a71f073e0358678d8e5357b28b22fca396ee996ae8152b5410c58f06c1e5ed",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/control-pane/ui.js",
     "sha256": "91a71f073e0358678d8e5357b28b22fca396ee996ae8152b5410c58f06c1e5ed",
@@ -21014,13 +20404,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/control-pane/work-item-mutations.js",
-    "sha256": "e9b46ebcfdeef9e9b831a2719dc96a80bffb7cfb9bc60a70ffa6f43ef524f116",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/control-pane/work-item-mutations.js",
     "sha256": "e9b46ebcfdeef9e9b831a2719dc96a80bffb7cfb9bc60a70ffa6f43ef524f116",
@@ -21056,13 +20439,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/cursor-agent-names.js",
-    "sha256": "c9d9eeb15ba9088fb7c38e37a75b882cb9f5f96fc34e871a15903b679bd951f6",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/cursor-agent-names.js",
     "sha256": "c9d9eeb15ba9088fb7c38e37a75b882cb9f5f96fc34e871a15903b679bd951f6",
@@ -21098,13 +20474,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/ecc_dashboard_runtime.py",
-    "sha256": "ef7696bec0c434af2eb8b72aa9b511eb9000533ec35c9083bda83f742dd46dd0",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/ecc_dashboard_runtime.py",
     "sha256": "ef7696bec0c434af2eb8b72aa9b511eb9000533ec35c9083bda83f742dd46dd0",
@@ -21140,13 +20509,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/feedback-links.js",
-    "sha256": "342ee97ae3a9132005ca5d4446be98f8064486656b26550596dc4d34fc40754c",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/feedback-links.js",
     "sha256": "342ee97ae3a9132005ca5d4446be98f8064486656b26550596dc4d34fc40754c",
@@ -21182,13 +20544,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/github-coordination.js",
-    "sha256": "94becfa9ae0ba6d6b50745bd953ad498aaf38d775592821e96d71a22a3648d92",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/github-coordination.js",
     "sha256": "94becfa9ae0ba6d6b50745bd953ad498aaf38d775592821e96d71a22a3648d92",
@@ -21224,13 +20579,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/github-coordination/actions.js",
-    "sha256": "2101b9c917e8a1b30e5f35000ae781461162e4f4fe856be329ff996dc779948d",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/github-coordination/actions.js",
     "sha256": "2101b9c917e8a1b30e5f35000ae781461162e4f4fe856be329ff996dc779948d",
@@ -21266,13 +20614,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/github-coordination/gh-api.js",
-    "sha256": "763b21a29e57e2ba04be454bce3b1c83a4ee46e57961cc9075aeff9f5ef1dccd",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/github-coordination/gh-api.js",
     "sha256": "763b21a29e57e2ba04be454bce3b1c83a4ee46e57961cc9075aeff9f5ef1dccd",
@@ -21308,13 +20649,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/github-coordination/parsing.js",
-    "sha256": "97be3a2469d2b4b300e87924576b1d23bb02ca6b32a9f02ea99a5c107feabf18",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/github-coordination/parsing.js",
     "sha256": "97be3a2469d2b4b300e87924576b1d23bb02ca6b32a9f02ea99a5c107feabf18",
@@ -21350,13 +20684,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/github-coordination/policy.js",
-    "sha256": "d4665d76163973a2abaed7c9842f53f55e1af71a2d8783770371d8be679f8e59",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/github-coordination/policy.js",
     "sha256": "d4665d76163973a2abaed7c9842f53f55e1af71a2d8783770371d8be679f8e59",
@@ -21392,13 +20719,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/github-coordination/state.js",
-    "sha256": "3f742052ffbd3d6c971dd26257378b09baf8cd48f6b133226a4c73e49f3e5b50",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/github-coordination/state.js",
     "sha256": "3f742052ffbd3d6c971dd26257378b09baf8cd48f6b133226a4c73e49f3e5b50",
@@ -21434,13 +20754,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/github-coordination/store.js",
-    "sha256": "6bd7347635e2d72f68efcb9f6bbdb19d6497d3d2f03acfbeaff2d150caa2476d",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/github-coordination/store.js",
     "sha256": "6bd7347635e2d72f68efcb9f6bbdb19d6497d3d2f03acfbeaff2d150caa2476d",
@@ -21476,13 +20789,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/github-discussions.js",
-    "sha256": "fc199932cb8d9ed9f40b96040f335f25219e2eb146a5100821df9ba7abebe513",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/github-discussions.js",
     "sha256": "fc199932cb8d9ed9f40b96040f335f25219e2eb146a5100821df9ba7abebe513",
@@ -21518,13 +20824,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/github-origin.js",
-    "sha256": "1b5d8d2406fe2c009f057877684f28d00955861630d2f5b64771f354edb497df",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/github-origin.js",
     "sha256": "1b5d8d2406fe2c009f057877684f28d00955861630d2f5b64771f354edb497df",
@@ -21560,13 +20859,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/harness-adapter-compliance.js",
-    "sha256": "878f55ec0ab76070fe3010b6d33dc76d98131ec6f34247b89013f69ba8fa2b76",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/harness-adapter-compliance.js",
     "sha256": "878f55ec0ab76070fe3010b6d33dc76d98131ec6f34247b89013f69ba8fa2b76",
@@ -21602,13 +20894,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/harness-capabilities.js",
-    "sha256": "3e9f30607f40b9d8089ed0bf4b28879620b35703ddc78c10a7de92f41ae84c57",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/harness-capabilities.js",
     "sha256": "3e9f30607f40b9d8089ed0bf4b28879620b35703ddc78c10a7de92f41ae84c57",
@@ -21644,13 +20929,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/hook-flags.js",
-    "sha256": "1f5fbf2d2ebd0ab07a3e54406db18c2932ae7bf965513ec12c521da1be54425d",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/hook-flags.js",
     "sha256": "1f5fbf2d2ebd0ab07a3e54406db18c2932ae7bf965513ec12c521da1be54425d",
@@ -21686,13 +20964,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/inspection.js",
-    "sha256": "4a760ac92a00878ff898a94fa4d28e27acc8c7248d0b1593ef236d6b198ea1b5",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/inspection.js",
     "sha256": "4a760ac92a00878ff898a94fa4d28e27acc8c7248d0b1593ef236d6b198ea1b5",
@@ -21728,13 +20999,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-executor.js",
-    "sha256": "ee0932b210425cb2b18618aed302806df13fced66b4393607138b00af144d5cb",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-executor.js",
     "sha256": "ee0932b210425cb2b18618aed302806df13fced66b4393607138b00af144d5cb",
@@ -21770,13 +21034,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-lifecycle.js",
-    "sha256": "d8928429d662e3fc2f8a21a4dc39148178edfb12225b13932838a497a042cc65",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-lifecycle.js",
     "sha256": "d8928429d662e3fc2f8a21a4dc39148178edfb12225b13932838a497a042cc65",
@@ -21812,13 +21069,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-manifests.js",
-    "sha256": "4cbb8cb2c7b55e8ff9292f858cdf09b771df20ffc92caa51f041658cb1048ec7",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-manifests.js",
     "sha256": "4cbb8cb2c7b55e8ff9292f858cdf09b771df20ffc92caa51f041658cb1048ec7",
@@ -21854,13 +21104,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-state-store-sync.js",
-    "sha256": "f493537dff4deb2ea4a094d4f263436b6bb0771862b6582b850459378cce3ea6",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-state-store-sync.js",
     "sha256": "f493537dff4deb2ea4a094d4f263436b6bb0771862b6582b850459378cce3ea6",
@@ -21896,13 +21139,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-state.js",
-    "sha256": "dd929c637c3a845a376d9e0fca071dfdf5710444bbafed4187294654516c6a8e",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-state.js",
     "sha256": "dd929c637c3a845a376d9e0fca071dfdf5710444bbafed4187294654516c6a8e",
@@ -21938,13 +21174,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/adal-project.js",
-    "sha256": "d0e011c0e52e2162e7f8c9daaf711d55c9ba739bb4b1f84df6b47520d5e945c1",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/adal-project.js",
     "sha256": "d0e011c0e52e2162e7f8c9daaf711d55c9ba739bb4b1f84df6b47520d5e945c1",
@@ -21980,13 +21209,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/antigravity-project.js",
-    "sha256": "7a1576d2f8775436d1dd3a6545051c3527b6ceac6196e19f30489b8b1aabbf21",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/antigravity-project.js",
     "sha256": "7a1576d2f8775436d1dd3a6545051c3527b6ceac6196e19f30489b8b1aabbf21",
@@ -22022,13 +21244,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/claude-home.js",
-    "sha256": "ed6e69fb0247cea6a86b01473de2b336040dcbf6e0c8fb6da5f59afe3a84de27",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/claude-home.js",
     "sha256": "ed6e69fb0247cea6a86b01473de2b336040dcbf6e0c8fb6da5f59afe3a84de27",
@@ -22064,13 +21279,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/claude-project.js",
-    "sha256": "6cf6803ef420742445f4ead5bf9442f63ae6b2e58a45ee8ed5a85c7ce38c92f6",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/claude-project.js",
     "sha256": "6cf6803ef420742445f4ead5bf9442f63ae6b2e58a45ee8ed5a85c7ce38c92f6",
@@ -22106,13 +21314,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/codebuddy-project.js",
-    "sha256": "e3ba3ce6ddfda8f70529189ec01872165ad34c99a4cb0bdfb1c1f473efc7eb11",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/codebuddy-project.js",
     "sha256": "e3ba3ce6ddfda8f70529189ec01872165ad34c99a4cb0bdfb1c1f473efc7eb11",
@@ -22148,13 +21349,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/codex-home.js",
-    "sha256": "0ea687959e8b34ff3816b0b352f09d827655053e5bb3c9df221c1ae010bfed61",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/codex-home.js",
     "sha256": "0ea687959e8b34ff3816b0b352f09d827655053e5bb3c9df221c1ae010bfed61",
@@ -22190,13 +21384,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/cursor-project.js",
-    "sha256": "9e706ce0558c480d4d9b2acdad01b91fbeb6b57537a25e44324c0dea9efefbf6",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/cursor-project.js",
     "sha256": "9e706ce0558c480d4d9b2acdad01b91fbeb6b57537a25e44324c0dea9efefbf6",
@@ -22232,13 +21419,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/gemini-project.js",
-    "sha256": "034c9fe5566fac06b66de1445078b6790b5371ec88dde219d04c9fa91e6170c0",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/gemini-project.js",
     "sha256": "034c9fe5566fac06b66de1445078b6790b5371ec88dde219d04c9fa91e6170c0",
@@ -22274,13 +21454,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/helpers.js",
-    "sha256": "f38cedd94cb13c48485c61f991e2e552a40d0b5252a09d38623efbe712e9bde3",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/helpers.js",
     "sha256": "f38cedd94cb13c48485c61f991e2e552a40d0b5252a09d38623efbe712e9bde3",
@@ -22316,13 +21489,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/hermes-home.js",
-    "sha256": "0ec5ab71e063fa58a5eadf7f0446ef97da9d31e8f8f9ff4066a5e5738de81555",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/hermes-home.js",
     "sha256": "0ec5ab71e063fa58a5eadf7f0446ef97da9d31e8f8f9ff4066a5e5738de81555",
@@ -22358,13 +21524,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/joycode-project.js",
-    "sha256": "6ead1448e2ea6b44ffa0a49d447fbe09db890f5b28f0552b287b6c63d3d39565",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/joycode-project.js",
     "sha256": "6ead1448e2ea6b44ffa0a49d447fbe09db890f5b28f0552b287b6c63d3d39565",
@@ -22400,13 +21559,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/kimi-project.js",
-    "sha256": "91a505c80bc8ab0dacf350b2ae31118a63e7f64a645024c97a32ffc921b1028b",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/kimi-project.js",
     "sha256": "91a505c80bc8ab0dacf350b2ae31118a63e7f64a645024c97a32ffc921b1028b",
@@ -22442,13 +21594,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/openclaw-home.js",
-    "sha256": "9bff2b34943d7b650be7ce7ea39a8766995f197ff5b0214a57d162ff06a092f9",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/openclaw-home.js",
     "sha256": "9bff2b34943d7b650be7ce7ea39a8766995f197ff5b0214a57d162ff06a092f9",
@@ -22484,13 +21629,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/opencode-home.js",
-    "sha256": "e8591f48e4963b9774580a81e8fefb25cdcb9f8a3c0d8f5919b021013dc04a64",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/opencode-home.js",
     "sha256": "e8591f48e4963b9774580a81e8fefb25cdcb9f8a3c0d8f5919b021013dc04a64",
@@ -22526,13 +21664,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/qwen-home.js",
-    "sha256": "0ff16a0b626e616cdb47ba752c256179bc1bc7b98e009aecc0d15ffacf5f21ae",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/qwen-home.js",
     "sha256": "0ff16a0b626e616cdb47ba752c256179bc1bc7b98e009aecc0d15ffacf5f21ae",
@@ -22568,13 +21699,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/registry.js",
-    "sha256": "725bb39a936da624c376602eb5322dd270d5160871c45014c44f9669ad120636",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/registry.js",
     "sha256": "725bb39a936da624c376602eb5322dd270d5160871c45014c44f9669ad120636",
@@ -22610,13 +21734,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install-targets/zed-project.js",
-    "sha256": "46367a5ae6fded350bcce30bb5a59ae7d86a65bd64aef0e502fa2aa225d73b80",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install-targets/zed-project.js",
     "sha256": "46367a5ae6fded350bcce30bb5a59ae7d86a65bd64aef0e502fa2aa225d73b80",
@@ -22652,13 +21769,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install/antigravity-agent.js",
-    "sha256": "9fc73be5de506706cf2cdb0a33750c97057263588055f39bba3171da9ab2e253",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install/antigravity-agent.js",
     "sha256": "9fc73be5de506706cf2cdb0a33750c97057263588055f39bba3171da9ab2e253",
@@ -22694,13 +21804,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install/antigravity-legacy-migration.js",
-    "sha256": "dbc44bcbb3e2faa141bc64fe108f0d59e18a8a8299507be6552f5034e4ea7202",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install/antigravity-legacy-migration.js",
     "sha256": "dbc44bcbb3e2faa141bc64fe108f0d59e18a8a8299507be6552f5034e4ea7202",
@@ -22736,13 +21839,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install/apply.js",
-    "sha256": "2038ea0d9a0f205782d5bb810fe9b58d4469e68eb7e1be303153549fb8ef493a",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install/apply.js",
     "sha256": "2038ea0d9a0f205782d5bb810fe9b58d4469e68eb7e1be303153549fb8ef493a",
@@ -22778,13 +21874,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install/claude-settings-lock.js",
-    "sha256": "3691ff987794e88d9fb5d1617c61f542f926463b0403b232f46ce155d54f59ac",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install/claude-settings-lock.js",
     "sha256": "3691ff987794e88d9fb5d1617c61f542f926463b0403b232f46ce155d54f59ac",
@@ -22820,13 +21909,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install/claude-settings.js",
-    "sha256": "cfa6e372a507a3b95f1dd58a0b5cc6c7d4e6b99b16baf8284918511807e89fad",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install/claude-settings.js",
     "sha256": "cfa6e372a507a3b95f1dd58a0b5cc6c7d4e6b99b16baf8284918511807e89fad",
@@ -22862,13 +21944,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install/claude-skill-migration.js",
-    "sha256": "38d217536d66daf75b4e052c3ebc23c0b69da53ed2fa0559984d383a05af34e3",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install/claude-skill-migration.js",
     "sha256": "38d217536d66daf75b4e052c3ebc23c0b69da53ed2fa0559984d383a05af34e3",
@@ -22904,13 +21979,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install/config.js",
-    "sha256": "c248281414336ff3628ad11c1d7996cab0a95e348ef0f8e2c3369289ffb1d791",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install/config.js",
     "sha256": "c248281414336ff3628ad11c1d7996cab0a95e348ef0f8e2c3369289ffb1d791",
@@ -22946,13 +22014,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install/hook-consent.js",
-    "sha256": "4f1506bbad284310af1419c0c55d9276902f6dae2d776ee9497acaaad6066006",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install/hook-consent.js",
     "sha256": "4f1506bbad284310af1419c0c55d9276902f6dae2d776ee9497acaaad6066006",
@@ -22988,13 +22049,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install/inventory.js",
-    "sha256": "7cc825d933e6733abef2d43f24a22084055f2bf4096484ff7c57e832a050bd2e",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install/inventory.js",
     "sha256": "7cc825d933e6733abef2d43f24a22084055f2bf4096484ff7c57e832a050bd2e",
@@ -23030,13 +22084,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install/link-rewrite.js",
-    "sha256": "4da79826d0c8a714a0ec6ffe02c97fce0acc2b2dcd4718c07c5219adaccbb41d",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install/link-rewrite.js",
     "sha256": "4da79826d0c8a714a0ec6ffe02c97fce0acc2b2dcd4718c07c5219adaccbb41d",
@@ -23072,13 +22119,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install/opencode-legacy-migration.js",
-    "sha256": "6f9dbbab3a605588a7d5060da37ad7f7a44f57f231e42a13b37dc3b172063ff0",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install/opencode-legacy-migration.js",
     "sha256": "6f9dbbab3a605588a7d5060da37ad7f7a44f57f231e42a13b37dc3b172063ff0",
@@ -23114,13 +22154,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install/ownership-guard.js",
-    "sha256": "000d8de192edceb32169b8725a797f908256f5a7e124c1803c29328eb07a36cc",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install/ownership-guard.js",
     "sha256": "000d8de192edceb32169b8725a797f908256f5a7e124c1803c29328eb07a36cc",
@@ -23156,13 +22189,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install/plan.js",
-    "sha256": "4ae2ff6e1995dffa87c012ad3cc4533b4a903b97f9be5ded663ce7cd760a679c",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install/plan.js",
     "sha256": "4ae2ff6e1995dffa87c012ad3cc4533b4a903b97f9be5ded663ce7cd760a679c",
@@ -23198,13 +22224,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install/request.js",
-    "sha256": "8bcf1bcdda81d41b39bb97661474be3f2e2ef6abe712dc70c9b096f37d001fe3",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install/request.js",
     "sha256": "8bcf1bcdda81d41b39bb97661474be3f2e2ef6abe712dc70c9b096f37d001fe3",
@@ -23240,13 +22259,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/install/runtime.js",
-    "sha256": "59bedb1c5ea8ef70bc3a77f4700b651f80a0585c0c9aed7127f2441f0198c28c",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/install/runtime.js",
     "sha256": "59bedb1c5ea8ef70bc3a77f4700b651f80a0585c0c9aed7127f2441f0198c28c",
@@ -23282,13 +22294,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/instinct-relevance.js",
-    "sha256": "57ff2a6c703ffdfcf7b962574848de332e3dc687ccfe95d588092302deb25401",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/instinct-relevance.js",
     "sha256": "57ff2a6c703ffdfcf7b962574848de332e3dc687ccfe95d588092302deb25401",
@@ -23324,13 +22329,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/invocation-environment.js",
-    "sha256": "e9c06440387850efb9f6de652f3b5f3070ba929d6d091b66b670652b406683c8",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/invocation-environment.js",
     "sha256": "e9c06440387850efb9f6de652f3b5f3070ba929d6d091b66b670652b406683c8",
@@ -23366,13 +22364,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/ito-environment.js",
-    "sha256": "fe1ba67f2ee2063a31d5b725263248adfd43a913000cb3128138166483698e8a",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/ito-environment.js",
     "sha256": "fe1ba67f2ee2063a31d5b725263248adfd43a913000cb3128138166483698e8a",
@@ -23408,13 +22399,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/llm-summary.js",
-    "sha256": "ce2caaae62f8f50ff48cf07ce9cf1ae2b8e37162bd897e59055f6cf68725db97",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/llm-summary.js",
     "sha256": "ce2caaae62f8f50ff48cf07ce9cf1ae2b8e37162bd897e59055f6cf68725db97",
@@ -23450,13 +22434,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/loopback-guard.js",
-    "sha256": "3efcc93c9c631876f824e61f97945a8260fba9ad7ea14baffee3de0781b74bcb",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/loopback-guard.js",
     "sha256": "3efcc93c9c631876f824e61f97945a8260fba9ad7ea14baffee3de0781b74bcb",
@@ -23492,13 +22469,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/mcp-config.js",
-    "sha256": "a6b1caaf4d7229ee1a02cad99e984a856c16b648fa292cc6044614503b05235d",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/mcp-config.js",
     "sha256": "a6b1caaf4d7229ee1a02cad99e984a856c16b648fa292cc6044614503b05235d",
@@ -23534,13 +22504,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/mcp-inventory/canonical-mcp.js",
-    "sha256": "1dc36570cc53741bb057dc7557078cf0bfb580c111a65a683bd25c1a56ca0c64",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/mcp-inventory/canonical-mcp.js",
     "sha256": "1dc36570cc53741bb057dc7557078cf0bfb580c111a65a683bd25c1a56ca0c64",
@@ -23576,13 +22539,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/mcp-inventory/collect.js",
-    "sha256": "b3f5e14c927229a9ce3b00bb1d47bec108d41da59b7d0bc7f09753ac6c09c3dc",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/mcp-inventory/collect.js",
     "sha256": "b3f5e14c927229a9ce3b00bb1d47bec108d41da59b7d0bc7f09753ac6c09c3dc",
@@ -23618,13 +22574,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/mcp-inventory/readers/claude-code.js",
-    "sha256": "5674d6ad9822a4e2cc6e37c4b6a9d25a77487f8f4e8addde9b7a27d17731d7f9",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/mcp-inventory/readers/claude-code.js",
     "sha256": "5674d6ad9822a4e2cc6e37c4b6a9d25a77487f8f4e8addde9b7a27d17731d7f9",
@@ -23660,13 +22609,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/mcp-inventory/readers/codex.js",
-    "sha256": "5cc9036dd43cffd81269f4eb67aceb8974003a757b95466fd55642ab6675d165",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/mcp-inventory/readers/codex.js",
     "sha256": "5cc9036dd43cffd81269f4eb67aceb8974003a757b95466fd55642ab6675d165",
@@ -23702,13 +22644,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/mcp-inventory/readers/opencode.js",
-    "sha256": "e2e54561925e8c8271ff5a94de4875a6807294f9e1788982768a11d192c693dd",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/mcp-inventory/readers/opencode.js",
     "sha256": "e2e54561925e8c8271ff5a94de4875a6807294f9e1788982768a11d192c693dd",
@@ -23744,13 +22679,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/memory-vault-format.js",
-    "sha256": "a5589f0cd0fd8a414436775e74243c39b068c86ddc99a4732d71ee54409a50c2",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/memory-vault-format.js",
     "sha256": "a5589f0cd0fd8a414436775e74243c39b068c86ddc99a4732d71ee54409a50c2",
@@ -23786,13 +22714,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/memory-vault.js",
-    "sha256": "83461fea071d2a96ca29a9e9767df770a0363b98721e3eebd2b371ddc48453ab",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/memory-vault.js",
     "sha256": "83461fea071d2a96ca29a9e9767df770a0363b98721e3eebd2b371ddc48453ab",
@@ -23828,13 +22749,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/missing-dependency.js",
-    "sha256": "63e18316c1e0ffbac1315fccd8e085df067970fda9d2372a69d09af4666a9ee7",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/missing-dependency.js",
     "sha256": "63e18316c1e0ffbac1315fccd8e085df067970fda9d2372a69d09af4666a9ee7",
@@ -23870,13 +22784,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/multi-harness-setup.js",
-    "sha256": "6db93c07191da66bf058327150ffa87e648c9d2d3ddc80c8f802166269fa27df",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/multi-harness-setup.js",
     "sha256": "6db93c07191da66bf058327150ffa87e648c9d2d3ddc80c8f802166269fa27df",
@@ -23912,13 +22819,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/nasiko-release.js",
-    "sha256": "87d9253ea6c05d7495b2dfde17f8e7b2ccec30d835c2bdc5f39027a806c98d11",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/nasiko-release.js",
     "sha256": "87d9253ea6c05d7495b2dfde17f8e7b2ccec30d835c2bdc5f39027a806c98d11",
@@ -23954,13 +22854,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/observer-sessions.js",
-    "sha256": "f8d12ce13a257a33f41e6b796891aa8af001c48a8237f24afd4216a2e5f3bfaa",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/observer-sessions.js",
     "sha256": "f8d12ce13a257a33f41e6b796891aa8af001c48a8237f24afd4216a2e5f3bfaa",
@@ -23996,13 +22889,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/opencode-paths.js",
-    "sha256": "8570d9b5a29a51afcfffc1af41da0b46980c03e28626e293e1be662eca392a71",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/opencode-paths.js",
     "sha256": "8570d9b5a29a51afcfffc1af41da0b46980c03e28626e293e1be662eca392a71",
@@ -24038,13 +22924,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/orchestration-session.js",
-    "sha256": "20331231b9e0b0779c94698366f46973e0d5e424f19417395f34591b63d81904",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/orchestration-session.js",
     "sha256": "20331231b9e0b0779c94698366f46973e0d5e424f19417395f34591b63d81904",
@@ -24080,13 +22959,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/package-manager.d.ts",
-    "sha256": "56b3ab30d7652d0062fde605cfe4a797933521b1b2a0999e82959800ec3b0215",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/package-manager.d.ts",
     "sha256": "56b3ab30d7652d0062fde605cfe4a797933521b1b2a0999e82959800ec3b0215",
@@ -24122,13 +22994,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/package-manager.js",
-    "sha256": "636f8bc8379ae0c26be1f7c5b61555cf2a274698a4f9fbd34e9eced9eacb3662",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/package-manager.js",
     "sha256": "636f8bc8379ae0c26be1f7c5b61555cf2a274698a4f9fbd34e9eced9eacb3662",
@@ -24164,13 +23029,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/path-safety.js",
-    "sha256": "542126cf47247161dd26713a1f33d34af2881db46435ac8ecef76a8be31c062c",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/path-safety.js",
     "sha256": "542126cf47247161dd26713a1f33d34af2881db46435ac8ecef76a8be31c062c",
@@ -24206,13 +23064,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/plan-canvas/markdown.js",
-    "sha256": "bb68dda565690e3830c93c64fb502dc4dc1ecf036c0cfdbd6d38d78022b58d72",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/plan-canvas/markdown.js",
     "sha256": "bb68dda565690e3830c93c64fb502dc4dc1ecf036c0cfdbd6d38d78022b58d72",
@@ -24248,13 +23099,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/plan-canvas/sdk.js",
-    "sha256": "26c0618591cbf6aac5cebf1b9555dc364ba87ad8213876a886318712b0324359",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/plan-canvas/sdk.js",
     "sha256": "26c0618591cbf6aac5cebf1b9555dc364ba87ad8213876a886318712b0324359",
@@ -24290,13 +23134,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/plan-canvas/server.js",
-    "sha256": "a617d3a0fb0f18b9e7a2257c70e6e585a75615598c087d2d217efbfe63fa59c3",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/plan-canvas/server.js",
     "sha256": "a617d3a0fb0f18b9e7a2257c70e6e585a75615598c087d2d217efbfe63fa59c3",
@@ -24332,13 +23169,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/plan-canvas/sessions.js",
-    "sha256": "12c0d16b99910bbaff7d462f4fab6865e92426fc2b179f577bb920011ead7d32",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/plan-canvas/sessions.js",
     "sha256": "12c0d16b99910bbaff7d462f4fab6865e92426fc2b179f577bb920011ead7d32",
@@ -24374,13 +23204,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/plan-canvas/ui.js",
-    "sha256": "73ee795cb6ce3960b3ac38c1bfdf1cef9f0ace8f412a4673280503ac60451d93",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/plan-canvas/ui.js",
     "sha256": "73ee795cb6ce3960b3ac38c1bfdf1cef9f0ace8f412a4673280503ac60451d93",
@@ -24416,13 +23239,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/powershell-destructive-command.js",
-    "sha256": "90748dfc22acabb22ebb6e8365d6821b6cb04acba3af467fdb239d5d66ceaa7b",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/powershell-destructive-command.js",
     "sha256": "90748dfc22acabb22ebb6e8365d6821b6cb04acba3af467fdb239d5d66ceaa7b",
@@ -24458,13 +23274,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/project-detect.js",
-    "sha256": "30abb668fb79d96f6a403494d5ee3ac1d25bb3688099e9c962533b44f236fb90",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/project-detect.js",
     "sha256": "30abb668fb79d96f6a403494d5ee3ac1d25bb3688099e9c962533b44f236fb90",
@@ -24500,13 +23309,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/resolve-ecc-root.js",
-    "sha256": "c36f288d96abcbababfc3284f11ab807eb040853bcdf9b97dcd7ac77506df86c",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/resolve-ecc-root.js",
     "sha256": "c36f288d96abcbababfc3284f11ab807eb040853bcdf9b97dcd7ac77506df86c",
@@ -24542,13 +23344,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/resolve-formatter.js",
-    "sha256": "4e0ecb82f611c1d3ea17767f4df1abf90bb508054fbfb51371f24c92263eee58",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/resolve-formatter.js",
     "sha256": "4e0ecb82f611c1d3ea17767f4df1abf90bb508054fbfb51371f24c92263eee58",
@@ -24584,13 +23379,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/session-adapters/canonical-session.js",
-    "sha256": "ab452ce5008ab08af750dbe011b010be96f534d6d5f70fc6651cbf0bff585b66",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/session-adapters/canonical-session.js",
     "sha256": "ab452ce5008ab08af750dbe011b010be96f534d6d5f70fc6651cbf0bff585b66",
@@ -24626,13 +23414,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/session-adapters/claude-history.js",
-    "sha256": "a7ba74dfcf7a3724cf0dab008160c4797dd3f2964eb93e3ef6cf8ad2e553f22f",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/session-adapters/claude-history.js",
     "sha256": "a7ba74dfcf7a3724cf0dab008160c4797dd3f2964eb93e3ef6cf8ad2e553f22f",
@@ -24668,13 +23449,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/session-adapters/codex-worktree.js",
-    "sha256": "0760a00fb7252902c3ce48badc56a2d08d58d622585e98d46ea18b913afba906",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/session-adapters/codex-worktree.js",
     "sha256": "0760a00fb7252902c3ce48badc56a2d08d58d622585e98d46ea18b913afba906",
@@ -24710,13 +23484,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/session-adapters/dmux-tmux.js",
-    "sha256": "b907b946fddc4e1266cfb058c52a20dd8accf8b6bc0b50ae20289a6792908b06",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/session-adapters/dmux-tmux.js",
     "sha256": "b907b946fddc4e1266cfb058c52a20dd8accf8b6bc0b50ae20289a6792908b06",
@@ -24752,13 +23519,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/session-adapters/opencode.js",
-    "sha256": "c11dc570443765568bc6520b69ba16ae2c6e69f0390ccb3e3530d3e177e71eb7",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/session-adapters/opencode.js",
     "sha256": "c11dc570443765568bc6520b69ba16ae2c6e69f0390ccb3e3530d3e177e71eb7",
@@ -24794,13 +23554,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/session-adapters/registry.js",
-    "sha256": "4058e4eaea56a4eae53e4bbf70834d4b9a4d609e3f0af23d4aded61fee3eac48",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/session-adapters/registry.js",
     "sha256": "4058e4eaea56a4eae53e4bbf70834d4b9a4d609e3f0af23d4aded61fee3eac48",
@@ -24836,13 +23589,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/session-aliases.d.ts",
-    "sha256": "1a7fbaec2a70335d8ad0280577e47d157f60f08e7f312a57dc415567d5c999a4",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/session-aliases.d.ts",
     "sha256": "1a7fbaec2a70335d8ad0280577e47d157f60f08e7f312a57dc415567d5c999a4",
@@ -24878,13 +23624,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/session-aliases.js",
-    "sha256": "a601ab52fddf9b2d2010460815eb8820e14dce3268efca0dce79dd4bc4b6d2fc",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/session-aliases.js",
     "sha256": "a601ab52fddf9b2d2010460815eb8820e14dce3268efca0dce79dd4bc4b6d2fc",
@@ -24920,13 +23659,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/session-bridge.js",
-    "sha256": "9ad9c91f1ad63c04ab3bbefba28608403ff9e0b60744ac3f18eea9478e0d040d",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/session-bridge.js",
     "sha256": "9ad9c91f1ad63c04ab3bbefba28608403ff9e0b60744ac3f18eea9478e0d040d",
@@ -24962,13 +23694,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/session-manager.d.ts",
-    "sha256": "5bcfabc789b4107f86293fdc239cc05140abb807690b7d416858362a30475c25",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/session-manager.d.ts",
     "sha256": "5bcfabc789b4107f86293fdc239cc05140abb807690b7d416858362a30475c25",
@@ -25004,13 +23729,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/session-manager.js",
-    "sha256": "cbfac8b5aa349b01de0ddced7aeaea99a5df4e8306c3077ef08aacc4d5700555",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/session-manager.js",
     "sha256": "cbfac8b5aa349b01de0ddced7aeaea99a5df4e8306c3077ef08aacc4d5700555",
@@ -25046,13 +23764,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/shell-split.js",
-    "sha256": "2b8c4dfebdab9426c3e01550572762070250638be959207e906faaa2635674e5",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/shell-split.js",
     "sha256": "2b8c4dfebdab9426c3e01550572762070250638be959207e906faaa2635674e5",
@@ -25088,13 +23799,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/shell-substitution.js",
-    "sha256": "36023c065ca40d2b40feccb3659deaa4dd195eda9ccf3ccd89ae44c0c45b10be",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/shell-substitution.js",
     "sha256": "36023c065ca40d2b40feccb3659deaa4dd195eda9ccf3ccd89ae44c0c45b10be",
@@ -25130,13 +23834,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/skill-evolution/dashboard.js",
-    "sha256": "8e817cdbdd354c3641e64f1edca4f6405203f3b36de948b4d881e516197eeb50",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/skill-evolution/dashboard.js",
     "sha256": "8e817cdbdd354c3641e64f1edca4f6405203f3b36de948b4d881e516197eeb50",
@@ -25172,13 +23869,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/skill-evolution/health.js",
-    "sha256": "a11a8eab2d7425bae51233d10a28ceb28060948bb07c1c7fafd65ed44b9887cc",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/skill-evolution/health.js",
     "sha256": "a11a8eab2d7425bae51233d10a28ceb28060948bb07c1c7fafd65ed44b9887cc",
@@ -25214,13 +23904,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/skill-evolution/index.js",
-    "sha256": "9947c13837f81f548eb36367c7228efecbeacc112cb2b933831bd8fc0e50c6ee",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/skill-evolution/index.js",
     "sha256": "9947c13837f81f548eb36367c7228efecbeacc112cb2b933831bd8fc0e50c6ee",
@@ -25256,13 +23939,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/skill-evolution/provenance.js",
-    "sha256": "6480ff6d2a9cf8974e046fb049e26ceca81568ccba761cdc661feece7e515905",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/skill-evolution/provenance.js",
     "sha256": "6480ff6d2a9cf8974e046fb049e26ceca81568ccba761cdc661feece7e515905",
@@ -25298,13 +23974,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/skill-evolution/tracker.js",
-    "sha256": "a4aaf552a06e45e5ccb1fe76c4ec98566ff088967102f86f968dadb6b102054b",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/skill-evolution/tracker.js",
     "sha256": "a4aaf552a06e45e5ccb1fe76c4ec98566ff088967102f86f968dadb6b102054b",
@@ -25340,13 +24009,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/skill-evolution/versioning.js",
-    "sha256": "ad7f4ce120ff04f3340fec49d486df3c90c11749998cf46356b6802ba1c24a0f",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/skill-evolution/versioning.js",
     "sha256": "ad7f4ce120ff04f3340fec49d486df3c90c11749998cf46356b6802ba1c24a0f",
@@ -25382,13 +24044,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/skill-improvement/amendify.js",
-    "sha256": "6b8411706a51211e3978beb2c1726fbc8aff88c3633cbead5da8e3909ed08db7",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/skill-improvement/amendify.js",
     "sha256": "6b8411706a51211e3978beb2c1726fbc8aff88c3633cbead5da8e3909ed08db7",
@@ -25424,13 +24079,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/skill-improvement/evaluate.js",
-    "sha256": "50334f4db1f0e8674bb459d4934744e305a45e3da203a09e98a5835ed45ba089",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/skill-improvement/evaluate.js",
     "sha256": "50334f4db1f0e8674bb459d4934744e305a45e3da203a09e98a5835ed45ba089",
@@ -25466,13 +24114,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/skill-improvement/health.js",
-    "sha256": "171a92c0cc0059e9d60a4814d5abaa14aaafa017190e52dfc4aed40ff569eb2f",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/skill-improvement/health.js",
     "sha256": "171a92c0cc0059e9d60a4814d5abaa14aaafa017190e52dfc4aed40ff569eb2f",
@@ -25508,13 +24149,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/skill-improvement/observations.js",
-    "sha256": "974219d2f10403cd82ec15554a30c2298b980c1bf4febf0afa8054cd72b3bb53",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/skill-improvement/observations.js",
     "sha256": "974219d2f10403cd82ec15554a30c2298b980c1bf4febf0afa8054cd72b3bb53",
@@ -25550,13 +24184,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/state-store/index.js",
-    "sha256": "180a207c4732daae5ee683f895e0fd2fef0c831e989eb92fa9d7c3fbbdd93b8d",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/state-store/index.js",
     "sha256": "180a207c4732daae5ee683f895e0fd2fef0c831e989eb92fa9d7c3fbbdd93b8d",
@@ -25592,13 +24219,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/state-store/install-state-projection.js",
-    "sha256": "a57ca4573db5f77a738d35eb8e5fac40ecfe7ca8068b30bcfe32829252356eac",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/state-store/install-state-projection.js",
     "sha256": "a57ca4573db5f77a738d35eb8e5fac40ecfe7ca8068b30bcfe32829252356eac",
@@ -25634,13 +24254,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/state-store/migrations.js",
-    "sha256": "31e3e814165eb365fe37c7ec5b31a3f8419e5fbe3b2613b75cb4c775356e00ef",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/state-store/migrations.js",
     "sha256": "31e3e814165eb365fe37c7ec5b31a3f8419e5fbe3b2613b75cb4c775356e00ef",
@@ -25670,13 +24283,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/lib/state-store/queries.js",
-    "sha256": "3873fca7da5c7c2b3e5ae055c4655915dc670b026ce1b7295e0ea7c41e4c4fcf",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/lib/state-store/queries.js",
     "sha256": "3873fca7da5c7c2b3e5ae055c4655915dc670b026ce1b7295e0ea7c41e4c4fcf",
     "executable": false,
@@ -25718,13 +24324,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/state-store/schema.js",
-    "sha256": "716d12244a0921c3230a58ea0b061532a858c5d2a2e9e915314d50ab4e1cf81b",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/state-store/schema.js",
     "sha256": "716d12244a0921c3230a58ea0b061532a858c5d2a2e9e915314d50ab4e1cf81b",
@@ -25754,13 +24353,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/lib/terminal-spinner.js",
-    "sha256": "af7a4552403df488be6c71c612d7015a7b18b29df09fd5a6d28fe9615214a828",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/lib/terminal-spinner.js",
     "sha256": "af7a4552403df488be6c71c612d7015a7b18b29df09fd5a6d28fe9615214a828",
     "executable": false,
@@ -25802,13 +24394,6 @@
     "shared_with": "ecc-skill-configure-ecc"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/terminal-welcome.js",
-    "sha256": "0235c151d8222666f70d022cdd9510f628944a97b70c4e35a676dd83a033244a",
-    "executable": false,
-    "shared_with": "ecc-skill-configure-ecc"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/terminal-welcome.js",
     "sha256": "0235c151d8222666f70d022cdd9510f628944a97b70c4e35a676dd83a033244a",
@@ -25823,46 +24408,38 @@
     "shared_with": "ecc-skill-configure-ecc"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/tmux-worktree-orchestrator.js",
-    "sha256": "82f96abe2c69d2e8aefed72b7d58214bf2c0adfded1ffa4895999eed96fc95ee",
-    "executable": false,
-    "previous_resource": "ecc-script-lib-tmux-worktree-orchestrator"
-  },
-  {
     "resource": "user-hook-codex-reference",
     "target": ".claude/scripts/lib/tmux-worktree-orchestrator.js",
     "sha256": "82f96abe2c69d2e8aefed72b7d58214bf2c0adfded1ffa4895999eed96fc95ee",
-    "executable": false,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "executable": false
   },
   {
     "resource": "user-hook-codex-memory-persistence-reference",
     "target": ".claude/scripts/lib/tmux-worktree-orchestrator.js",
     "sha256": "82f96abe2c69d2e8aefed72b7d58214bf2c0adfded1ffa4895999eed96fc95ee",
     "executable": false,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "shared_with": "user-hook-codex-reference"
   },
   {
     "resource": "ecc-skill-configure-ecc",
     "target": ".claude/scripts/lib/tmux-worktree-orchestrator.js",
     "sha256": "82f96abe2c69d2e8aefed72b7d58214bf2c0adfded1ffa4895999eed96fc95ee",
     "executable": false,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "shared_with": "user-hook-codex-reference"
   },
   {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/tmux-worktree-orchestrator.js",
     "sha256": "82f96abe2c69d2e8aefed72b7d58214bf2c0adfded1ffa4895999eed96fc95ee",
     "executable": false,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "shared_with": "user-hook-codex-reference"
   },
   {
     "resource": "ecc-agent-harness-optimizer",
     "target": ".claude/scripts/lib/tmux-worktree-orchestrator.js",
     "sha256": "82f96abe2c69d2e8aefed72b7d58214bf2c0adfded1ffa4895999eed96fc95ee",
     "executable": false,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "shared_with": "user-hook-codex-reference"
   },
   {
     "resource": "user-hook-codex-reference",
@@ -25880,13 +24457,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/lib/transcript-context.js",
-    "sha256": "38f399260f79904bc8a97448d1dff965aaf0f04596143ce344fdbf64747bf0a2",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/lib/transcript-context.js",
     "sha256": "38f399260f79904bc8a97448d1dff965aaf0f04596143ce344fdbf64747bf0a2",
     "executable": false,
@@ -25928,13 +24498,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/utils.d.ts",
-    "sha256": "e1f069be658ec550347d24a06bbb163a1a2072022ca03a68941ec3295d8e43e6",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/utils.d.ts",
     "sha256": "e1f069be658ec550347d24a06bbb163a1a2072022ca03a68941ec3295d8e43e6",
@@ -25964,13 +24527,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/lib/utils.js",
-    "sha256": "c9a84bd7993cb65e532a16b1872ce468b869ec40aac2d743aa03bcbf6a6dd5a8",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/lib/utils.js",
     "sha256": "c9a84bd7993cb65e532a16b1872ce468b869ec40aac2d743aa03bcbf6a6dd5a8",
     "executable": false,
@@ -26012,13 +24568,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/worktree-lifecycle/git.js",
-    "sha256": "1e4ae40955370fab145ab2113408a97fa23c96fd596ccfa82999b2625a2237b9",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/worktree-lifecycle/git.js",
     "sha256": "1e4ae40955370fab145ab2113408a97fa23c96fd596ccfa82999b2625a2237b9",
@@ -26054,13 +24603,6 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/lib/worktree-lifecycle/lifecycle.js",
-    "sha256": "2cc84526644db7b61038f30f7a53ce8f43e33b8dbb9a64c1e6fa85d434173c21",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/lib/worktree-lifecycle/lifecycle.js",
     "sha256": "2cc84526644db7b61038f30f7a53ce8f43e33b8dbb9a64c1e6fa85d434173c21",
@@ -26075,130 +24617,106 @@
     "shared_with": "user-hook-codex-reference"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/orchestrate-codex-worker.sh",
-    "sha256": "e12846f09fae815b634e5d0675f693510518f7cac97a227a9a7fcd83e10f662a",
-    "executable": true,
-    "previous_resource": "ecc-script-orchestrate-codex-worker"
-  },
-  {
     "resource": "user-hook-codex-reference",
     "target": ".claude/scripts/orchestrate-codex-worker.sh",
     "sha256": "e12846f09fae815b634e5d0675f693510518f7cac97a227a9a7fcd83e10f662a",
-    "executable": true,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "executable": true
   },
   {
     "resource": "user-hook-codex-memory-persistence-reference",
     "target": ".claude/scripts/orchestrate-codex-worker.sh",
     "sha256": "e12846f09fae815b634e5d0675f693510518f7cac97a227a9a7fcd83e10f662a",
     "executable": true,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "shared_with": "user-hook-codex-reference"
   },
   {
     "resource": "ecc-skill-configure-ecc",
     "target": ".claude/scripts/orchestrate-codex-worker.sh",
     "sha256": "e12846f09fae815b634e5d0675f693510518f7cac97a227a9a7fcd83e10f662a",
     "executable": true,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "shared_with": "user-hook-codex-reference"
   },
   {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/orchestrate-codex-worker.sh",
     "sha256": "e12846f09fae815b634e5d0675f693510518f7cac97a227a9a7fcd83e10f662a",
     "executable": true,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "shared_with": "user-hook-codex-reference"
   },
   {
     "resource": "ecc-agent-harness-optimizer",
     "target": ".claude/scripts/orchestrate-codex-worker.sh",
     "sha256": "e12846f09fae815b634e5d0675f693510518f7cac97a227a9a7fcd83e10f662a",
     "executable": true,
-    "shared_with": "ecc-skill-dmux-workflows"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/orchestrate-worktrees.js",
-    "sha256": "a510d697ffd52c9588ad5a6739d697df3424f00571c39fd0249a3916d867fc97",
-    "executable": false,
-    "previous_resource": "ecc-script-orchestrate-worktrees"
+    "shared_with": "user-hook-codex-reference"
   },
   {
     "resource": "user-hook-codex-reference",
     "target": ".claude/scripts/orchestrate-worktrees.js",
     "sha256": "a510d697ffd52c9588ad5a6739d697df3424f00571c39fd0249a3916d867fc97",
-    "executable": false,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "executable": false
   },
   {
     "resource": "user-hook-codex-memory-persistence-reference",
     "target": ".claude/scripts/orchestrate-worktrees.js",
     "sha256": "a510d697ffd52c9588ad5a6739d697df3424f00571c39fd0249a3916d867fc97",
     "executable": false,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "shared_with": "user-hook-codex-reference"
   },
   {
     "resource": "ecc-skill-configure-ecc",
     "target": ".claude/scripts/orchestrate-worktrees.js",
     "sha256": "a510d697ffd52c9588ad5a6739d697df3424f00571c39fd0249a3916d867fc97",
     "executable": false,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "shared_with": "user-hook-codex-reference"
   },
   {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/orchestrate-worktrees.js",
     "sha256": "a510d697ffd52c9588ad5a6739d697df3424f00571c39fd0249a3916d867fc97",
     "executable": false,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "shared_with": "user-hook-codex-reference"
   },
   {
     "resource": "ecc-agent-harness-optimizer",
     "target": ".claude/scripts/orchestrate-worktrees.js",
     "sha256": "a510d697ffd52c9588ad5a6739d697df3424f00571c39fd0249a3916d867fc97",
     "executable": false,
-    "shared_with": "ecc-skill-dmux-workflows"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/orchestration-status.js",
-    "sha256": "6e381c7d078c70e8b2c68b3e4734d6e90b32dfadbe68e2a2a6a05272f2677bb4",
-    "executable": false,
-    "previous_resource": "ecc-script-orchestration-status"
+    "shared_with": "user-hook-codex-reference"
   },
   {
     "resource": "user-hook-codex-reference",
     "target": ".claude/scripts/orchestration-status.js",
     "sha256": "6e381c7d078c70e8b2c68b3e4734d6e90b32dfadbe68e2a2a6a05272f2677bb4",
-    "executable": false,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "executable": false
   },
   {
     "resource": "user-hook-codex-memory-persistence-reference",
     "target": ".claude/scripts/orchestration-status.js",
     "sha256": "6e381c7d078c70e8b2c68b3e4734d6e90b32dfadbe68e2a2a6a05272f2677bb4",
     "executable": false,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "shared_with": "user-hook-codex-reference"
   },
   {
     "resource": "ecc-skill-configure-ecc",
     "target": ".claude/scripts/orchestration-status.js",
     "sha256": "6e381c7d078c70e8b2c68b3e4734d6e90b32dfadbe68e2a2a6a05272f2677bb4",
     "executable": false,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "shared_with": "user-hook-codex-reference"
   },
   {
     "resource": "ecc-skill-tdd-workflow",
     "target": ".claude/scripts/orchestration-status.js",
     "sha256": "6e381c7d078c70e8b2c68b3e4734d6e90b32dfadbe68e2a2a6a05272f2677bb4",
     "executable": false,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "shared_with": "user-hook-codex-reference"
   },
   {
     "resource": "ecc-agent-harness-optimizer",
     "target": ".claude/scripts/orchestration-status.js",
     "sha256": "6e381c7d078c70e8b2c68b3e4734d6e90b32dfadbe68e2a2a6a05272f2677bb4",
     "executable": false,
-    "shared_with": "ecc-skill-dmux-workflows"
+    "shared_with": "user-hook-codex-reference"
   },
   {
     "resource": "ecc-skill-tdd-workflow",
@@ -26229,13 +24747,6 @@
     "shared_with": "ecc-skill-tdd-workflow"
   },
   {
-    "resource": "ecc-skill-dmux-workflows",
-    "target": ".claude/scripts/setup-package-manager.js",
-    "sha256": "499f38ef03b3f7f9896ad97229b8213df215544bb3c6bd6343e3889f023f6bda",
-    "executable": false,
-    "shared_with": "ecc-skill-tdd-workflow"
-  },
-  {
     "resource": "ecc-agent-harness-optimizer",
     "target": ".claude/scripts/setup-package-manager.js",
     "sha256": "499f38ef03b3f7f9896ad97229b8213df215544bb3c6bd6343e3889f023f6bda",
@@ -26258,13 +24769,6 @@
   },
   {
     "resource": "ecc-skill-configure-ecc",
-    "target": ".claude/scripts/skills-health.js",
-    "sha256": "85966ad7f337ea1ade297ef62d54fa5483e6e69ee857ec7c26098f1ad04205bd",
-    "executable": false,
-    "shared_with": "user-hook-codex-reference"
-  },
-  {
-    "resource": "ecc-skill-dmux-workflows",
     "target": ".claude/scripts/skills-health.js",
     "sha256": "85966ad7f337ea1ade297ef62d54fa5483e6e69ee857ec7c26098f1ad04205bd",
     "executable": false,

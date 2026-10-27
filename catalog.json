@@ -1462,15 +1462,6 @@
       "project": null
     },
     {
-      "id": "lark-vc-agent",
-      "kind": "skill",
-      "payload": ".agents/skills/lark-vc-agent",
-      "origin": "upstream",
-      "upstream": "skills-open-feishu-cn",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "lark-whiteboard",
       "kind": "skill",
       "payload": ".agents/skills/lark-whiteboard",
@@ -1677,26 +1668,6 @@
       "id": "split-to-prs",
       "kind": "skill",
       "payload": "resources/split-to-prs",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "browser-use",
-      "kind": "skill",
-      "files": {
-        "root": "resources/browser-use",
-        "entries": [
-          {
-            "target": ".agents/skills/browser-use",
-            "tree": "files/.agents/skills/browser-use"
-          },
-          {
-            "target": ".agents/skills/browser-use/PROVENANCE.md",
-            "source": "files/metadata/PROVENANCE.md"
-          }
-        ]
-      },
       "origin": "self",
       "scope": "user",
       "project": null
@@ -3472,23 +3443,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-codehealth-mcp",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/codehealth-mcp",
-            "tree": ".agents/skills/codehealth-mcp"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-coding-standards",
       "kind": "skill",
       "files": {
@@ -3660,26 +3614,6 @@
       "upstream": "ecc",
       "scope": "user",
       "project": null
-    },
-    {
-      "id": "ecc-skill-dmux-workflows",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/dmux-workflows",
-            "tree": ".agents/skills/dmux-workflows"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null,
-      "dependencies": [
-        "ecc-runtime"
-      ]
     },
     {
       "id": "ecc-skill-e2e-testing",
@@ -4501,125 +4435,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-source-command-epic-claim",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-epic-claim",
-            "tree": ".agents/skills/source-command-epic-claim"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-epic-decompose",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-epic-decompose",
-            "tree": ".agents/skills/source-command-epic-decompose"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-epic-publish",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-epic-publish",
-            "tree": ".agents/skills/source-command-epic-publish"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-epic-review",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-epic-review",
-            "tree": ".agents/skills/source-command-epic-review"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-epic-sync",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-epic-sync",
-            "tree": ".agents/skills/source-command-epic-sync"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-epic-unblock",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-epic-unblock",
-            "tree": ".agents/skills/source-command-epic-unblock"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-epic-validate",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-epic-validate",
-            "tree": ".agents/skills/source-command-epic-validate"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-source-command-fastapi-review",
       "kind": "skill",
       "files": {
@@ -4679,23 +4494,6 @@
           {
             "target": ".agents/skills/source-command-go-review",
             "tree": ".agents/skills/source-command-go-review"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-jira",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-jira",
-            "tree": ".agents/skills/source-command-jira"
           }
         ]
       },

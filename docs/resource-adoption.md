@@ -65,7 +65,6 @@
 | lark-slides | https://open.feishu.cn | 用户 |
 | lark-task | https://open.feishu.cn | 用户 |
 | lark-vc | https://open.feishu.cn | 用户 |
-| lark-vc-agent | https://open.feishu.cn | 用户 |
 | lark-whiteboard | https://open.feishu.cn | 用户 |
 | lark-wiki | https://open.feishu.cn | 用户 |
 | lark-workflow-meeting-summary | https://open.feishu.cn | 用户 |

@@ -23,10 +23,14 @@ The selection now installs no Claude Skills, Agents, Rules or commands. The 202 
 
 The later user-scope review removes 17 Claude-centric Skills (including the explicitly deprecated continuous-learning v1) and 21 companion commands from the ECC subscription. The selection retains 107 Skills and 37 command wrappers without modifying upstream bodies. Multi-client configuration and generic development workflows remain subscribed.
 
-The 202 shared runtime files still serve six retained consumers: two Codex hook references, configure-ecc, dmux-workflows, tdd-workflow and the Codex harness-optimizer Agent. Removed workflow ownership/adoption entries no longer keep additional claims. Their former shared-owner anchors are reassigned to retained consumers without changing runtime file bytes or executable modes.
+At that cleanup, the 202 shared runtime files served six retained consumers: two Codex hook references, configure-ecc, dmux-workflows, tdd-workflow and the Codex harness-optimizer Agent. Removed workflow ownership/adoption entries no longer keep additional claims. Their former shared-owner anchors are reassigned to retained consumers without changing runtime file bytes or executable modes.
 
 ## Stack subscription scope review
 
 The subsequent stack review unsubscribes 48 ECC Skills/command wrappers without matching first-party project manifests, and removes the self-maintained React Motion package because no project declares its runtime dependency. Nine remaining React, FastAPI and Vue conversion capabilities move from user scope to their actual projects (23 project resource declarations). Their upstream bodies are unchanged and share the existing ECC source fetch. The subscription now selects 65 Skills and 31 command wrappers; all 68 Agent selections and the 202 supporting-file mappings remain unchanged.
 
 Rust, C/C++, Python, Go and basic Vue guides remain user-scoped. React capabilities serve TP and the perception platform. FastAPI capabilities serve Organism, the perception platform, SROS protocol work and the explicitly registered voice-assistant project. Vue conversion serves the two EasyGo frontends and Organism. Previously installed upstream files are moved by verified file fingerprints so only their scope changes; this operation does not claim an upstream refresh.
+
+## Selected entry retirement
+
+The current subscription removes codehealth-mcp, dmux-workflows, the seven Epic commands and jira: 63 Skills, 23 commands and all 68 Agents remain selected. The 202 runtime mappings remain unchanged for five retained consumers: the two Codex hook references, configure-ecc, tdd-workflow and harness-optimizer. Adoption anchors formerly named dmux-workflows now name an existing retained consumer with identical fingerprints and executable flags. No upstream body or runtime implementation file is modified.
