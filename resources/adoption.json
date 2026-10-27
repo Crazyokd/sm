@@ -11736,30 +11736,6 @@
     "executable": false
   },
   {
-    "resource": "user-prompt-codex-prompts-opsx-apply-md",
-    "target": ".codex/prompts/opsx-apply.md",
-    "sha256": "5c574d0b7f500120135e6f8e4df0562beaaa741c50e462c384579f53c2b3e558",
-    "executable": false
-  },
-  {
-    "resource": "user-prompt-codex-prompts-opsx-archive-md",
-    "target": ".codex/prompts/opsx-archive.md",
-    "sha256": "5bbd8ca7fb10fadc7a8935d52caac6c5e6560c8bda8a94fec685d8bb80a82cd9",
-    "executable": false
-  },
-  {
-    "resource": "user-prompt-codex-prompts-opsx-explore-md",
-    "target": ".codex/prompts/opsx-explore.md",
-    "sha256": "53a531d219e4549065c965ecd67578d793f68a7cacc0790db33bad9f08ab3095",
-    "executable": false
-  },
-  {
-    "resource": "user-prompt-codex-prompts-opsx-propose-md",
-    "target": ".codex/prompts/opsx-propose.md",
-    "sha256": "6254fbac15207c1cd2ef3e4772a8d11c9651fa6f8e841a34eb3aa56d558ffc08",
-    "executable": false
-  },
-  {
     "resource": "user-hook-codex-reference",
     "target": ".codex/hooks/README.md",
     "sha256": "d01f9d0474014e089ebbb67a9b86384c9ea3dda5229df939e8c45e7d2e283170",
