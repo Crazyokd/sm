@@ -9,10 +9,12 @@ description: Use when running easygo-app Rust builds, targeted tests, formatting
 
 使用本 skill 的脚本传递原始命令参数，避免手拼 ROS、接口 SDK、音乐资源和测试 domain：
 
+以下路径相对于本 Skill 目录。若当前在 Git 工作树中，先从该仓库主检出的 `.agents/skills/easygo-app-checks/` 读取本 Skill，再以实际工作树路径作为 `APP_WORKTREE`。
+
 ```bash
-python3 /home/standard/.codex/skills/easygo-app-checks/scripts/run.py APP_WORKTREE -- cargo nextest run -p easygo-app -E 'test(TEST_NAME)'
-python3 /home/standard/.codex/skills/easygo-app-checks/scripts/run.py APP_WORKTREE -- just precommit
-python3 /home/standard/.codex/skills/easygo-app-checks/scripts/run.py APP_WORKTREE -- cargo build -p easygo-app --profile deploy
+python3 scripts/run.py APP_WORKTREE -- cargo nextest run -p easygo-app -E 'test(TEST_NAME)'
+python3 scripts/run.py APP_WORKTREE -- just precommit
+python3 scripts/run.py APP_WORKTREE -- cargo build -p easygo-app --profile deploy
 ```
 
 脚本从 App 主检出的相邻 easygo-music-resources 找 manifest.system.yaml，使用已有环境变量 EASYGO_MUSIC_MANIFEST 时尊重该显式路径；缺文件直接失败。不要用容器 /sros/music 的旧默认清单迁就构建错误，也不要为定向测试删 HMI 声音映射。测试使用独立 domain 191 和单个 nextest worker。

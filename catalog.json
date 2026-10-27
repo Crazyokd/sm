@@ -9,7 +9,8 @@
     "simenv": "~/workspace/simenv",
     "sm": "~/repo/sm",
     "sros-core": "~/repo/sros-core",
-    "tp": "~/repo/tp"
+    "tp": "~/repo/tp",
+    "easygo-workspace-app": "~/workspace/easygo/src/easygo-app"
   },
   "upstreams": {
     "ecc": {
@@ -1831,14 +1832,6 @@
       "project": null
     },
     {
-      "id": "update-cli-config",
-      "kind": "skill",
-      "payload": "resources/update-cli-config",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "update-cursor-settings",
       "kind": "skill",
       "payload": "resources/update-cursor-settings",
@@ -3649,23 +3642,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-agent-sort",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/agent-sort",
-            "tree": ".agents/skills/agent-sort"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-ai-regression-testing",
       "kind": "skill",
       "files": {
@@ -3802,23 +3778,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-ck",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/ck",
-            "tree": ".agents/skills/ck"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-click-path-audit",
       "kind": "skill",
       "files": {
@@ -3861,23 +3820,6 @@
           {
             "target": ".agents/skills/code-tour",
             "tree": ".agents/skills/code-tour"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-codebase-onboarding",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/codebase-onboarding",
-            "tree": ".agents/skills/codebase-onboarding"
           }
         ]
       },
@@ -3938,23 +3880,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-config-gc",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/config-gc",
-            "tree": ".agents/skills/config-gc"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-configure-ecc",
       "kind": "skill",
       "files": {
@@ -3973,57 +3898,6 @@
       "dependencies": [
         "ecc-runtime"
       ]
-    },
-    {
-      "id": "ecc-skill-context-budget",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/context-budget",
-            "tree": ".agents/skills/context-budget"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-continuous-learning",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/continuous-learning",
-            "tree": ".agents/skills/continuous-learning"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-continuous-learning-v2",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/continuous-learning-v2",
-            "tree": ".agents/skills/continuous-learning-v2"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
     },
     {
       "id": "ecc-skill-contract-first",
@@ -4153,23 +4027,6 @@
           {
             "target": ".agents/skills/database-migrations",
             "tree": ".agents/skills/database-migrations"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-delivery-gate",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/delivery-gate",
-            "tree": ".agents/skills/delivery-gate"
           }
         ]
       },
@@ -4343,23 +4200,6 @@
           {
             "target": ".agents/skills/ecc-guide",
             "tree": ".agents/skills/ecc-guide"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-ecc-recipes",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/ecc-recipes",
-            "tree": ".agents/skills/ecc-recipes"
           }
         ]
       },
@@ -4615,23 +4455,6 @@
           {
             "target": ".agents/skills/hexagonal-architecture",
             "tree": ".agents/skills/hexagonal-architecture"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-hookify-rules",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/hookify-rules",
-            "tree": ".agents/skills/hookify-rules"
           }
         ]
       },
@@ -5117,23 +4940,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-plankton-code-quality",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/plankton-code-quality",
-            "tree": ".agents/skills/plankton-code-quality"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-postgres-patterns",
       "kind": "skill",
       "files": {
@@ -5372,40 +5178,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-repo-scan",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/repo-scan",
-            "tree": ".agents/skills/repo-scan"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-rules-distill",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/rules-distill",
-            "tree": ".agents/skills/rules-distill"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-rust-patterns",
       "kind": "skill",
       "files": {
@@ -5448,57 +5220,6 @@
           {
             "target": ".agents/skills/santa-method",
             "tree": ".agents/skills/santa-method"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-skill-comply",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/skill-comply",
-            "tree": ".agents/skills/skill-comply"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-skill-scout",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/skill-scout",
-            "tree": ".agents/skills/skill-scout"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-skill-stocktake",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/skill-stocktake",
-            "tree": ".agents/skills/skill-stocktake"
           }
         ]
       },
@@ -5557,26 +5278,6 @@
       "upstream": "ecc",
       "scope": "user",
       "project": null
-    },
-    {
-      "id": "ecc-skill-strategic-compact",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/strategic-compact",
-            "tree": ".agents/skills/strategic-compact"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null,
-      "dependencies": [
-        "ecc-runtime"
-      ]
     },
     {
       "id": "ecc-skill-tdd-workflow",
@@ -5735,26 +5436,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-source-command-auto-update",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-auto-update",
-            "tree": ".agents/skills/source-command-auto-update"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null,
-      "dependencies": [
-        "ecc-runtime"
-      ]
-    },
-    {
       "id": "ecc-skill-source-command-build-fix",
       "kind": "skill",
       "files": {
@@ -5763,23 +5444,6 @@
           {
             "target": ".agents/skills/source-command-build-fix",
             "tree": ".agents/skills/source-command-build-fix"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-cost-report",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-cost-report",
-            "tree": ".agents/skills/source-command-cost-report"
           }
         ]
       },
@@ -5976,23 +5640,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-source-command-evolve",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-evolve",
-            "tree": ".agents/skills/source-command-evolve"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-source-command-fastapi-review",
       "kind": "skill",
       "files": {
@@ -6129,125 +5776,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-source-command-hookify",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-hookify",
-            "tree": ".agents/skills/source-command-hookify"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-hookify-configure",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-hookify-configure",
-            "tree": ".agents/skills/source-command-hookify-configure"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-hookify-help",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-hookify-help",
-            "tree": ".agents/skills/source-command-hookify-help"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-hookify-list",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-hookify-list",
-            "tree": ".agents/skills/source-command-hookify-list"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-instinct-export",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-instinct-export",
-            "tree": ".agents/skills/source-command-instinct-export"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-instinct-import",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-instinct-import",
-            "tree": ".agents/skills/source-command-instinct-import"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-instinct-status",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-instinct-status",
-            "tree": ".agents/skills/source-command-instinct-status"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-source-command-jira",
       "kind": "skill",
       "files": {
@@ -6299,40 +5827,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-source-command-learn",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-learn",
-            "tree": ".agents/skills/source-command-learn"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-learn-eval",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-learn-eval",
-            "tree": ".agents/skills/source-command-learn-eval"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-source-command-marketing-campaign",
       "kind": "skill",
       "files": {
@@ -6341,23 +5835,6 @@
           {
             "target": ".agents/skills/source-command-marketing-campaign",
             "tree": ".agents/skills/source-command-marketing-campaign"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-plan",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-plan",
-            "tree": ".agents/skills/source-command-plan"
           }
         ]
       },
@@ -6392,57 +5869,6 @@
           {
             "target": ".agents/skills/source-command-project-init",
             "tree": ".agents/skills/source-command-project-init"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-projects",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-projects",
-            "tree": ".agents/skills/source-command-projects"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-promote",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-promote",
-            "tree": ".agents/skills/source-command-promote"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-prune",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-prune",
-            "tree": ".agents/skills/source-command-prune"
           }
         ]
       },
@@ -6503,23 +5929,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-source-command-resume-session",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-resume-session",
-            "tree": ".agents/skills/source-command-resume-session"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-source-command-review-pr",
       "kind": "skill",
       "files": {
@@ -6569,80 +5978,6 @@
       "upstream": "ecc",
       "scope": "user",
       "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-save-session",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-save-session",
-            "tree": ".agents/skills/source-command-save-session"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-setup-pm",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-setup-pm",
-            "tree": ".agents/skills/source-command-setup-pm"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null,
-      "dependencies": [
-        "ecc-runtime"
-      ]
-    },
-    {
-      "id": "ecc-skill-source-command-skill-create",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-skill-create",
-            "tree": ".agents/skills/source-command-skill-create"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-skill-health",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-skill-health",
-            "tree": ".agents/skills/source-command-skill-health"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null,
-      "dependencies": [
-        "ecc-runtime"
-      ]
     },
     {
       "id": "ecc-skill-source-command-test-coverage",
@@ -7878,14 +7213,30 @@
         "root": "resources/easygo-app-checks",
         "entries": [
           {
-            "target": ".codex/skills/easygo-app-checks",
-            "tree": "files/.codex/skills/easygo-app-checks"
+            "target": ".agents/skills/easygo-app-checks",
+            "tree": "files/.agents/skills/easygo-app-checks"
           }
         ]
       },
       "origin": "self",
-      "scope": "user",
-      "project": null
+      "scope": "project",
+      "project": "easygo-app"
+    },
+    {
+      "id": "easygo-workspace-app-checks",
+      "kind": "skill",
+      "files": {
+        "root": "resources/easygo-workspace-app-checks",
+        "entries": [
+          {
+            "target": ".agents/skills/easygo-app-checks",
+            "tree": "files/.agents/skills/easygo-app-checks"
+          }
+        ]
+      },
+      "origin": "self",
+      "scope": "project",
+      "project": "easygo-workspace-app"
     }
   ]
 }

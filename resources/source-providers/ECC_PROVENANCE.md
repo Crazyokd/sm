@@ -18,3 +18,9 @@ The complete-unit conversion preserves all 202 runtime target bytes and executab
 ## Claude resource retirement
 
 The selection now installs no Claude Skills, Agents, Rules or commands. The 202 `.claude/scripts` files remain solely as the shared `ecc-runtime` supporting dependency for ten Codex/shared consumers: two Codex hook references, seven Skills and one Agent. Their upstream bytes and locations remain unchanged so existing consumers keep their dependencies. Claude-only consumers and mirrors have been removed from the catalog and adoption manifest. Codex plugin subscriptions whose upstream name contains `claude` remain Codex subscriptions.
+
+## Claude workflow subscription cleanup
+
+The later user-scope review removes 17 Claude-centric Skills (including the explicitly deprecated continuous-learning v1) and 21 companion commands from the ECC subscription. The selection retains 107 Skills and 37 command wrappers without modifying upstream bodies. Multi-client configuration and generic development workflows remain subscribed.
+
+The 202 shared runtime files still serve six retained consumers: two Codex hook references, configure-ecc, dmux-workflows, tdd-workflow and the Codex harness-optimizer Agent. Removed workflow ownership/adoption entries no longer keep additional claims. Their former shared-owner anchors are reassigned to retained consumers without changing runtime file bytes or executable modes.
