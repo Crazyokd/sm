@@ -10,7 +10,9 @@
     "sm": "~/repo/sm",
     "sros-core": "~/repo/sros-core",
     "tp": "~/repo/tp",
-    "easygo-workspace-app": "~/workspace/easygo/src/easygo-app"
+    "easygo-workspace-app": "~/workspace/easygo/src/easygo-app",
+    "easygo-voice-assistant": "~/workspace/easygo/src/voice_assistant",
+    "pipeline-studio": "~/workspace/easygo/src/perception_platform/pipeline_studio"
   },
   "upstreams": {
     "ecc": {
@@ -2094,26 +2096,6 @@
       "project": null
     },
     {
-      "id": "motion-ui",
-      "kind": "skill",
-      "files": {
-        "root": "resources/motion-ui",
-        "entries": [
-          {
-            "target": ".agents/skills/motion-ui",
-            "tree": "files/.agents/skills/motion-ui"
-          },
-          {
-            "target": ".agents/skills/motion-ui/PROVENANCE.md",
-            "source": "files/metadata/PROVENANCE.md"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "iteration-cleanup",
       "kind": "skill",
       "files": {
@@ -3659,40 +3641,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-android-clean-architecture",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/android-clean-architecture",
-            "tree": ".agents/skills/android-clean-architecture"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-angular-developer",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/angular-developer",
-            "tree": ".agents/skills/angular-developer"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-api-design",
       "kind": "skill",
       "files": {
@@ -3752,23 +3700,6 @@
           {
             "target": ".agents/skills/browser-qa",
             "tree": ".agents/skills/browser-qa"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-bun-runtime",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/bun-runtime",
-            "tree": ".agents/skills/bun-runtime"
           }
         ]
       },
@@ -3854,23 +3785,6 @@
           {
             "target": ".agents/skills/coding-standards",
             "tree": ".agents/skills/coding-standards"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-compose-multiplatform-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/compose-multiplatform-patterns",
-            "tree": ".agents/skills/compose-multiplatform-patterns"
           }
         ]
       },
@@ -3985,40 +3899,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-csharp-testing",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/csharp-testing",
-            "tree": ".agents/skills/csharp-testing"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-dart-flutter-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/dart-flutter-patterns",
-            "tree": ".agents/skills/dart-flutter-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-database-migrations",
       "kind": "skill",
       "files": {
@@ -4070,74 +3950,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-django-celery",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/django-celery",
-            "tree": ".agents/skills/django-celery"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-django-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/django-patterns",
-            "tree": ".agents/skills/django-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-django-tdd",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/django-tdd",
-            "tree": ".agents/skills/django-tdd"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-django-verification",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/django-verification",
-            "tree": ".agents/skills/django-verification"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-dmux-workflows",
       "kind": "skill",
       "files": {
@@ -4156,23 +3968,6 @@
       "dependencies": [
         "ecc-runtime"
       ]
-    },
-    {
-      "id": "ecc-skill-dotnet-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/dotnet-patterns",
-            "tree": ".agents/skills/dotnet-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
     },
     {
       "id": "ecc-skill-e2e-testing",
@@ -4256,25 +4051,8 @@
       },
       "origin": "upstream",
       "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-flutter-dart-code-review",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/flutter-dart-code-review",
-            "tree": ".agents/skills/flutter-dart-code-review"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
+      "scope": "project",
+      "project": "organism"
     },
     {
       "id": "ecc-skill-frontend-a11y",
@@ -4290,8 +4068,8 @@
       },
       "origin": "upstream",
       "upstream": "ecc",
-      "scope": "user",
-      "project": null
+      "scope": "project",
+      "project": "tp"
     },
     {
       "id": "ecc-skill-frontend-design-direction",
@@ -4324,8 +4102,8 @@
       },
       "origin": "upstream",
       "upstream": "ecc",
-      "scope": "user",
-      "project": null
+      "scope": "project",
+      "project": "tp"
     },
     {
       "id": "ecc-skill-frontend-slides",
@@ -4336,40 +4114,6 @@
           {
             "target": ".agents/skills/frontend-slides",
             "tree": ".agents/skills/frontend-slides"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-fsharp-testing",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/fsharp-testing",
-            "tree": ".agents/skills/fsharp-testing"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-generating-python-installer",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/generating-python-installer",
-            "tree": ".agents/skills/generating-python-installer"
           }
         ]
       },
@@ -4515,193 +4259,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-java-coding-standards",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/java-coding-standards",
-            "tree": ".agents/skills/java-coding-standards"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-jpa-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/jpa-patterns",
-            "tree": ".agents/skills/jpa-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-kotlin-coroutines-flows",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/kotlin-coroutines-flows",
-            "tree": ".agents/skills/kotlin-coroutines-flows"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-kotlin-exposed-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/kotlin-exposed-patterns",
-            "tree": ".agents/skills/kotlin-exposed-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-kotlin-ktor-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/kotlin-ktor-patterns",
-            "tree": ".agents/skills/kotlin-ktor-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-kotlin-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/kotlin-patterns",
-            "tree": ".agents/skills/kotlin-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-kotlin-testing",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/kotlin-testing",
-            "tree": ".agents/skills/kotlin-testing"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-laravel-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/laravel-patterns",
-            "tree": ".agents/skills/laravel-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-laravel-plugin-discovery",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/laravel-plugin-discovery",
-            "tree": ".agents/skills/laravel-plugin-discovery"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-laravel-tdd",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/laravel-tdd",
-            "tree": ".agents/skills/laravel-tdd"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-laravel-verification",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/laravel-verification",
-            "tree": ".agents/skills/laravel-verification"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-living-docs-governance",
       "kind": "skill",
       "files": {
@@ -4770,57 +4327,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-motion-advanced",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/motion-advanced",
-            "tree": ".agents/skills/motion-advanced"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-motion-foundations",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/motion-foundations",
-            "tree": ".agents/skills/motion-foundations"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-motion-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/motion-patterns",
-            "tree": ".agents/skills/motion-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-mysql-patterns",
       "kind": "skill",
       "files": {
@@ -4829,91 +4335,6 @@
           {
             "target": ".agents/skills/mysql-patterns",
             "tree": ".agents/skills/mysql-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-nestjs-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/nestjs-patterns",
-            "tree": ".agents/skills/nestjs-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-nextjs-turbopack",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/nextjs-turbopack",
-            "tree": ".agents/skills/nextjs-turbopack"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-nuxt4-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/nuxt4-patterns",
-            "tree": ".agents/skills/nuxt4-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-perl-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/perl-patterns",
-            "tree": ".agents/skills/perl-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-perl-testing",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/perl-testing",
-            "tree": ".agents/skills/perl-testing"
           }
         ]
       },
@@ -5042,74 +4463,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-quarkus-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/quarkus-patterns",
-            "tree": ".agents/skills/quarkus-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-quarkus-tdd",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/quarkus-tdd",
-            "tree": ".agents/skills/quarkus-tdd"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-quarkus-verification",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/quarkus-verification",
-            "tree": ".agents/skills/quarkus-verification"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-react-native-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/react-native-patterns",
-            "tree": ".agents/skills/react-native-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-react-patterns",
       "kind": "skill",
       "files": {
@@ -5123,8 +4476,8 @@
       },
       "origin": "upstream",
       "upstream": "ecc",
-      "scope": "user",
-      "project": null
+      "scope": "project",
+      "project": "tp"
     },
     {
       "id": "ecc-skill-react-performance",
@@ -5140,8 +4493,8 @@
       },
       "origin": "upstream",
       "upstream": "ecc",
-      "scope": "user",
-      "project": null
+      "scope": "project",
+      "project": "tp"
     },
     {
       "id": "ecc-skill-react-testing",
@@ -5157,8 +4510,8 @@
       },
       "origin": "upstream",
       "upstream": "ecc",
-      "scope": "user",
-      "project": null
+      "scope": "project",
+      "project": "tp"
     },
     {
       "id": "ecc-skill-redis-patterns",
@@ -5229,57 +4582,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-springboot-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/springboot-patterns",
-            "tree": ".agents/skills/springboot-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-springboot-tdd",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/springboot-tdd",
-            "tree": ".agents/skills/springboot-tdd"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-springboot-verification",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/springboot-verification",
-            "tree": ".agents/skills/springboot-verification"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-tdd-workflow",
       "kind": "skill",
       "files": {
@@ -5300,23 +4602,6 @@
       ]
     },
     {
-      "id": "ecc-skill-tinystruct-patterns",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/tinystruct-patterns",
-            "tree": ".agents/skills/tinystruct-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-ui-to-vue",
       "kind": "skill",
       "files": {
@@ -5330,8 +4615,8 @@
       },
       "origin": "upstream",
       "upstream": "ecc",
-      "scope": "user",
-      "project": null
+      "scope": "project",
+      "project": "easygo-fe"
     },
     {
       "id": "ecc-skill-unified-memory",
@@ -5393,23 +4678,6 @@
           {
             "target": ".agents/skills/vue-patterns",
             "tree": ".agents/skills/vue-patterns"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-windows-desktop-e2e",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/windows-desktop-e2e",
-            "tree": ".agents/skills/windows-desktop-e2e"
           }
         ]
       },
@@ -5653,8 +4921,8 @@
       },
       "origin": "upstream",
       "upstream": "ecc",
-      "scope": "user",
-      "project": null
+      "scope": "project",
+      "project": "organism"
     },
     {
       "id": "ecc-skill-source-command-feature-dev",
@@ -5665,57 +4933,6 @@
           {
             "target": ".agents/skills/source-command-feature-dev",
             "tree": ".agents/skills/source-command-feature-dev"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-flutter-build",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-flutter-build",
-            "tree": ".agents/skills/source-command-flutter-build"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-flutter-review",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-flutter-review",
-            "tree": ".agents/skills/source-command-flutter-review"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-flutter-test",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-flutter-test",
-            "tree": ".agents/skills/source-command-flutter-test"
           }
         ]
       },
@@ -5759,23 +4976,6 @@
       "project": null
     },
     {
-      "id": "ecc-skill-source-command-gradle-build",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-gradle-build",
-            "tree": ".agents/skills/source-command-gradle-build"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "ecc-skill-source-command-jira",
       "kind": "skill",
       "files": {
@@ -5784,40 +4984,6 @@
           {
             "target": ".agents/skills/source-command-jira",
             "tree": ".agents/skills/source-command-jira"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-kotlin-build",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-kotlin-build",
-            "tree": ".agents/skills/source-command-kotlin-build"
-          }
-        ]
-      },
-      "origin": "upstream",
-      "upstream": "ecc",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "ecc-skill-source-command-kotlin-test",
-      "kind": "skill",
-      "files": {
-        "root": ".",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-kotlin-test",
-            "tree": ".agents/skills/source-command-kotlin-test"
           }
         ]
       },
@@ -5908,8 +5074,8 @@
       },
       "origin": "upstream",
       "upstream": "ecc",
-      "scope": "user",
-      "project": null
+      "scope": "project",
+      "project": "tp"
     },
     {
       "id": "ecc-skill-source-command-refactor-clean",
@@ -7237,6 +6403,244 @@
       "origin": "self",
       "scope": "project",
       "project": "easygo-workspace-app"
+    },
+    {
+      "id": "pipeline-studio-skill-fastapi-patterns",
+      "kind": "skill",
+      "files": {
+        "root": ".",
+        "entries": [
+          {
+            "target": ".agents/skills/fastapi-patterns",
+            "tree": ".agents/skills/fastapi-patterns"
+          }
+        ]
+      },
+      "origin": "upstream",
+      "upstream": "ecc",
+      "scope": "project",
+      "project": "pipeline-studio"
+    },
+    {
+      "id": "sros-core-skill-fastapi-patterns",
+      "kind": "skill",
+      "files": {
+        "root": ".",
+        "entries": [
+          {
+            "target": ".agents/skills/fastapi-patterns",
+            "tree": ".agents/skills/fastapi-patterns"
+          }
+        ]
+      },
+      "origin": "upstream",
+      "upstream": "ecc",
+      "scope": "project",
+      "project": "sros-core"
+    },
+    {
+      "id": "easygo-voice-assistant-skill-fastapi-patterns",
+      "kind": "skill",
+      "files": {
+        "root": ".",
+        "entries": [
+          {
+            "target": ".agents/skills/fastapi-patterns",
+            "tree": ".agents/skills/fastapi-patterns"
+          }
+        ]
+      },
+      "origin": "upstream",
+      "upstream": "ecc",
+      "scope": "project",
+      "project": "easygo-voice-assistant"
+    },
+    {
+      "id": "pipeline-studio-skill-frontend-a11y",
+      "kind": "skill",
+      "files": {
+        "root": ".",
+        "entries": [
+          {
+            "target": ".agents/skills/frontend-a11y",
+            "tree": ".agents/skills/frontend-a11y"
+          }
+        ]
+      },
+      "origin": "upstream",
+      "upstream": "ecc",
+      "scope": "project",
+      "project": "pipeline-studio"
+    },
+    {
+      "id": "pipeline-studio-skill-frontend-patterns",
+      "kind": "skill",
+      "files": {
+        "root": ".",
+        "entries": [
+          {
+            "target": ".agents/skills/frontend-patterns",
+            "tree": ".agents/skills/frontend-patterns"
+          }
+        ]
+      },
+      "origin": "upstream",
+      "upstream": "ecc",
+      "scope": "project",
+      "project": "pipeline-studio"
+    },
+    {
+      "id": "pipeline-studio-skill-react-patterns",
+      "kind": "skill",
+      "files": {
+        "root": ".",
+        "entries": [
+          {
+            "target": ".agents/skills/react-patterns",
+            "tree": ".agents/skills/react-patterns"
+          }
+        ]
+      },
+      "origin": "upstream",
+      "upstream": "ecc",
+      "scope": "project",
+      "project": "pipeline-studio"
+    },
+    {
+      "id": "pipeline-studio-skill-react-performance",
+      "kind": "skill",
+      "files": {
+        "root": ".",
+        "entries": [
+          {
+            "target": ".agents/skills/react-performance",
+            "tree": ".agents/skills/react-performance"
+          }
+        ]
+      },
+      "origin": "upstream",
+      "upstream": "ecc",
+      "scope": "project",
+      "project": "pipeline-studio"
+    },
+    {
+      "id": "pipeline-studio-skill-react-testing",
+      "kind": "skill",
+      "files": {
+        "root": ".",
+        "entries": [
+          {
+            "target": ".agents/skills/react-testing",
+            "tree": ".agents/skills/react-testing"
+          }
+        ]
+      },
+      "origin": "upstream",
+      "upstream": "ecc",
+      "scope": "project",
+      "project": "pipeline-studio"
+    },
+    {
+      "id": "easygo-web-skill-ui-to-vue",
+      "kind": "skill",
+      "files": {
+        "root": ".",
+        "entries": [
+          {
+            "target": ".agents/skills/ui-to-vue",
+            "tree": ".agents/skills/ui-to-vue"
+          }
+        ]
+      },
+      "origin": "upstream",
+      "upstream": "ecc",
+      "scope": "project",
+      "project": "easygo-web"
+    },
+    {
+      "id": "organism-skill-ui-to-vue",
+      "kind": "skill",
+      "files": {
+        "root": ".",
+        "entries": [
+          {
+            "target": ".agents/skills/ui-to-vue",
+            "tree": ".agents/skills/ui-to-vue"
+          }
+        ]
+      },
+      "origin": "upstream",
+      "upstream": "ecc",
+      "scope": "project",
+      "project": "organism"
+    },
+    {
+      "id": "pipeline-studio-skill-source-command-fastapi-review",
+      "kind": "skill",
+      "files": {
+        "root": ".",
+        "entries": [
+          {
+            "target": ".agents/skills/source-command-fastapi-review",
+            "tree": ".agents/skills/source-command-fastapi-review"
+          }
+        ]
+      },
+      "origin": "upstream",
+      "upstream": "ecc",
+      "scope": "project",
+      "project": "pipeline-studio"
+    },
+    {
+      "id": "sros-core-skill-source-command-fastapi-review",
+      "kind": "skill",
+      "files": {
+        "root": ".",
+        "entries": [
+          {
+            "target": ".agents/skills/source-command-fastapi-review",
+            "tree": ".agents/skills/source-command-fastapi-review"
+          }
+        ]
+      },
+      "origin": "upstream",
+      "upstream": "ecc",
+      "scope": "project",
+      "project": "sros-core"
+    },
+    {
+      "id": "easygo-voice-assistant-skill-source-command-fastapi-review",
+      "kind": "skill",
+      "files": {
+        "root": ".",
+        "entries": [
+          {
+            "target": ".agents/skills/source-command-fastapi-review",
+            "tree": ".agents/skills/source-command-fastapi-review"
+          }
+        ]
+      },
+      "origin": "upstream",
+      "upstream": "ecc",
+      "scope": "project",
+      "project": "easygo-voice-assistant"
+    },
+    {
+      "id": "pipeline-studio-skill-source-command-react-test",
+      "kind": "skill",
+      "files": {
+        "root": ".",
+        "entries": [
+          {
+            "target": ".agents/skills/source-command-react-test",
+            "tree": ".agents/skills/source-command-react-test"
+          }
+        ]
+      },
+      "origin": "upstream",
+      "upstream": "ecc",
+      "scope": "project",
+      "project": "pipeline-studio"
     }
   ]
 }
