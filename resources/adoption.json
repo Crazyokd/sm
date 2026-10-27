@@ -11828,18 +11828,6 @@
     "sha256": "621bbc06d7dc8f31670c47c3111def5b441259db26761400e3540735a807b195"
   },
   {
-    "resource": "iteration-cleanup",
-    "target": ".codex/skills/iteration-cleanup/SKILL.md",
-    "sha256": "f675b37b44e3bdf013532492b727c28f8060f294118efbd02e13f01ca5ccf194",
-    "executable": false
-  },
-  {
-    "resource": "iteration-cleanup",
-    "target": ".codex/skills/iteration-cleanup/agents/openai.yaml",
-    "sha256": "33be57ca4ab2b88e62407f9d09c52f67e6471816687bc7a5c90df2def6a63593",
-    "executable": false
-  },
-  {
     "resource": "easygo-rule-agents-md",
     "target": "AGENTS.md",
     "sha256": "730b9d02ad5e1801ce05a8fa935ed6fac745d7666d9c1f167a64df22c9bd44e9",

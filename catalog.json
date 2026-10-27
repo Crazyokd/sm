@@ -2102,14 +2102,14 @@
         "root": "resources/iteration-cleanup",
         "entries": [
           {
-            "target": ".codex/skills/iteration-cleanup",
-            "tree": "files/.codex/skills/iteration-cleanup"
+            "target": ".agents/skills/iteration-cleanup",
+            "tree": "files/.agents/skills/iteration-cleanup"
           }
         ]
       },
       "origin": "self",
-      "scope": "user",
-      "project": null
+      "scope": "project",
+      "project": "simenv"
     },
     {
       "id": "easygo-rule-agents-md",

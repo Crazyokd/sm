@@ -1,11 +1,11 @@
 ---
 name: iteration-cleanup
-description: Use when repeated builds, Docker image creation, simulations, or test runs accumulate large iteration artifacts, before another large iteration, at checkpoints, or after disk growth and ENOSPC errors.
+description: Use in simenv when repeated builds, Docker image creation, simulations, or test runs accumulate large iteration artifacts, before another large iteration, at checkpoints, or after disk growth and ENOSPC errors.
 ---
 
-# 迭代产物清理
+# simenv 迭代产物清理
 
-让迭代占用有上限，同时保留可复现的源码和验收证据。每轮开始大构建/录制前，以及归档完成和结束本轮时，都执行一次；不要等磁盘写满。
+仅用于 simenv 项目的构建、仿真与测试迭代。让迭代占用有上限，同时保留可复现的源码和验收证据。每轮开始大构建/录制前，以及归档完成和结束本轮时，都执行一次；不要等磁盘写满。
 
 ## 执行
 
