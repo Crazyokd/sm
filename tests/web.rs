@@ -248,7 +248,7 @@ async fn plugin_toggle_proposes_reviewed_declaration_without_mutating_native_ins
     assert_eq!(status, StatusCode::OK);
     assert!(page.contains("插件内容由上游维护"));
     assert!(page.contains("订阅与启停经 MR 审核后应用"));
-    assert!(page.contains("<dt>插件上游</dt>"));
+    assert!(page.contains("<h2>插件上游</h2>"));
     assert!(f.get("/resources").await.1.contains("订阅声明"));
     let token = f.token().await;
     let (status, body) = f
