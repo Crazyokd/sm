@@ -147,6 +147,19 @@
         "source-skills",
         "resources/source-providers/skills-vueuse-skills.json"
       ]
+    },
+    "openspec": {
+      "argv": [
+        "@sm",
+        "source-openspec"
+      ]
+    },
+    "skills-einverne-remix-snapshot": {
+      "argv": [
+        "@sm",
+        "source-skills",
+        "resources/source-providers/skills-einverne-remix-snapshot.json"
+      ]
     }
   },
   "dependencies": {
@@ -1660,24 +1673,25 @@
       "id": "user-hook-codex-reference",
       "kind": "hook",
       "files": {
-        "root": "resources/user-hook-codex-reference",
+        "root": ".",
         "entries": [
           {
             "target": ".codex/hooks/README.md",
-            "source": "files/.codex/hooks/README.md"
+            "source": ".codex/hooks/README.md"
           },
           {
             "target": ".codex/hooks/codex-hooks.json",
-            "source": "files/.codex/hooks/codex-hooks.json"
+            "source": ".codex/hooks/codex-hooks.json"
           }
         ]
       },
-      "origin": "self",
+      "origin": "upstream",
       "scope": "user",
       "project": null,
       "dependencies": [
         "ecc-runtime"
-      ]
+      ],
+      "upstream": "ecc"
     },
     {
       "id": "user-hook-codex-hindsight",
@@ -1707,24 +1721,25 @@
       "id": "user-hook-codex-memory-persistence-reference",
       "kind": "hook",
       "files": {
-        "root": "resources/user-hook-codex-memory-persistence-reference",
+        "root": ".",
         "entries": [
           {
             "target": ".codex/hooks/memory-persistence/README.md",
-            "source": "files/.codex/hooks/memory-persistence/README.md"
+            "source": ".codex/hooks/memory-persistence/README.md"
           },
           {
             "target": ".codex/hooks/memory-persistence/hooks.json",
-            "source": "files/.codex/hooks/memory-persistence/hooks.json"
+            "source": ".codex/hooks/memory-persistence/hooks.json"
           }
         ]
       },
-      "origin": "self",
+      "origin": "upstream",
       "scope": "user",
       "project": null,
       "dependencies": [
         "ecc-runtime"
-      ]
+      ],
+      "upstream": "ecc"
     },
     {
       "id": "user-hook-kimi-hindsight",
@@ -2006,17 +2021,18 @@
       "id": "remix-icon",
       "kind": "skill",
       "files": {
-        "root": "resources/remix-icon",
+        "root": ".",
         "entries": [
           {
             "target": ".agents/skills/remix-icon",
-            "tree": "files/.agents/skills/remix-icon"
+            "tree": ".agents/skills/remix-icon"
           }
         ]
       },
-      "origin": "self",
+      "origin": "upstream",
       "scope": "project",
-      "project": "easygo-web"
+      "project": "easygo-web",
+      "upstream": "skills-einverne-remix-snapshot"
     },
     {
       "id": "perception-platform-rule-agents-md",
@@ -2278,65 +2294,69 @@
       "id": "easygo-app-skill-openspec-apply-change",
       "kind": "skill",
       "files": {
-        "root": "resources/easygo-app-skill-openspec-apply-change",
+        "root": ".",
         "entries": [
           {
             "target": ".agents/skills/openspec-apply-change",
-            "tree": "files/.agents/skills/openspec-apply-change"
+            "tree": ".agents/skills/openspec-apply-change"
           }
         ]
       },
-      "origin": "self",
+      "origin": "upstream",
       "scope": "project",
-      "project": "easygo-app"
+      "project": "easygo-app",
+      "upstream": "openspec"
     },
     {
       "id": "easygo-app-skill-openspec-archive-change",
       "kind": "skill",
       "files": {
-        "root": "resources/easygo-app-skill-openspec-archive-change",
+        "root": ".",
         "entries": [
           {
             "target": ".agents/skills/openspec-archive-change",
-            "tree": "files/.agents/skills/openspec-archive-change"
+            "tree": ".agents/skills/openspec-archive-change"
           }
         ]
       },
-      "origin": "self",
+      "origin": "upstream",
       "scope": "project",
-      "project": "easygo-app"
+      "project": "easygo-app",
+      "upstream": "openspec"
     },
     {
       "id": "easygo-app-skill-openspec-explore",
       "kind": "skill",
       "files": {
-        "root": "resources/easygo-app-skill-openspec-explore",
+        "root": ".",
         "entries": [
           {
             "target": ".agents/skills/openspec-explore",
-            "tree": "files/.agents/skills/openspec-explore"
+            "tree": ".agents/skills/openspec-explore"
           }
         ]
       },
-      "origin": "self",
+      "origin": "upstream",
       "scope": "project",
-      "project": "easygo-app"
+      "project": "easygo-app",
+      "upstream": "openspec"
     },
     {
       "id": "easygo-app-skill-openspec-propose",
       "kind": "skill",
       "files": {
-        "root": "resources/easygo-app-skill-openspec-propose",
+        "root": ".",
         "entries": [
           {
             "target": ".agents/skills/openspec-propose",
-            "tree": "files/.agents/skills/openspec-propose"
+            "tree": ".agents/skills/openspec-propose"
           }
         ]
       },
-      "origin": "self",
+      "origin": "upstream",
       "scope": "project",
-      "project": "easygo-app"
+      "project": "easygo-app",
+      "upstream": "openspec"
     },
     {
       "id": "easygo-app-skill-remote-build",
@@ -2403,70 +2423,6 @@
       "project": "easygo-app"
     },
     {
-      "id": "easygo-app-skill-source-command-opsx-apply",
-      "kind": "skill",
-      "files": {
-        "root": "resources/easygo-app-skill-source-command-opsx-apply",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-opsx-apply",
-            "tree": "files/.agents/skills/source-command-opsx-apply"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "easygo-app"
-    },
-    {
-      "id": "easygo-app-skill-source-command-opsx-archive",
-      "kind": "skill",
-      "files": {
-        "root": "resources/easygo-app-skill-source-command-opsx-archive",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-opsx-archive",
-            "tree": "files/.agents/skills/source-command-opsx-archive"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "easygo-app"
-    },
-    {
-      "id": "easygo-app-skill-source-command-opsx-explore",
-      "kind": "skill",
-      "files": {
-        "root": "resources/easygo-app-skill-source-command-opsx-explore",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-opsx-explore",
-            "tree": "files/.agents/skills/source-command-opsx-explore"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "easygo-app"
-    },
-    {
-      "id": "easygo-app-skill-source-command-opsx-propose",
-      "kind": "skill",
-      "files": {
-        "root": "resources/easygo-app-skill-source-command-opsx-propose",
-        "entries": [
-          {
-            "target": ".agents/skills/source-command-opsx-propose",
-            "tree": "files/.agents/skills/source-command-opsx-propose"
-          }
-        ]
-      },
-      "origin": "self",
-      "scope": "project",
-      "project": "easygo-app"
-    },
-    {
       "id": "easygo-app-rule-agents-md",
       "kind": "rule",
       "files": {
@@ -2486,17 +2442,18 @@
       "id": "easygo-fe-skill-remix-icon",
       "kind": "skill",
       "files": {
-        "root": "resources/easygo-fe-skill-remix-icon",
+        "root": ".",
         "entries": [
           {
             "target": ".agents/skills/remix-icon",
-            "tree": "files/.agents/skills/remix-icon"
+            "tree": ".agents/skills/remix-icon"
           }
         ]
       },
-      "origin": "self",
+      "origin": "upstream",
       "scope": "project",
-      "project": "easygo-fe"
+      "project": "easygo-fe",
+      "upstream": "skills-einverne-remix-snapshot"
     },
     {
       "id": "easygo-fe-rule-agents-md",

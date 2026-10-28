@@ -2,7 +2,7 @@
 {% block title %}资源目录{% endblock %}
 {% macro resource_table(rows) %}
 <div class="table-wrap"><table><caption class="sr-only">纳管资源及其来源、作用域和应用状态</caption><thead><tr><th>资源</th><th>类型</th><th>来源</th><th>归属</th><th>客户端适配</th><th>应用情况</th><th><span class="sr-only">操作</span></th></tr></thead><tbody>
-{% for r in rows %}<tr data-resource-id="{{ r.id }}" data-origin="{{ r.origin }}"><td><a class="resource-name" href="/resources/{{ r.id }}">{{ r.id }}</a></td><td>{{ r.kind_label }}</td><td><span class="pill {{ r.origin }}">{{ '自行维护' if r.origin=='self' else '上游拉取' }}</span></td><td>{{ r.project if r.scope=='project' else '用户级' }}</td><td>{{ r.client_label }}</td><td><span class="status {{ r.status }}">{{ r.status_label }}</span></td><td><a class="text-link" href="/resources/{{ r.id }}">查看 →</a></td></tr>
+{% for r in rows %}<tr data-resource-id="{{ r.id }}" data-origin="{{ r.origin }}"><td><a class="resource-name" href="/resources/{{ r.id }}">{{ r.id }}</a></td><td>{{ r.kind_label }}</td><td><span class="pill {{ r.origin }}">{{ '订阅声明' if r.installation else ('自行维护' if r.origin=='self' else '上游拉取') }}</span></td><td>{{ r.project if r.scope=='project' else '用户级' }}</td><td>{{ r.client_label }}</td><td><span class="status {{ r.status }}">{{ r.status_label }}</span></td><td><a class="text-link" href="/resources/{{ r.id }}">查看 →</a></td></tr>
 {% else %}<tr><td colspan="7" class="empty">{% if total %}没有符合筛选条件的资源。{% else %}尚无已同步资源。可以先创建资源提案，或到运行状态查看首次同步结果。{% endif %}</td></tr>{% endfor %}
 </tbody></table></div>
 {% endmacro %}

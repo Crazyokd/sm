@@ -11738,30 +11738,6 @@
     "executable": false
   },
   {
-    "resource": "easygo-app-skill-source-command-opsx-apply",
-    "target": ".agents/skills/source-command-opsx-apply/SKILL.md",
-    "sha256": "305057c863fa9413940d95909e232a1a785ab10bb00292dce158b9bd3eacd616",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-source-command-opsx-archive",
-    "target": ".agents/skills/source-command-opsx-archive/SKILL.md",
-    "sha256": "d79648dacb469f5566828863990d22feea62b44eb5051721a28d925c96426298",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-source-command-opsx-explore",
-    "target": ".agents/skills/source-command-opsx-explore/SKILL.md",
-    "sha256": "d4aa831df4fba350e8595a0ab28fff6c7eedd61b94cbdef5fcce3fb2fb8d8b5f",
-    "executable": false
-  },
-  {
-    "resource": "easygo-app-skill-source-command-opsx-propose",
-    "target": ".agents/skills/source-command-opsx-propose/SKILL.md",
-    "sha256": "c8497ebbe952ada365e9ad3ca7ed0544ea3cbbf03d1fa660603e3a42bcec8342",
-    "executable": false
-  },
-  {
     "resource": "easygo-app-rule-agents-md",
     "target": "AGENTS.md",
     "sha256": "db6c310bac53658ad969f730e9f690bb98daa00f0ea976d23530dfa691237bb6",

@@ -968,6 +968,22 @@
     {
       "source": "scripts/skills-health.js",
       "target": ".claude/scripts/skills-health.js"
+    },
+    {
+      "target": ".codex/hooks/README.md",
+      "source": "hooks/README.md"
+    },
+    {
+      "target": ".codex/hooks/codex-hooks.json",
+      "source": "hooks/codex-hooks.json"
+    },
+    {
+      "target": ".codex/hooks/memory-persistence/README.md",
+      "source": "hooks/memory-persistence/README.md"
+    },
+    {
+      "target": ".codex/hooks/memory-persistence/hooks.json",
+      "source": "hooks/memory-persistence/hooks.json"
     }
   ]
 }

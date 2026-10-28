@@ -19,6 +19,10 @@ fn run() -> Result<i32> {
         sm::skill_source::generate(selection, output)?;
         return Ok(0);
     }
+    if let Commands::SourceOpenspec { output } = &args.command {
+        sm::openspec::generate(output)?;
+        return Ok(0);
+    }
     let runtime = Runtime::discover(args.repo.as_deref())?;
     match sm::cli::run(args, &runtime)? {
         CommandOutcome::Exit(code) => Ok(code),

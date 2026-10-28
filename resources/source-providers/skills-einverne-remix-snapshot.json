@@ -1,0 +1,7 @@
+{
+  "source": "https://github.com/einverne/agent-skills.git",
+  "subpath": "vendor/remix-icon",
+  "skills": [
+    "remix-icon"
+  ]
+}

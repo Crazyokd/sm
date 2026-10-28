@@ -44,6 +44,10 @@ pub enum Commands {
         selection: PathBuf,
         output: PathBuf,
     },
+    #[command(hide = true)]
+    SourceOpenspec {
+        output: PathBuf,
+    },
     Diagnose {
         #[arg(long)]
         output: PathBuf,
@@ -91,6 +95,10 @@ pub fn record(agent: Client, directory: &std::path::Path) -> i32 {
     0
 }
 pub fn run(args: Args, runtime: &Runtime) -> Result<CommandOutcome> {
+    if let Commands::SourceOpenspec { output } = args.command {
+        crate::openspec::generate(&output)?;
+        return Ok(CommandOutcome::Exit(0));
+    }
     if let Commands::SourceSkills { selection, output } = args.command {
         crate::skill_source::generate(&selection, &output)?;
         return Ok(CommandOutcome::Exit(0));
@@ -164,7 +172,8 @@ pub fn run(args: Args, runtime: &Runtime) -> Result<CommandOutcome> {
         Commands::Serve { .. }
         | Commands::Record { .. }
         | Commands::SourceEcc { .. }
-        | Commands::SourceSkills { .. } => unreachable!("handled above"),
+        | Commands::SourceSkills { .. }
+        | Commands::SourceOpenspec { .. } => unreachable!("handled above"),
     };
     Ok(CommandOutcome::Exit(exit))
 }

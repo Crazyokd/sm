@@ -18,6 +18,7 @@ pub mod gitlab;
 pub mod installations;
 pub mod inventory;
 pub mod observe;
+pub mod openspec;
 pub mod privacy;
 pub mod process;
 pub mod project_git;
