@@ -1646,14 +1646,6 @@
       "project": "easygo-web"
     },
     {
-      "id": "create-subagent",
-      "kind": "skill",
-      "payload": "resources/create-subagent",
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
       "id": "user-rule-codex-agents-md",
       "kind": "rule",
       "files": {

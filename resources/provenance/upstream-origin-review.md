@@ -9,10 +9,10 @@
 - 两份项目级 remix-icon 与 [einverne/agent-skills/vendor/remix-icon](https://github.com/einverne/agent-skills/tree/main/vendor/remix-icon) 只差末尾换行。[镜像来源说明](https://github.com/einverne/agent-skills/blob/main/vendor/README.md) 明确其来自 mrgoonie/claudekit-skills。原仓现只保留 web-frameworks/references/remix-icon-integration.md，独立 Skill 已整合；因此登记实际存在的公开镜像快照来源，跟随该镜像目录，保留两个原项目范围，不扩大为 web-frameworks 订阅。镜像更新不保证与原仓同步。
 - user-hook-codex-reference 和 user-hook-codex-memory-persistence-reference 回归现有 ECC 来源。codex-hooks.json 及两个 memory-persistence 文件与 ecc-universal 2.2.3 发布包逐字节一致；通用 README 属于较早 ECC 文档快照。正文不再存入自维护目录，由既有原生来源生成器按声明路径更新。202 个共享运行文件与其他消费者声明保持原样。
 
-## 保留本地改写并注明来源
+## 本地改写与来源记录
 
 - improve-codebase-architecture：记录 mattpocock/skills 的历史来源、CodeGraph 等本地修改及维护边界。原始副本的存在不授权覆盖本地定制。
-- create-subagent：通过审核过的历史 Cursor 原件指纹确认派生来源，记录后续 Codex 原生说明改写。当前本地版本继续自维护，不建立 Cursor 订阅。
+- create-subagent：通过审核过的历史 Cursor 原件指纹确认派生来源。此前改写为 Codex 说明并保留；现按用户排除 Cursor 派生资源的要求清退这份本地改写，不建立 Cursor 订阅。现有 Agent 定义与原生能力不随这个 Skill 的移除而删除。
 - 用户级 AGENTS.md：前四节与 multica-ai/andrej-karpathy-skills 的 CLAUDE.md 去掉标题后一致，补充引用。后续 CodeGraph 维护块与图示、SM 规则继续作为本地组合规则维护。
 
 ## 插件声明

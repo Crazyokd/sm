@@ -7,3 +7,5 @@ The supported clients are Codex and Kimi. Retire 19 Cursor-specific Skill copies
 Do not rewrite shared upstream packages: the ECC install executor and target registry import Cursor-named support modules even for Codex consumers, and Codex/Kimi plugin packages include unused adapters. They remain unchanged and do not establish Cursor entry points. The corresponding entry-point subscriptions are retired. Tracked project-rule sources also require retirement in their owning repositories so fresh checkouts do not restore them.
 
 The EasyGo workspace-rule template and installer are also retired as one legacy project integration. Its AGENTS instruction is removed in both the owning repository and the SM source; the existing simulation safety requirements in AGENTS remain.
+
+The later retirement also removes the locally rewritten create-subagent Skill. Its historical Cursor fingerprint remains in the retirement manifest for provenance; no Cursor subscription, native Agent definition, or Agent capability is added or removed by that Skill retirement.

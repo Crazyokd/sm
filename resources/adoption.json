@@ -11298,18 +11298,6 @@
     "executable": false
   },
   {
-    "resource": "create-subagent",
-    "target": ".agents/skills/create-subagent/PROVENANCE.md",
-    "sha256": "53a5f5464d24f3b5b8fefd5db7d8a7125a0452bccfbdcc1c54ae21164b2eff54",
-    "executable": false
-  },
-  {
-    "resource": "create-subagent",
-    "target": ".agents/skills/create-subagent/SKILL.md",
-    "sha256": "8874e78acaa6ae74e4252ba63cb6374eb6bfa47a324ff0542d0e28f9c01fb56a",
-    "executable": false
-  },
-  {
     "resource": "user-rule-codex-agents-md",
     "target": ".codex/AGENTS.md",
     "sha256": "eb1845580e6e7fa9679bf34e5e1fea43782aabfd1d6ddb4d7e976e0daa4e1307",
