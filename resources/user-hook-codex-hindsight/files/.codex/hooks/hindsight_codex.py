@@ -18,11 +18,12 @@ def default_plugin_root() -> Path:
     explicit = os.environ.get("HINDSIGHT_PLUGIN_ROOT") or os.environ.get("CLAUDE_PLUGIN_ROOT")
     if explicit:
         return Path(explicit).expanduser()
-    root = CODEX_HOME / "plugins" / "cache" / "hindsight" / "hindsight-memory"
-    versions = sorted((p for p in root.glob("*") if (p / "scripts" / "lib").is_dir()), reverse=True)
-    if versions:
-        return versions[0]
-    return root / "0.7.4"
+    for home in (CODEX_HOME, Path.home() / ".claude"):
+        root = home / "plugins" / "cache" / "hindsight" / "hindsight-memory"
+        versions = sorted((p for p in root.glob("*") if (p / "scripts" / "lib").is_dir()), reverse=True)
+        if versions:
+            return versions[0]
+    return CODEX_HOME / "plugins" / "cache" / "hindsight" / "hindsight-memory" / "0.7.4"
 
 
 PLUGIN_ROOT = default_plugin_root()

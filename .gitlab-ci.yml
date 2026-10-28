@@ -29,7 +29,7 @@ rust:
   before_script:
     - sed -i 's|http://deb.debian.org|http://mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list.d/debian.sources
     - apt-get update -qq
-    - apt-get install -y --no-install-recommends git systemd nodejs
+    - apt-get install -y --no-install-recommends git systemd nodejs python3
     - mkdir -p "$CARGO_HOME"
     - |
       cat > "$CARGO_HOME/config.toml" <<'EOF'
@@ -40,6 +40,7 @@ rust:
       EOF
     - rustup component add rustfmt clippy
   script:
+    - python3 tests/test_hindsight_codex.py
     - cargo fmt --check
     - cargo clippy --all-targets --locked -- -D warnings
     - cargo test --locked
