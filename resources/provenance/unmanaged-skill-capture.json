@@ -1,0 +1,90 @@
+{
+  "generated_at": "2026-10-29T03:06:30.921984+00:00",
+  "installation_changes": false,
+  "proposals": [
+    {
+      "status": "capture-proposal",
+      "name": "gitlab-api",
+      "path": "/home/standard/workspace/easygo/.agents/skills/gitlab-api",
+      "scope": "project",
+      "project": "easygo",
+      "current_manager": "unmanaged",
+      "enabled": null,
+      "enabled_source": null,
+      "proposed_action": "review native source and scope before transferring ownership; preserve current bytes and disabled state",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "sha256": "108d97d54b7eee620dc82cc60d69abf9e07655ac9be3485c6ec56bcce1d4698f",
+          "executable": false
+        }
+      ]
+    },
+    {
+      "status": "capture-proposal",
+      "name": "motion",
+      "path": "/home/standard/workspace/easygo/src/easygo/.agents/skills/motion",
+      "scope": "project",
+      "project": "easygo-web",
+      "current_manager": "unmanaged",
+      "enabled": null,
+      "enabled_source": null,
+      "proposed_action": "review native source and scope before transferring ownership; preserve current bytes and disabled state",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "sha256": "f0e7a7749a2eed534f115c551b6ff27c17c9f38c25689302b7032fe583e41a60",
+          "executable": false
+        },
+        {
+          "path": "references/components.md",
+          "sha256": "739a643e263a50006fb29dce5fd1e84a704574d4bdfcda485b4951023ac02110",
+          "executable": false
+        },
+        {
+          "path": "references/composables.md",
+          "sha256": "99b732a765cd1a6ccaba4ec8bad36bb861184717a0d3d654f9335f6ff5c6ba56",
+          "executable": false
+        },
+        {
+          "path": "references/examples.md",
+          "sha256": "581b1df1e3ac71b124bea641501b1b33c3e4bfbc87ce2614bce024920d425807",
+          "executable": false
+        }
+      ]
+    },
+    {
+      "status": "capture-proposal",
+      "name": "motion",
+      "path": "/home/standard/workspace/easygo/src/easygo-fe/.agents/skills/motion",
+      "scope": "project",
+      "project": "easygo-fe",
+      "current_manager": "unmanaged",
+      "enabled": null,
+      "enabled_source": null,
+      "proposed_action": "review native source and scope before transferring ownership; preserve current bytes and disabled state",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "sha256": "f0e7a7749a2eed534f115c551b6ff27c17c9f38c25689302b7032fe583e41a60",
+          "executable": false
+        },
+        {
+          "path": "references/components.md",
+          "sha256": "739a643e263a50006fb29dce5fd1e84a704574d4bdfcda485b4951023ac02110",
+          "executable": false
+        },
+        {
+          "path": "references/composables.md",
+          "sha256": "99b732a765cd1a6ccaba4ec8bad36bb861184717a0d3d654f9335f6ff5c6ba56",
+          "executable": false
+        },
+        {
+          "path": "references/examples.md",
+          "sha256": "581b1df1e3ac71b124bea641501b1b33c3e4bfbc87ce2614bce024920d425807",
+          "executable": false
+        }
+      ]
+    }
+  ]
+}

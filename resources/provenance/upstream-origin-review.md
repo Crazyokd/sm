@@ -11,7 +11,7 @@
 
 ## 本地改写与来源记录
 
-- improve-codebase-architecture：记录 mattpocock/skills 的历史来源、CodeGraph 等本地修改及维护边界。原始副本的存在不授权覆盖本地定制。
+- improve-codebase-architecture：此前将 mattpocock/skills 的本地改写继续当作自维护资源保留。2026-10-29 来源复核后纠正为跟随原上游，移除本地改写正文及来源副本；随同登记原件明确调用的 codebase-design、grilling、domain-modeling，各项独立分类，共享现有 Matt Pocock 来源抓取。保留上游原生 agents/openai.yaml 中禁止隐式调用的策略。
 - create-subagent：通过审核过的历史 Cursor 原件指纹确认派生来源。此前改写为 Codex 说明并保留；现按用户排除 Cursor 派生资源的要求清退这份本地改写，不建立 Cursor 订阅。现有 Agent 定义与原生能力不随这个 Skill 的移除而删除。
 - 用户级 AGENTS.md：前四节与 multica-ai/andrej-karpathy-skills 的 CLAUDE.md 去掉标题后一致，补充引用。后续 CodeGraph 维护块与图示、SM 规则继续作为本地组合规则维护。
 

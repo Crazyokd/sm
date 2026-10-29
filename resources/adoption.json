@@ -5556,24 +5556,6 @@
     "executable": false
   },
   {
-    "resource": "improve-codebase-architecture",
-    "target": ".agents/skills/improve-codebase-architecture/DEEPENING.md",
-    "sha256": "cf71f31aba610b1fd6e1efd4e29d3ec9e520d177a13e148d6a8d9ab5600d9f43",
-    "executable": false
-  },
-  {
-    "resource": "improve-codebase-architecture",
-    "target": ".agents/skills/improve-codebase-architecture/LANGUAGE.md",
-    "sha256": "cc25b1c0f2a99680511686eb28c5f7dc90b9b27b06e76dc1309cad524db69e1e",
-    "executable": false
-  },
-  {
-    "resource": "improve-codebase-architecture",
-    "target": ".agents/skills/improve-codebase-architecture/SKILL.md",
-    "sha256": "0605ee4838f2bd029c5852ee078061faacce1c0a77d17964da1958131371a835",
-    "executable": false
-  },
-  {
     "resource": "lark-approval",
     "target": ".agents/skills/lark-approval/SKILL.md",
     "sha256": "2ac464c970291bf38e9a5ce7e2fb013c13abaf03d736ad75f64dd93a635aa5f7",

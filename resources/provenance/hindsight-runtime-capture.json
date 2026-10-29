@@ -1,0 +1,114 @@
+{
+  "status": "capture-proposal",
+  "scope": "user",
+  "origin": "upstream",
+  "upstream_source": "https://github.com/vectorize-io/hindsight.git",
+  "current_manager": "legacy native plugin cache, no SM refresh declaration",
+  "current_enabled": "consumers preserve current hook and MCP enablement; runtime has no independent switch",
+  "consumers": [
+    "user-hook-codex-hindsight",
+    "user-hook-kimi-hindsight",
+    "user-mcp-codex-config-toml-hindsight",
+    "user-mcp-kimi-code-mcp-json-hindsight"
+  ],
+  "reason": "MCP declarations reference an absent Codex cache; adapters require an unmanaged shared runtime. Capture existing source closure before repairing lifecycle. No installation or ownership change is authorized by this proposal alone.",
+  "files": [
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/LICENSE",
+      "sha256": "01fde0bedf83bdc185065d7af524a61690efe576a67f922eaff3a1280c17b63a",
+      "executable": false
+    },
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/requirements.txt",
+      "sha256": "a3d7674bdc0c4155c4a4042da2b273e532a188d0de2384eae8fa561d9d0bd8c4",
+      "executable": false
+    },
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/settings.json",
+      "sha256": "215fcc06f396dd3fcd26969d5556c25f27e4c22ebd0966c3760264dc04114ce7",
+      "executable": false
+    },
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/session_start.py",
+      "sha256": "57b4cf869bc51b4a15507972d3942097faec17f58dc7dbca8e5c7f32d0056d80",
+      "executable": true
+    },
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/session_end.py",
+      "sha256": "9e68f6ff23f0cc994ce33dc08c483b3db2bebac50862a0097ee147e326f1c053",
+      "executable": true
+    },
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/recall.py",
+      "sha256": "2400ba0e870a5d54a50d6ebd0632e17faabbc9cb134b87bad347e74b2dc7fbec",
+      "executable": true
+    },
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/retain.py",
+      "sha256": "3236e33db8d965f21ebe82dd34128f045d260eef3ea78d42e72ab610b4488fe1",
+      "executable": true
+    },
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/mcp_server.py",
+      "sha256": "cef7699e74f2c90b6ee8281c27db7030294af494bdc329d2486254280bac41b1",
+      "executable": false
+    },
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/run_mcp.sh",
+      "sha256": "68d70c277b90d8c8cd31c10555255062df701f2f9ad727441cd166282c013a98",
+      "executable": true
+    },
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/lib/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "executable": false
+    },
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/lib/bank.py",
+      "sha256": "5419d6f4d320b7e730c846f259bfab494ff7fe31427d67a5d65c2ca675af1b83",
+      "executable": false
+    },
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/lib/client.py",
+      "sha256": "7b1658d520e2f2a97b8ee79cb0df2b0ef250f05802d9ba41f3462212f4fbbc65",
+      "executable": false
+    },
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/lib/config.py",
+      "sha256": "a7a6adc1bb9e2b9d65081b0f00adcd0074cd137efe1a4e8d4595e7e41ec040e7",
+      "executable": false
+    },
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/lib/content.py",
+      "sha256": "dca63f9105dd741e265b3477a0149f35fccb72820986858b0abc70a653f28f7c",
+      "executable": false
+    },
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/lib/daemon.py",
+      "sha256": "6ab78621ba0dda99989d58542ca40966a23de080f4fc79ec1cc02fabed9da51e",
+      "executable": false
+    },
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/lib/llm.py",
+      "sha256": "0525c1ff526a7a45d41ac9e22c98185e08b4e8256745fc1f9ebcf888fcaa0f55",
+      "executable": false
+    },
+    {
+      "path": ".claude/plugins/cache/hindsight/hindsight-memory/0.7.4/scripts/lib/state.py",
+      "sha256": "f01f37f983e860badb84b4885b5178eb381147e5fc5b45eb45a5de16a513ae69",
+      "executable": false
+    }
+  ],
+  "excluded": [
+    "__pycache__",
+    "*.pyc",
+    "runtime data, virtual environments, credentials, trust and sessions"
+  ],
+  "limitations": [
+    "Official integration is deprecated in favor of hindsight-coding-agents; this proposal does not migrate its API or install the successor.",
+    "Choose a maintained runtime source and validate four consumers before applying ownership or connection changes.",
+    "Historical pre-removal files:7 match current cache,10differ; original commit of installed0.7.4 remains unresolved."
+  ],
+  "historical_source": "https://github.com/vectorize-io/hindsight/tree/f8ea2b09ffb5b04645987a34d008255166ef88c9/hindsight-integrations/claude-code",
+  "upstream_path_status": "removed from main in 81232d06222bc1c7076ade19e67b3724277a3e34 on2026-10-23; historical 0.7.6 is not current local0.7.4"
+}

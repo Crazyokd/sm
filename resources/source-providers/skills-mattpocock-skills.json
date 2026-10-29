@@ -1,6 +1,10 @@
 {
   "source": "https://github.com/mattpocock/skills.git",
   "skills": [
-    "grill-me"
+    "grill-me",
+    "improve-codebase-architecture",
+    "codebase-design",
+    "grilling",
+    "domain-modeling"
   ]
 }

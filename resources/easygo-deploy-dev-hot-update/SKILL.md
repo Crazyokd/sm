@@ -14,7 +14,7 @@ Use the actual EasyGo workspace requested by the user. Deploy only when the user
 
 Deploy the exact requested branch, tag, MR head/merge result, or SHA. Use the relevant source repo's `origin/main` when the user requests latest/main; ask if the source version is ambiguous. The EasyGo root ref is not the nested app ref.
 
-Resolve destination tokens using the current SSH configuration (`ssh -G` when useful), without asking the user whether a token is an alias or IP. For robot password login, the existing default is `std` / `SRpasswd@2017`; use `std@<target>` when a username is needed and pass `--passwd` to the deployment script. If key login fails, try this credential path before declaring the target inaccessible. Verify architecture/container from the target; `arm64` / `easygo` are common real-robot defaults.
+Resolve destination tokens using the current SSH configuration (`ssh -G` when useful), without asking the user whether a token is an alias or IP. Use the username configured for the target. Prefer key-based login; when password login is required, obtain the credential from the approved local credential source and pass `--passwd` to the deployment script. Do not store passwords in this Skill or use a hard-coded fallback. Verify architecture/container from the target; `arm64` / `easygo` are common real-robot defaults.
 
 For targets behind intermediate hosts, read [SSH routes](references/ssh-routes.md). Keep the same route, authentication, and port for preflight, deployment, and verification.
 

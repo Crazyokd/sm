@@ -1271,10 +1271,11 @@
     {
       "id": "improve-codebase-architecture",
       "kind": "skill",
-      "payload": "resources/improve-codebase-architecture",
-      "origin": "self",
+      "payload": ".agents/skills/improve-codebase-architecture",
+      "origin": "upstream",
       "scope": "user",
-      "project": null
+      "project": null,
+      "upstream": "skills-mattpocock-skills"
     },
     {
       "id": "lark-approval",
@@ -6068,6 +6069,33 @@
       "upstream": "ecc",
       "scope": "project",
       "project": "pipeline-studio"
+    },
+    {
+      "id": "codebase-design",
+      "kind": "skill",
+      "payload": ".agents/skills/codebase-design",
+      "origin": "upstream",
+      "upstream": "skills-mattpocock-skills",
+      "scope": "user",
+      "project": null
+    },
+    {
+      "id": "grilling",
+      "kind": "skill",
+      "payload": ".agents/skills/grilling",
+      "origin": "upstream",
+      "upstream": "skills-mattpocock-skills",
+      "scope": "user",
+      "project": null
+    },
+    {
+      "id": "domain-modeling",
+      "kind": "skill",
+      "payload": ".agents/skills/domain-modeling",
+      "origin": "upstream",
+      "upstream": "skills-mattpocock-skills",
+      "scope": "user",
+      "project": null
     }
   ]
 }
