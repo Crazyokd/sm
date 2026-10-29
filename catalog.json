@@ -64,13 +64,6 @@
         "resources/source-providers/skills-github-awesome-copilot.json"
       ]
     },
-    "skills-juliusbrussee-caveman": {
-      "argv": [
-        "@sm",
-        "source-skills",
-        "resources/source-providers/skills-juliusbrussee-caveman.json"
-      ]
-    },
     "skills-mattpocock-skills": {
       "argv": [
         "@sm",
@@ -1042,69 +1035,6 @@
       "payload": ".agents/skills/browser-harness",
       "origin": "upstream",
       "upstream": "skills-browser-use-browser-harness",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "cavecrew",
-      "kind": "skill",
-      "payload": ".agents/skills/cavecrew",
-      "origin": "upstream",
-      "upstream": "skills-juliusbrussee-caveman",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "caveman",
-      "kind": "skill",
-      "payload": ".agents/skills/caveman",
-      "origin": "upstream",
-      "upstream": "skills-juliusbrussee-caveman",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "caveman-commit",
-      "kind": "skill",
-      "payload": ".agents/skills/caveman-commit",
-      "origin": "upstream",
-      "upstream": "skills-juliusbrussee-caveman",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "caveman-compress",
-      "kind": "skill",
-      "payload": ".agents/skills/caveman-compress",
-      "origin": "upstream",
-      "upstream": "skills-juliusbrussee-caveman",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "caveman-help",
-      "kind": "skill",
-      "payload": ".agents/skills/caveman-help",
-      "origin": "upstream",
-      "upstream": "skills-juliusbrussee-caveman",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "caveman-review",
-      "kind": "skill",
-      "payload": ".agents/skills/caveman-review",
-      "origin": "upstream",
-      "upstream": "skills-juliusbrussee-caveman",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "caveman-stats",
-      "kind": "skill",
-      "payload": ".agents/skills/caveman-stats",
-      "origin": "upstream",
-      "upstream": "skills-juliusbrussee-caveman",
       "scope": "user",
       "project": null
     },
@@ -2754,32 +2684,6 @@
             "codex",
             "https://github.com/DietrichGebert/ponytail.git",
             "ponytail@ponytail",
-            "${SM_ENABLED}"
-          ]
-        ]
-      },
-      "origin": "self",
-      "scope": "user",
-      "project": null
-    },
-    {
-      "id": "codex-caveman-caveman",
-      "kind": "policy",
-      "installation": {
-        "agent": "codex",
-        "source": "https://github.com/JuliusBrussee/caveman.git",
-        "selector": "caveman@caveman",
-        "enabled": true,
-        "paths": [
-          "~/.codex/plugins/cache/caveman/caveman"
-        ],
-        "update": [
-          [
-            "node",
-            "resources/source-providers/native-plugins.js",
-            "codex",
-            "https://github.com/JuliusBrussee/caveman.git",
-            "caveman@caveman",
             "${SM_ENABLED}"
           ]
         ]

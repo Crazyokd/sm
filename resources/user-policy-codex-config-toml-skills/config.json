@@ -19,34 +19,6 @@
       },
       {
         "enabled": false,
-        "name": "cavecrew"
-      },
-      {
-        "enabled": false,
-        "name": "caveman"
-      },
-      {
-        "enabled": false,
-        "name": "caveman-commit"
-      },
-      {
-        "enabled": false,
-        "name": "caveman-compress"
-      },
-      {
-        "enabled": false,
-        "name": "caveman-help"
-      },
-      {
-        "enabled": false,
-        "name": "caveman-review"
-      },
-      {
-        "enabled": false,
-        "name": "caveman-stats"
-      },
-      {
-        "enabled": false,
         "name": "lark-approval"
       },
       {
