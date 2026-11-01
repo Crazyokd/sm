@@ -8,7 +8,7 @@ Make resource usage evidence explicit, attributable, and useful for later optimi
 
 - Record resource lifecycle signals with stable resource, turn, and invocation identifiers.
 - Distinguish native activation from file reads, tool execution, and path inference.
-- Preserve backward compatibility with existing JSONL events and SQLite observations.
+- Treat the telemetry event schema as the current unreleased local schema.
 - Expose bounded usage summaries through SM health/status and the existing activity view.
 - Keep the hot path local, append-only, redacted, and free of network or model calls.
 
@@ -22,7 +22,7 @@ Make resource usage evidence explicit, attributable, and useful for later optimi
 
 ## Data model
 
-Every new observation may carry `signal`, `detected_from`, `confidence`, `turn_id`, `invocation_id`, and `parent_invocation_id`. Existing observations deserialize through defaults.
+Every observation carries `signal`, `detected_from`, `confidence`, `turn_id`, `invocation_id`, and `parent_invocation_id`.
 
 The usage summary reports total observations, attributed observations, confidence counts, signal counts, and per-resource activation/load/tool/completion/failure counts for a bounded window.
 
@@ -37,7 +37,7 @@ The usage summary reports total observations, attributed observations, confidenc
 
 1. Replayed explicit activation events produce high-confidence activation observations with correlation IDs.
 2. Unique active-path matches produce low-confidence observations and ambiguous paths remain unattributed.
-3. Existing event files and observations remain readable.
+3. The current event schema is strict; malformed or older records are rejected instead of silently reclassified.
 4. Usage summaries distinguish activation from generic tool execution and expose attribution coverage.
 5. Health, status, diagnostics, and the activity page expose the same summary.
 6. Tests cover duplicate IDs, failed activation, nested correlation, upstream exclusion, and retention-window aggregation.

@@ -29,7 +29,7 @@ fn state(root: &Path) -> State {
     state
 }
 fn envelope(id: &str, timestamp: &str) -> String {
-    json!({"id":id,"agent":"codex","timestamp":timestamp,"payload":{"resource_id":"review","event":"Stop"}}).to_string() + "\n"
+    json!({"id":id,"agent":"codex","timestamp":timestamp,"payload":{"resource_id":"review","event":"Stop"},"resource_id":"review","resource_content_hash":null,"detected_from":"explicit"}).to_string() + "\n"
 }
 fn day(days: i64) -> String {
     (Utc::now() - Duration::days(days)).date_naive().to_string()

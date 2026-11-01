@@ -74,17 +74,11 @@ pub struct Observation {
     pub resource_id: Option<String>,
     pub resource_content_hash: Option<String>,
     pub evidence_kind: EvidenceKind,
-    #[serde(default)]
     pub signal: ResourceSignal,
-    #[serde(default)]
     pub detected_from: DetectionSource,
-    #[serde(default)]
     pub confidence: Confidence,
-    #[serde(default)]
     pub turn_id: Option<String>,
-    #[serde(default)]
     pub invocation_id: Option<String>,
-    #[serde(default)]
     pub parent_invocation_id: Option<String>,
     pub facts: Map<String, Value>,
     pub coverage: Coverage,
@@ -501,7 +495,6 @@ struct Envelope {
     resource_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     resource_content_hash: Option<String>,
-    #[serde(default)]
     detected_from: DetectionSource,
 }
 pub fn record_event(agent: Client, payload: &Value, directory: &Path) -> Result<()> {
@@ -705,19 +698,7 @@ pub fn ingest_events(directory: &Path, state: &State) -> Result<Vec<Observation>
                 let evidence_kind = evidence_kind(&envelope.payload);
                 let signal = resource_signal(&envelope.payload);
                 let detected_from = if observed {
-                    match envelope.detected_from {
-                        DetectionSource::Unattributed
-                            if envelope
-                                .payload
-                                .resource_id
-                                .as_deref()
-                                .and_then(|id| resources.get(id))
-                                .is_some() =>
-                        {
-                            DetectionSource::Explicit
-                        }
-                        source => source,
-                    }
+                    envelope.detected_from
                 } else {
                     DetectionSource::Unattributed
                 };
@@ -814,12 +795,14 @@ pub fn resource_usage_summary(
     let mut resources = BTreeMap::<String, ResourceUsage>::new();
     for text in statement.query_map([], |row| row.get::<_, String>(0))? {
         let observation: Observation = serde_json::from_str(&text?)?;
-        let timestamp = match observation_timestamp(&observation.timestamp) {
-            Some(timestamp) if timestamp >= cutoff => timestamp,
+        let timestamp = match chrono::DateTime::parse_from_rfc3339(&observation.timestamp) {
+            Ok(timestamp) if timestamp.with_timezone(&chrono::Utc) >= cutoff => timestamp,
             _ => continue,
         };
+        let signal = observation.signal;
+        let observation_confidence = observation.confidence;
         summary.observations = summary.observations.saturating_add(1);
-        match observation.confidence {
+        match observation_confidence {
             Confidence::High => summary.high_confidence = summary.high_confidence.saturating_add(1),
             Confidence::Medium => {
                 summary.medium_confidence = summary.medium_confidence.saturating_add(1)
@@ -838,7 +821,7 @@ pub fn resource_usage_summary(
                 ..Default::default()
             });
         usage.observations = usage.observations.saturating_add(1);
-        match observation.signal {
+        match signal {
             ResourceSignal::Activation => usage.activations = usage.activations.saturating_add(1),
             ResourceSignal::Load => usage.loads = usage.loads.saturating_add(1),
             ResourceSignal::ToolExecution | ResourceSignal::Failure => {
@@ -847,12 +830,12 @@ pub fn resource_usage_summary(
             ResourceSignal::Completion => usage.completions = usage.completions.saturating_add(1),
             ResourceSignal::Unknown => {}
         }
-        if observation.signal == ResourceSignal::Failure
+        if signal == ResourceSignal::Failure
             || observation.facts.get("outcome").and_then(Value::as_str) == Some("failure")
         {
             usage.failures = usage.failures.saturating_add(1);
         }
-        match observation.confidence {
+        match observation_confidence {
             Confidence::High => usage.high_confidence = usage.high_confidence.saturating_add(1),
             Confidence::Medium => {
                 usage.medium_confidence = usage.medium_confidence.saturating_add(1)
@@ -880,17 +863,6 @@ pub fn resource_usage_summary(
             .then_with(|| left.resource_id.cmp(&right.resource_id))
     });
     Ok(summary)
-}
-fn observation_timestamp(text: &str) -> Option<chrono::DateTime<chrono::Utc>> {
-    chrono::DateTime::parse_from_rfc3339(text)
-        .ok()
-        .map(|time| time.with_timezone(&chrono::Utc))
-        .or_else(|| {
-            chrono::NaiveDate::parse_from_str(text, "%Y-%m-%d")
-                .ok()?
-                .and_hms_opt(0, 0, 0)
-                .map(|time| time.and_utc())
-        })
 }
 pub fn pending_observations(state: &State, limit: usize) -> Result<Vec<Observation>> {
     let db = state.connect()?;

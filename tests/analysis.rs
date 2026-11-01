@@ -130,7 +130,7 @@ fn fixture() -> (TempDir, Catalog, Observation, Value) {
     fs::write(root.path().join("resources/review/evals.json"),json!({"required":["Verify result"],"forbidden":["Read config again","Resolve entry again"]}).to_string()).unwrap();
     fs::write(root.path().join("catalog.json"),json!({"projects":{"app":"~/repo/app"},"resources":[{"id":"review","kind":"skill","origin":"self","scope":"user","project":null,"payload":"resources/review"}]}).to_string()).unwrap();
     let catalog = Catalog::load(root.path()).unwrap();
-    let observation=serde_json::from_value(json!({"id":"event-1","agent":"codex","session_id":"one-session","cwd":"/repo","event":"PostToolUse","timestamp":"2026-10-21","resource_id":"review","facts":{"tool_input":{"command":"Read config twice; resolve entry twice"}},"coverage":"observed","evidence_kind":"execution"})).unwrap();
+    let observation=serde_json::from_value(json!({"id":"event-1","agent":"codex","session_id":"one-session","cwd":"/repo","event":"PostToolUse","timestamp":"2026-10-21T00:00:00Z","resource_id":"review","resource_content_hash":null,"evidence_kind":"tool_execution","signal":"tool_execution","detected_from":"explicit","confidence":"medium","turn_id":null,"invocation_id":null,"parent_invocation_id":null,"facts":{"tool_input":{"command":"Read config twice; resolve entry twice"}},"coverage":"observed"})).unwrap();
     let reply = json!({"candidates":[{"resource_id":"review","issue":"Two redundant steps","evidence":["event-1"],"changes":[{"path":"resources/review/SKILL.md","content":AFTER}],"expected_checks":["Keep verification"]}]});
     (root, catalog, observation, reply)
 }

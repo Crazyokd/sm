@@ -4,7 +4,7 @@
 
 **Goal:** Add a local, confidence-aware resource telemetry protocol and usage summary to SM.
 
-**Architecture:** Extend the existing JSONL observation envelope and SQLite-backed observations with backward-compatible lifecycle and attribution fields. Derive bounded summaries from stored observations and surface them through health/status/diagnostics and the existing activity page.
+**Architecture:** Extend the current JSONL observation envelope and SQLite-backed observations with strict lifecycle and attribution fields. Derive bounded summaries from stored observations and surface them through health/status/diagnostics and the existing activity page.
 
 **Tech Stack:** Rust 2024, serde/serde_json, rusqlite, chrono, existing Axum/minijinja web UI.
 
@@ -13,7 +13,7 @@
 ## Global Constraints
 
 - Keep the hook hot path local and non-blocking with respect to external services.
-- Preserve existing observation JSON and SQLite compatibility through serde defaults.
+- Use the current unreleased observation schema strictly; do not add compatibility readers.
 - Redact and bound event payloads; never persist raw prompt/tool output/file content.
 - Do not analyze or mutate upstream resource content.
 - Do not add an external telemetry dependency in this phase.
@@ -22,7 +22,7 @@
 
 - Explicit activation with a valid self resource must outrank path inference and retain correlation IDs.
 - Shared or ambiguous paths must remain unattributed instead of being guessed.
-- Historical rows without new fields must deserialize and contribute to summaries safely.
+- Records missing the new telemetry fields must fail validation rather than silently changing evidence quality.
 - Retired or upstream IDs must not become self-resource optimization evidence.
 - A failed or truncated event must remain visible in health and usage quality counters.
 
@@ -33,12 +33,12 @@
 - Test: `tests/observations.rs`
 
 **Interfaces:**
-- Produces backward-compatible `Observation` fields for signal, attribution source, confidence, turn ID, invocation ID, and parent invocation ID.
+- Produces strict `Observation` fields for signal, attribution source, confidence, turn ID, invocation ID, and parent invocation ID.
 - Produces deterministic classification helpers for lifecycle signals and attribution confidence.
 
 - [x] Write failing tests for explicit activation, path inference, ambiguous paths, and nested correlation IDs.
 - [x] Run the focused observation tests and verify they fail for missing fields/classification.
-- [x] Implement typed enums, default deserialization, payload extraction, and classification in `src/observe.rs`.
+- [x] Implement typed enums, strict deserialization, payload extraction, and classification in `src/observe.rs`.
 - [x] Run the focused tests and verify they pass.
 
 ### Task 2: Bounded usage summary
@@ -54,7 +54,7 @@
 
 - [x] Write failing tests for activation/load/tool/completion/failure counts and the retention window.
 - [x] Run the focused tests and verify they fail.
-- [x] Implement bounded SQLite-backed aggregation with stable sorting and historical-row defaults.
+- [x] Implement bounded SQLite-backed aggregation with stable sorting.
 - [x] Add the summary to diagnostics health and verify tests pass.
 
 ### Task 3: Status and activity visibility

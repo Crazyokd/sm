@@ -349,7 +349,7 @@ fn later_analysis_batch_failure_keeps_the_selection_pending_for_a_complete_retry
     let db = state.connect().unwrap();
     let ids: Vec<_> = (0..8).map(|index| format!("batch-event-{index}")).collect();
     for id in &ids {
-        let row = json!({"id":id,"agent":"codex","session_id":"session","cwd":"/repo","event":"PostToolUse","timestamp":"2026-10-26","resource_id":"review","facts":{"text":"x".repeat(180_000)},"coverage":"observed","evidence_kind":"execution"});
+        let row = json!({"id":id,"agent":"codex","session_id":"session","cwd":"/repo","event":"PostToolUse","timestamp":"2026-10-26T00:00:00Z","resource_id":"review","resource_content_hash":null,"evidence_kind":"tool_execution","signal":"tool_execution","detected_from":"explicit","confidence":"medium","turn_id":null,"invocation_id":null,"parent_invocation_id":null,"facts":{"text":"x".repeat(180_000)},"coverage":"observed"});
         db.execute(
             "INSERT INTO observations(id,value,processed) VALUES (?1,?2,0)",
             [id, &row.to_string()],

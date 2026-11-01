@@ -1,4 +1,3 @@
-use rusqlite::params;
 use serde_json::json;
 use sm::{
     model::{Catalog, Client, Resource},
@@ -210,35 +209,6 @@ fn usage_summary_separates_activation_from_tool_and_failure_signals() {
 }
 
 #[test]
-fn usage_summary_accepts_legacy_date_only_timestamps() {
-    let root = tempdir().unwrap();
-    let state = state(root.path());
-    let legacy = json!({
-        "id":"legacy-date",
-        "agent":"codex",
-        "session_id":"legacy",
-        "cwd":"/repo",
-        "event":"SkillActivated",
-        "timestamp":chrono::Utc::now().format("%Y-%m-%d").to_string(),
-        "resource_id":"review",
-        "resource_content_hash":null,
-        "evidence_kind":"native_activation",
-        "facts":{},
-        "coverage":"observed"
-    });
-    state
-        .connect()
-        .unwrap()
-        .execute(
-            "INSERT INTO observations(id,value,processed) VALUES (?1,?2,0)",
-            params!["legacy-date", legacy.to_string()],
-        )
-        .unwrap();
-    let summary = resource_usage_summary(&state, chrono::Duration::days(7)).unwrap();
-    assert_eq!(summary.observations, 1);
-    assert_eq!(summary.resources[0].observations, 1);
-}
-#[test]
 fn complete_bad_records_are_skipped_and_partial_record_is_retained() {
     let root = tempdir().unwrap();
     let state = state(root.path());
@@ -258,7 +228,7 @@ fn complete_bad_records_are_skipped_and_partial_record_is_retained() {
     let mut stream = fs::OpenOptions::new().append(true).open(&file).unwrap();
     stream
         .write_all(
-            b"{\"id\":\"partial\",\"agent\":\"codex\",\"timestamp\":\"2026-10-21\",\"payload\":{}",
+            b"{\"id\":\"partial\",\"agent\":\"codex\",\"timestamp\":\"2026-10-21T00:00:00Z\",\"payload\":{},\"resource_id\":null,\"resource_content_hash\":null,\"detected_from\":\"unattributed\"",
         )
         .unwrap();
     assert!(ingest_events(root.path(), &state).unwrap().is_empty());
