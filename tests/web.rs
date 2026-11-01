@@ -666,6 +666,26 @@ async fn observation_counts_are_not_reported_as_usage_frequency_or_retirement() 
     assert!(page.contains("2 条") && page.contains("1 个"));
     assert!(page.contains("不等于调用次数"));
 }
+
+#[tokio::test]
+async fn activity_exposes_activation_and_attribution_confidence() {
+    let f = Fixture::new();
+    record_event(
+        sm::model::Client::Codex,
+        &json!({
+            "event":"SkillActivated",
+            "resource_id":"review",
+            "turn_id":"turn-1",
+            "invocation_id":"invocation-1"
+        }),
+        f.state.directory().unwrap(),
+    )
+    .unwrap();
+    ingest_events(f.state.directory().unwrap(), &f.state).unwrap();
+    let page = f.get("/activity").await.1;
+    assert!(page.contains("激活") && page.contains("高 1"));
+    assert!(page.contains("明确 ID") && page.contains("高"));
+}
 #[tokio::test]
 async fn findings_link_actual_evidence_and_related_mr() {
     let f = Fixture::new();

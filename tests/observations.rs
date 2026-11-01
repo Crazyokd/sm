@@ -1,7 +1,11 @@
+use rusqlite::params;
 use serde_json::json;
 use sm::{
     model::{Catalog, Client, Resource},
-    observe::{capture_health, ingest_events, pending_observations, record_event, record_failure},
+    observe::{
+        Confidence, DetectionSource, ResourceSignal, capture_health, ingest_events,
+        pending_observations, record_event, record_failure, resource_usage_summary,
+    },
     privacy::{redact, redact_text},
     state::State,
 };
@@ -62,6 +66,177 @@ fn native_ids_deduplicate_but_legitimate_repeats_remain() {
         .unwrap();
     }
     assert_eq!(ingest_events(root.path(), &state).unwrap().len(), 2);
+}
+
+#[test]
+fn explicit_activation_keeps_lifecycle_and_correlation_metadata() {
+    let root = tempdir().unwrap();
+    let state = state(root.path());
+    record_event(
+        Client::Codex,
+        &json!({
+            "event": "SkillActivated",
+            "resource_id": "review",
+            "turn_id": "turn-1",
+            "invocation_id": "invocation-1",
+            "parent_invocation_id": "parent-1"
+        }),
+        root.path(),
+    )
+    .unwrap();
+    let row = ingest_events(root.path(), &state).unwrap().remove(0);
+    assert_eq!(row.signal, ResourceSignal::Activation);
+    assert_eq!(row.detected_from, DetectionSource::Explicit);
+    assert_eq!(row.confidence, Confidence::High);
+    assert_eq!(row.turn_id.as_deref(), Some("turn-1"));
+    assert_eq!(row.invocation_id.as_deref(), Some("invocation-1"));
+    assert_eq!(row.parent_invocation_id.as_deref(), Some("parent-1"));
+}
+
+#[test]
+fn skill_tool_post_use_is_a_native_activation_signal() {
+    let root = tempdir().unwrap();
+    let state = state(root.path());
+    record_event(
+        Client::Codex,
+        &json!({
+            "event":"PostToolUse",
+            "tool_name":"Skill",
+            "resource_id":"review",
+            "tool_use_id":"tool-1"
+        }),
+        root.path(),
+    )
+    .unwrap();
+    let row = ingest_events(root.path(), &state).unwrap().remove(0);
+    assert_eq!(row.signal, ResourceSignal::Activation);
+    assert_eq!(
+        row.evidence_kind,
+        sm::observe::EvidenceKind::NativeActivation
+    );
+    assert_eq!(row.confidence, Confidence::High);
+    assert_eq!(row.invocation_id.as_deref(), Some("tool-1"));
+}
+
+#[test]
+fn path_inference_is_low_confidence_and_shared_paths_stay_unattributed() {
+    let root = tempdir().unwrap();
+    let state = state(root.path());
+    let mut catalog = state.get::<Catalog>("catalog").unwrap();
+    let mut other = catalog.resources[0].clone();
+    other.id = "other".into();
+    catalog.resources.push(other);
+    state.set("catalog", &catalog).unwrap();
+    fs::write(
+        root.path().join("active.json"),
+        json!({
+            "owned": [
+                {"resource_id":"review","path":"/skills/review/SKILL.md"},
+                {"resource_id":"other","path":"/skills/other/SKILL.md"},
+                {"resource_id":"review","path":"/config/shared.toml"},
+                {"resource_id":"other","path":"/config/shared.toml"}
+            ],
+            "hashes": {"review":"review-hash","other":"other-hash"}
+        })
+        .to_string(),
+    )
+    .unwrap();
+    record_event(
+        Client::Codex,
+        &json!({"event":"FileRead","tool_input":{"path":"/skills/review/SKILL.md"}}),
+        root.path(),
+    )
+    .unwrap();
+    record_event(
+        Client::Codex,
+        &json!({"event":"FileRead","tool_input":{"path":"/config/shared.toml"}}),
+        root.path(),
+    )
+    .unwrap();
+    record_event(
+        Client::Codex,
+        &json!({
+            "event":"FileRead",
+            "resource_id":"invalid id",
+            "tool_input":{"path":"/skills/review/SKILL.md"}
+        }),
+        root.path(),
+    )
+    .unwrap();
+    let rows = ingest_events(root.path(), &state).unwrap();
+    let unique = rows
+        .iter()
+        .find(|row| row.resource_id.as_deref() == Some("review"))
+        .unwrap();
+    assert_eq!(unique.signal, ResourceSignal::Load);
+    assert_eq!(unique.detected_from, DetectionSource::ActivePath);
+    assert_eq!(unique.confidence, Confidence::Low);
+    let shared = rows.iter().find(|row| row.resource_id.is_none()).unwrap();
+    assert_eq!(shared.detected_from, DetectionSource::Unattributed);
+    assert_eq!(shared.confidence, Confidence::Unknown);
+    let recovered = rows
+        .iter()
+        .filter(|row| row.resource_id.as_deref() == Some("review"))
+        .nth(1)
+        .unwrap();
+    assert_eq!(recovered.detected_from, DetectionSource::ActivePath);
+}
+
+#[test]
+fn usage_summary_separates_activation_from_tool_and_failure_signals() {
+    let root = tempdir().unwrap();
+    let state = state(root.path());
+    for event in [
+        json!({"event":"SkillActivated","resource_id":"review","invocation_id":"i-1"}),
+        json!({"event":"PostToolUse","tool_name":"Bash","resource_id":"review","invocation_id":"i-1"}),
+        json!({"event":"PostToolUseFailure","tool_name":"Bash","resource_id":"review","invocation_id":"i-1","error":"failed"}),
+    ] {
+        record_event(Client::Codex, &event, root.path()).unwrap();
+    }
+    ingest_events(root.path(), &state).unwrap();
+    let summary = resource_usage_summary(&state, chrono::Duration::days(7)).unwrap();
+    assert_eq!(summary.observations, 3);
+    assert_eq!(summary.attributed_observations, 3);
+    assert_eq!(summary.high_confidence, 2);
+    assert_eq!(summary.medium_confidence, 1);
+    let row = summary
+        .resources
+        .iter()
+        .find(|row| row.resource_id == "review")
+        .unwrap();
+    assert_eq!(row.activations, 1);
+    assert_eq!(row.tool_executions, 2);
+    assert_eq!(row.failures, 1);
+}
+
+#[test]
+fn usage_summary_accepts_legacy_date_only_timestamps() {
+    let root = tempdir().unwrap();
+    let state = state(root.path());
+    let legacy = json!({
+        "id":"legacy-date",
+        "agent":"codex",
+        "session_id":"legacy",
+        "cwd":"/repo",
+        "event":"SkillActivated",
+        "timestamp":chrono::Utc::now().format("%Y-%m-%d").to_string(),
+        "resource_id":"review",
+        "resource_content_hash":null,
+        "evidence_kind":"native_activation",
+        "facts":{},
+        "coverage":"observed"
+    });
+    state
+        .connect()
+        .unwrap()
+        .execute(
+            "INSERT INTO observations(id,value,processed) VALUES (?1,?2,0)",
+            params!["legacy-date", legacy.to_string()],
+        )
+        .unwrap();
+    let summary = resource_usage_summary(&state, chrono::Duration::days(7)).unwrap();
+    assert_eq!(summary.observations, 1);
+    assert_eq!(summary.resources[0].observations, 1);
 }
 #[test]
 fn complete_bad_records_are_skipped_and_partial_record_is_retained() {

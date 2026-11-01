@@ -35,6 +35,34 @@ pub enum EvidenceKind {
     Execution,
     Inferred,
 }
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq, Ord, PartialOrd)]
+#[serde(rename_all = "snake_case")]
+pub enum ResourceSignal {
+    Activation,
+    Load,
+    ToolExecution,
+    Completion,
+    Failure,
+    #[default]
+    Unknown,
+}
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq, Ord, PartialOrd)]
+#[serde(rename_all = "snake_case")]
+pub enum DetectionSource {
+    Explicit,
+    ActivePath,
+    #[default]
+    Unattributed,
+}
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq, Ord, PartialOrd)]
+#[serde(rename_all = "snake_case")]
+pub enum Confidence {
+    High,
+    Medium,
+    Low,
+    #[default]
+    Unknown,
+}
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Observation {
     pub id: String,
@@ -46,8 +74,46 @@ pub struct Observation {
     pub resource_id: Option<String>,
     pub resource_content_hash: Option<String>,
     pub evidence_kind: EvidenceKind,
+    #[serde(default)]
+    pub signal: ResourceSignal,
+    #[serde(default)]
+    pub detected_from: DetectionSource,
+    #[serde(default)]
+    pub confidence: Confidence,
+    #[serde(default)]
+    pub turn_id: Option<String>,
+    #[serde(default)]
+    pub invocation_id: Option<String>,
+    #[serde(default)]
+    pub parent_invocation_id: Option<String>,
     pub facts: Map<String, Value>,
     pub coverage: Coverage,
+}
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResourceUsage {
+    pub resource_id: String,
+    pub observations: u64,
+    pub activations: u64,
+    pub loads: u64,
+    pub tool_executions: u64,
+    pub completions: u64,
+    pub failures: u64,
+    pub high_confidence: u64,
+    pub medium_confidence: u64,
+    pub low_confidence: u64,
+    pub last_seen: Option<String>,
+}
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResourceUsageSummary {
+    pub window_days: u64,
+    pub since: String,
+    pub observations: u64,
+    pub attributed_observations: u64,
+    pub unattributed_observations: u64,
+    pub high_confidence: u64,
+    pub medium_confidence: u64,
+    pub low_confidence: u64,
+    pub resources: Vec<ResourceUsage>,
 }
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ActiveIndex {
@@ -353,6 +419,63 @@ fn evidence_kind(payload: &HookPayload) -> EvidenceKind {
     }
     EvidenceKind::Unknown
 }
+fn fact_string(payload: &HookPayload, keys: &[&str]) -> Option<String> {
+    keys.iter()
+        .find_map(|key| payload.facts.get(*key).and_then(Value::as_str))
+        .filter(|value| !value.is_empty() && value.len() <= 240)
+        .map(str::to_owned)
+}
+fn resource_signal(payload: &HookPayload) -> ResourceSignal {
+    let event = payload
+        .hook_event_name
+        .as_deref()
+        .or(payload.event.as_deref())
+        .unwrap_or_default();
+    if let Some(signal) = payload.facts.get("resource_event").and_then(Value::as_str) {
+        return match signal {
+            "activation" => ResourceSignal::Activation,
+            "load" => ResourceSignal::Load,
+            "tool" | "tool_execution" => ResourceSignal::ToolExecution,
+            "completion" => ResourceSignal::Completion,
+            "failure" => ResourceSignal::Failure,
+            _ => ResourceSignal::Unknown,
+        };
+    }
+    match event {
+        "SkillActivated" | "SkillInvocation" | "skill_activated" | "skill_activation" => {
+            ResourceSignal::Activation
+        }
+        "ResourceLoaded" | "resource_loaded" | "FileRead" | "file_read" => ResourceSignal::Load,
+        "ResourceCompleted" | "resource_completed" => ResourceSignal::Completion,
+        "PostToolUseFailure" | "post_tool_use_failure" => ResourceSignal::Failure,
+        "PostToolUse" | "ToolResult" | "tool_result" => {
+            if matches!(
+                payload.facts.get("tool_name").and_then(Value::as_str),
+                Some("Skill" | "skill")
+            ) {
+                ResourceSignal::Activation
+            } else if payload.facts.get("outcome").and_then(Value::as_str) == Some("failure") {
+                ResourceSignal::Failure
+            } else {
+                ResourceSignal::ToolExecution
+            }
+        }
+        _ => ResourceSignal::Unknown,
+    }
+}
+fn confidence(source: DetectionSource, signal: ResourceSignal) -> Confidence {
+    match source {
+        DetectionSource::Explicit => match signal {
+            ResourceSignal::Activation
+            | ResourceSignal::Load
+            | ResourceSignal::Completion
+            | ResourceSignal::Failure => Confidence::High,
+            ResourceSignal::ToolExecution | ResourceSignal::Unknown => Confidence::Medium,
+        },
+        DetectionSource::ActivePath => Confidence::Low,
+        DetectionSource::Unattributed => Confidence::Unknown,
+    }
+}
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct HookPayload {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -378,6 +501,8 @@ struct Envelope {
     resource_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     resource_content_hash: Option<String>,
+    #[serde(default)]
+    detected_from: DetectionSource,
 }
 pub fn record_event(agent: Client, payload: &Value, directory: &Path) -> Result<()> {
     if internal_run() {
@@ -431,7 +556,11 @@ pub fn record_event(agent: Client, payload: &Value, directory: &Path) -> Result<
             .filter(|id| id.len() <= 240 && valid_id(id))
             .map(|id| redact_text(id, Some(240))),
         resource_content_hash: None,
+        detected_from: DetectionSource::Unattributed,
     };
+    if envelope.resource_id.is_some() {
+        envelope.detected_from = DetectionSource::Explicit;
+    }
     let active = directory.join("active.json");
     reject_symlink_path(&active)?;
     if active.is_file() {
@@ -453,6 +582,7 @@ pub fn record_event(agent: Client, payload: &Value, directory: &Path) -> Result<
                 let id = matches.into_iter().next().expect("one matched resource");
                 envelope.resource_id = Some(id.clone());
                 envelope.resource_content_hash = index.hashes.get(id).cloned();
+                envelope.detected_from = DetectionSource::ActivePath;
             }
         }
     }
@@ -573,20 +703,60 @@ pub fn ingest_events(directory: &Path, state: &State) -> Result<Vec<Observation>
                     .clone();
                 let observed = resource_id.is_some();
                 let evidence_kind = evidence_kind(&envelope.payload);
+                let signal = resource_signal(&envelope.payload);
+                let detected_from = if observed {
+                    match envelope.detected_from {
+                        DetectionSource::Unattributed
+                            if envelope
+                                .payload
+                                .resource_id
+                                .as_deref()
+                                .and_then(|id| resources.get(id))
+                                .is_some() =>
+                        {
+                            DetectionSource::Explicit
+                        }
+                        source => source,
+                    }
+                } else {
+                    DetectionSource::Unattributed
+                };
+                let confidence = confidence(detected_from, signal);
+                let session_id = envelope.payload.session_id.clone().unwrap_or_default();
+                let cwd = envelope.payload.cwd.clone().unwrap_or_default();
+                let event = envelope
+                    .payload
+                    .hook_event_name
+                    .clone()
+                    .or_else(|| envelope.payload.event.clone())
+                    .unwrap_or_else(|| "unknown".into());
                 Ok(Some(Observation {
                     id: envelope.id,
                     agent: envelope.agent,
-                    session_id: envelope.payload.session_id.unwrap_or_default(),
-                    cwd: envelope.payload.cwd.unwrap_or_default(),
-                    event: envelope
-                        .payload
-                        .hook_event_name
-                        .or(envelope.payload.event)
-                        .unwrap_or_else(|| "unknown".into()),
+                    session_id,
+                    cwd,
+                    event,
                     timestamp: envelope.timestamp,
                     resource_id,
                     resource_content_hash: envelope.resource_content_hash,
                     evidence_kind,
+                    signal,
+                    detected_from,
+                    confidence,
+                    turn_id: fact_string(&envelope.payload, &["turn_id", "turnId"]),
+                    invocation_id: fact_string(
+                        &envelope.payload,
+                        &[
+                            "invocation_id",
+                            "skill_invocation_id",
+                            "tool_use_id",
+                            "tool_call_id",
+                        ],
+                    ),
+                    parent_invocation_id: fact_string(
+                        &envelope.payload,
+                        &["parent_invocation_id", "parent_id"],
+                    ),
                     coverage: if observed {
                         Coverage::Observed
                     } else {
@@ -627,6 +797,100 @@ pub fn ingest_events(directory: &Path, state: &State) -> Result<Vec<Observation>
     state.set("event_stamps", &stamps)?;
     state.set("recording_errors", &errors)?;
     Ok(added)
+}
+pub fn resource_usage_summary(
+    state: &State,
+    window: chrono::Duration,
+) -> Result<ResourceUsageSummary> {
+    let now = chrono::Utc::now();
+    let cutoff = now - window;
+    let mut summary = ResourceUsageSummary {
+        window_days: window.num_days().max(0) as u64,
+        since: cutoff.to_rfc3339(),
+        ..Default::default()
+    };
+    let db = state.connect()?;
+    let mut statement = db.prepare("SELECT value FROM observations")?;
+    let mut resources = BTreeMap::<String, ResourceUsage>::new();
+    for text in statement.query_map([], |row| row.get::<_, String>(0))? {
+        let observation: Observation = serde_json::from_str(&text?)?;
+        let timestamp = match observation_timestamp(&observation.timestamp) {
+            Some(timestamp) if timestamp >= cutoff => timestamp,
+            _ => continue,
+        };
+        summary.observations = summary.observations.saturating_add(1);
+        match observation.confidence {
+            Confidence::High => summary.high_confidence = summary.high_confidence.saturating_add(1),
+            Confidence::Medium => {
+                summary.medium_confidence = summary.medium_confidence.saturating_add(1)
+            }
+            Confidence::Low => summary.low_confidence = summary.low_confidence.saturating_add(1),
+            Confidence::Unknown => {}
+        }
+        let Some(resource_id) = observation.resource_id else {
+            continue;
+        };
+        summary.attributed_observations = summary.attributed_observations.saturating_add(1);
+        let usage = resources
+            .entry(resource_id.clone())
+            .or_insert_with(|| ResourceUsage {
+                resource_id,
+                ..Default::default()
+            });
+        usage.observations = usage.observations.saturating_add(1);
+        match observation.signal {
+            ResourceSignal::Activation => usage.activations = usage.activations.saturating_add(1),
+            ResourceSignal::Load => usage.loads = usage.loads.saturating_add(1),
+            ResourceSignal::ToolExecution | ResourceSignal::Failure => {
+                usage.tool_executions = usage.tool_executions.saturating_add(1)
+            }
+            ResourceSignal::Completion => usage.completions = usage.completions.saturating_add(1),
+            ResourceSignal::Unknown => {}
+        }
+        if observation.signal == ResourceSignal::Failure
+            || observation.facts.get("outcome").and_then(Value::as_str) == Some("failure")
+        {
+            usage.failures = usage.failures.saturating_add(1);
+        }
+        match observation.confidence {
+            Confidence::High => usage.high_confidence = usage.high_confidence.saturating_add(1),
+            Confidence::Medium => {
+                usage.medium_confidence = usage.medium_confidence.saturating_add(1)
+            }
+            Confidence::Low => usage.low_confidence = usage.low_confidence.saturating_add(1),
+            Confidence::Unknown => {}
+        }
+        if usage
+            .last_seen
+            .as_deref()
+            .is_none_or(|last| last < observation.timestamp.as_str())
+        {
+            usage.last_seen = Some(timestamp.to_rfc3339());
+        }
+    }
+    summary.unattributed_observations = summary
+        .observations
+        .saturating_sub(summary.attributed_observations);
+    summary.resources = resources.into_values().collect();
+    summary.resources.sort_by(|left, right| {
+        right
+            .activations
+            .cmp(&left.activations)
+            .then_with(|| right.observations.cmp(&left.observations))
+            .then_with(|| left.resource_id.cmp(&right.resource_id))
+    });
+    Ok(summary)
+}
+fn observation_timestamp(text: &str) -> Option<chrono::DateTime<chrono::Utc>> {
+    chrono::DateTime::parse_from_rfc3339(text)
+        .ok()
+        .map(|time| time.with_timezone(&chrono::Utc))
+        .or_else(|| {
+            chrono::NaiveDate::parse_from_str(text, "%Y-%m-%d")
+                .ok()?
+                .and_hms_opt(0, 0, 0)
+                .map(|time| time.and_utc())
+        })
 }
 pub fn pending_observations(state: &State, limit: usize) -> Result<Vec<Observation>> {
     let db = state.connect()?;

@@ -3,7 +3,7 @@ use crate::{
         ApplyStatus, Catalog, Client, Resource, ResourceContent, ResourceKind, ResourceResult,
         Scope, Source, UpstreamSource,
     },
-    observe::{Coverage, Observation, RecordingError},
+    observe::{Confidence, Coverage, DetectionSource, Observation, RecordingError, ResourceSignal},
     privacy::redact_text,
     proposals::{ChangeSet, Proposal},
     service::{Busy, Finding, JobGuard, NativeSubmitter, Runtime, Submitter, synchronize},
@@ -1051,6 +1051,9 @@ struct EventView {
     event: String,
     coverage: Coverage,
     evidence_kind: crate::observe::EvidenceKind,
+    signal: ResourceSignal,
+    detected_from: DetectionSource,
+    confidence: Confidence,
     outcome: Option<String>,
     duration_ms: Option<f64>,
     excerpt: String,
@@ -1061,6 +1064,11 @@ struct Usage {
     sessions: u64,
     retired_events: u64,
     last_seen_label: String,
+    activations: u64,
+    high_confidence: u64,
+    medium_confidence: u64,
+    low_confidence: u64,
+    window_days: u64,
 }
 #[derive(Serialize)]
 struct UsageView {
@@ -1101,19 +1109,27 @@ async fn activity(WebState(context): WebState<Shared>) -> WebResult<Html<String>
                 id: row.id, time_label: time_label(&row.timestamp), agent: row.agent,
                 resource_id: row.resource_id, event: row.event, coverage: row.coverage,
                 evidence_kind: row.evidence_kind,
+                signal: row.signal, detected_from: row.detected_from, confidence: row.confidence,
                 outcome: row.facts.get("outcome").and_then(serde_json::Value::as_str).map(str::to_owned),
                 duration_ms: row.facts.get("duration_ms").and_then(serde_json::Value::as_f64),
                 excerpt: redact_text(excerpt, Some(180)),
             });
         }
+        let health = crate::diagnostics::health(&context.state)?;
+        let resource_usage: BTreeMap<_, _> = health
+            .resource_usage
+            .resources
+            .into_iter()
+            .map(|usage| (usage.resource_id.clone(), usage))
+            .collect();
         let mut counts = BTreeMap::new();
         let mut query = db.prepare("SELECT json_extract(value,'$.resource_id'),COUNT(*),COUNT(DISTINCT NULLIF(json_extract(value,'$.session_id'),'')),MAX(json_extract(value,'$.timestamp')) FROM observations GROUP BY 1")?;
         for row in query.query_map([], |row| Ok((row.get::<_, Option<String>>(0)?, row.get::<_, u64>(1)?, row.get::<_, u64>(2)?, row.get::<_, String>(3)?)))? {
             let (id, events, sessions, last_seen) = row?;
-            if let Some(id) = id { counts.insert(id, Usage { events, sessions, retired_events: 0, last_seen_label: time_label(&last_seen) }); }
+            if let Some(id) = id { counts.insert(id, Usage { events, sessions, retired_events: 0, last_seen_label: time_label(&last_seen), activations: 0, high_confidence: 0, medium_confidence: 0, low_confidence: 0, window_days: 0 }); }
         }
         for (id, total) in context.state.get::<BTreeMap<String, crate::retention::UsageTotal>>("usage_totals")? {
-            let usage = counts.entry(id).or_insert(Usage { events: 0, sessions: 0, retired_events: 0, last_seen_label: String::new() });
+            let usage = counts.entry(id).or_insert(Usage { events: 0, sessions: 0, retired_events: 0, last_seen_label: String::new(), activations: 0, high_confidence: 0, medium_confidence: 0, low_confidence: 0, window_days: 0 });
             usage.events = usage.events.saturating_add(total.events);
             usage.retired_events = total.events;
             if let Some(last) = total.last_seen {
@@ -1122,14 +1138,35 @@ async fn activity(WebState(context): WebState<Shared>) -> WebResult<Html<String>
             }
         }
         let usage = rows.into_iter().filter(|r| r.resource.source.is_self()).map(|resource| {
-            let usage = counts.remove(&resource.resource.id); UsageView { resource, usage }
+            let mut usage = counts.remove(&resource.resource.id);
+            if let Some(summary) = resource_usage.get(&resource.resource.id) {
+                let current = usage.get_or_insert_with(|| Usage {
+                    events: summary.observations,
+                    sessions: 0,
+                    retired_events: 0,
+                    last_seen_label: summary.last_seen.as_deref().map(time_label).unwrap_or_default(),
+                    activations: 0,
+                    high_confidence: 0,
+                    medium_confidence: 0,
+                    low_confidence: 0,
+                    window_days: health.resource_usage.window_days,
+                });
+                current.activations = summary.activations;
+                current.high_confidence = summary.high_confidence;
+                current.medium_confidence = summary.medium_confidence;
+                current.low_confidence = summary.low_confidence;
+                current.window_days = health.resource_usage.window_days;
+            }
+            if let Some(current) = usage.as_mut() {
+                current.window_days = health.resource_usage.window_days;
+            }
+            UsageView { resource, usage }
         }).collect();
         let mut findings = Vec::new();
         for finding in context.state.get::<Vec<Finding>>("findings")? {
             let proposals = proposals_for(&context.state, &finding.resource_id)?;
             findings.push(FindingView { finding, proposals });
         }
-        let health = crate::diagnostics::health(&context.state)?;
         render(&context, "activity.html", &ActivityPage {
             base, events, findings, usage, recording_errors: health.parsing_errors,
             pending_raw_bytes: health.pending_raw_bytes, pending_observations: health.pending_observations,

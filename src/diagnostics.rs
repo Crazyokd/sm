@@ -1,7 +1,9 @@
 use crate::{
     files::reject_symlink_path,
     model::ResourceResult,
-    observe::{CaptureHealth, RecordingError, capture_health},
+    observe::{
+        CaptureHealth, RecordingError, ResourceUsageSummary, capture_health, resource_usage_summary,
+    },
     privacy::{redact, redact_text},
     process::run_command,
     retention::{RetentionHealth, summary},
@@ -39,6 +41,7 @@ pub struct Health {
     pub processed_observations: u64,
     pub parsing_errors: Vec<RecordingError>,
     pub storage: Storage,
+    pub resource_usage: ResourceUsageSummary,
 }
 
 pub fn health(state: &State) -> Result<Health> {
@@ -69,6 +72,10 @@ pub fn health(state: &State) -> Result<Health> {
             events_bytes: retention.raw_bytes,
             total_bytes,
         },
+        resource_usage: resource_usage_summary(
+            state,
+            chrono::Duration::days(retention.retention_days as i64),
+        )?,
         retention,
     })
 }
