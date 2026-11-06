@@ -16,7 +16,7 @@ use std::{
     fs,
     path::{Path, PathBuf},
     process::Command,
-    time::Duration,
+    time::{Duration, Instant},
 };
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -423,7 +423,9 @@ impl AgentRunner for CliRunner {
                     name: String,
                 }
                 let servers: Vec<Server> = serde_json::from_slice(
-                    &run_command(listing, None, Duration::from_secs(30))?.stdout,
+                    &run_command(listing, None, Duration::from_secs(30))
+                        .context("Codex MCP listing failed")?
+                        .stdout,
                 )?;
                 let mut overrides = Vec::new();
                 for server in servers {
@@ -447,6 +449,7 @@ impl AgentRunner for CliRunner {
                 command
                     .args([
                         "exec",
+                        "--json",
                         "--sandbox",
                         "read-only",
                         "--ephemeral",
@@ -463,8 +466,29 @@ impl AgentRunner for CliRunner {
                     .arg(temporary.path())
                     .arg("-")
                     .current_dir(temporary.path())
-                    .env("SM_INTERNAL_RUN", "1");
-                run_command(command, Some(prompt.as_bytes()), Duration::from_secs(300))?;
+                    .env("SM_INTERNAL_RUN", "1")
+                    .env("RUST_BACKTRACE", "1");
+                let started = Instant::now();
+                run_command(command, Some(prompt.as_bytes()), Duration::from_secs(300)).map_err(
+                    |error| {
+                        let elapsed_ms = started.elapsed().as_millis();
+                        let mut version = Command::new(&self.executable);
+                        version.arg("--version").env("SM_INTERNAL_RUN", "1");
+                        let version = run_command(version, None, Duration::from_secs(5))
+                            .map(|output| {
+                                redact_text(
+                                    String::from_utf8_lossy(&output.stdout).trim(),
+                                    Some(80),
+                                )
+                            })
+                            .unwrap_or_else(|_| "unavailable".into());
+                        error.context(format!(
+                            "Codex analysis failed ({version}, {} input bytes, {} ms)",
+                            prompt.len(),
+                            elapsed_ms
+                        ))
+                    },
+                )?;
                 serde_json::from_slice(&fs::read(output)?).context("invalid Codex analysis reply")
             }
             Client::Kimi => {

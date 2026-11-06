@@ -452,6 +452,63 @@ fn resource_hash_tracks_paths_and_content() {
     assert_ne!(changed, content_hash(resource).unwrap());
 }
 #[test]
+fn codex_failures_identify_listing_and_analysis_with_input_and_version() {
+    use std::os::unix::fs::PermissionsExt;
+    let root = tempdir().unwrap();
+    for listing_fails in [true, false] {
+        let cli = root.path().join("codex");
+        let listing = if listing_fails {
+            "printf 'listing unavailable\\n' >&2; exit 5"
+        } else {
+            "printf '[]'; exit 0"
+        };
+        fs::write(&cli, format!("#!/bin/sh\ncase \" $* \" in *' --version '*) printf 'codex-cli fixture'; exit 0;; *' mcp list '*) {listing};; esac\ncat >/dev/null\nprintf 'analysis unavailable\\n' >&2\nexit 7\n")).unwrap();
+        fs::set_permissions(&cli, fs::Permissions::from_mode(0o700)).unwrap();
+        let error = format!(
+            "{:#}",
+            CliRunner::new(Client::Codex, cli)
+                .run("evidence")
+                .unwrap_err()
+        );
+        if listing_fails {
+            assert!(
+                error.contains("Codex MCP listing failed") && error.contains("listing unavailable"),
+                "{error}"
+            );
+        } else {
+            assert!(
+                error.contains("Codex analysis failed")
+                    && error.contains("codex-cli fixture")
+                    && error.contains("8 input bytes")
+                    && error.contains("analysis unavailable")
+                    && error.contains("exit status: 7"),
+                "{error}"
+            );
+        }
+    }
+}
+
+#[test]
+fn codex_analysis_uses_machine_output_and_reads_the_final_reply_file() {
+    use std::os::unix::fs::PermissionsExt;
+    let root = tempdir().unwrap();
+    let cli = root.path().join("codex");
+    fs::write(&cli, r#"#!/bin/sh
+case " $* " in *' mcp list '*) printf '[]'; exit 0;; esac
+cat >/dev/null
+case " $* " in *' --json '*) ;; *) printf 'failed printing to stderr: Resource temporarily unavailable\n' >&2; exit 101;; esac
+while [ "$#" -gt 0 ]; do if [ "$1" = '--output-last-message' ]; then shift; out=$1; fi; shift; done
+printf '{"type":"thread.started"}\n{"type":"turn.completed"}\n'
+printf '{"candidates":[]}' > "$out"
+"#).unwrap();
+    fs::set_permissions(&cli, fs::Permissions::from_mode(0o700)).unwrap();
+    let reply = CliRunner::new(Client::Codex, cli)
+        .run(&"evidence ".repeat(56000))
+        .unwrap();
+    assert!(reply.candidates.is_empty());
+}
+
+#[test]
 fn native_analysis_runners_have_no_business_tools_and_keep_large_input_off_argv() {
     use std::os::unix::fs::PermissionsExt;
     let root = tempdir().unwrap();

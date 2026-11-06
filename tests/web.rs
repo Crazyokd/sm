@@ -27,6 +27,27 @@ struct Fixture {
     state: State,
     app: axum::Router,
 }
+
+#[tokio::test]
+async fn nightly_history_distinguishes_sync_and_analysis_results() {
+    for (sync_ok, analysis_ok, sync_label, analysis_label) in [
+        (Some(false), Some(true), "需处理", "完成"),
+        (Some(true), Some(false), "完成", "需处理"),
+        (Some(false), None, "需处理", "未运行"),
+        (None, None, "未运行", "未运行"),
+    ] {
+        let f = Fixture::new();
+        f.state.add_run("cycle", &json!({"ok":false,"proposals":[],"details":{"sync_ok":sync_ok,"analysis_ok":analysis_ok,"observations_processed":1000}})).unwrap();
+        let (status, page) = f.get("/jobs").await;
+        assert_eq!(status, StatusCode::OK);
+        assert!(page.contains(&format!("资源同步：{sync_label}")), "{page}");
+        assert!(
+            page.contains(&format!("自动改进：{analysis_label}")),
+            "{page}"
+        );
+        assert!(page.contains("处理 1000 条"));
+    }
+}
 #[tokio::test]
 async fn resource_views_group_upstreams_and_keep_filters_and_self_dependencies_independent() {
     let f = Fixture::new();

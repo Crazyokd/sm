@@ -670,6 +670,8 @@ pub struct SubmittedProposal {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CycleDetails {
     pub application: BTreeMap<String, ResourceResult>,
+    pub sync_ok: Option<bool>,
+    pub analysis_ok: Option<bool>,
     pub observations_processed: usize,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub retention: Option<crate::retention::RetentionReport>,
@@ -711,90 +713,106 @@ pub fn cycle_with(
         run.stage("ingest", None, 0, 1)?;
         ingest_events(state.directory()?, state)?;
         run.stage("fetch_approved", None, 0, 1)?;
+        result.details.sync_ok = Some(false);
         let temporary = tempfile::tempdir()?;
         let source = fetch_approved(&runtime.repo, &temporary.path().join("approved"))?;
         let (catalog, applied) = apply_source_tracked(&source, runtime, state, Some(&mut run))?;
         result.ok = applied.ok();
+        result.details.sync_ok = Some(applied.ok());
         result.details.application = applied.results;
-        let observations = pending_observations(state, 1000)?;
-        if !observations.is_empty() && catalog.resources.iter().any(|r| r.source.is_self()) {
-            run.stage("analysis", None, 0, observations.len())?;
-            let fallback;
-            let runner = match runner {
-                Some(runner) => runner,
-                None => {
-                    fallback = default_runner()?;
-                    &fallback
-                }
-            };
-            let candidates = analyze_observations(&catalog, &observations, runner)?;
-            run.stage("analysis", None, observations.len(), observations.len())?;
-            let total = candidates.len();
-            let mut findings = Vec::new();
-            for (index, candidate) in candidates.into_iter().enumerate() {
-                run.stage("validation", Some(&candidate.resource_id), index, total)?;
-                let proposed = temporary.path().join(format!("candidate-{index}"));
-                copy_tree(&source, &proposed)?;
-                for (path, text) in &candidate.changes {
-                    let path = contained(&proposed, Path::new(path))?;
-                    fs::create_dir_all(path.parent().context("candidate target parent missing")?)?;
-                    fs::write(path, text)?;
-                }
-                let validation = evaluate_candidate(&candidate, &source, &proposed)?;
-                findings.push(Finding {
-                    resource_id: candidate.resource_id.clone(),
-                    issue: candidate.issue.clone(),
-                    evidence: candidate.evidence.clone(),
-                    validation: validation.clone(),
-                });
-                let validation_status = serde_json::to_value(validation.status)?;
-                run.resource_result(
-                    &candidate.resource_id,
-                    validation_status.as_str().unwrap_or("unknown"),
-                    "Candidate validation finished",
-                );
-                run.stage("validation", Some(&candidate.resource_id), index + 1, total)?;
-                if validation.status == ValidationStatus::Failed {
-                    continue;
-                }
-                run.stage("proposal", Some(&candidate.resource_id), index, total)?;
-                let change = to_changeset(&candidate, &validation)?;
-                let mut proposal =
-                    match crate::proposals::create_proposal(&runtime.repo, &change, state) {
-                        Ok(proposal) => proposal,
-                        Err(error) if error.is::<NoChanges>() => continue,
-                        Err(error) => return Err(error),
-                    };
-                run.stage("submit_mr", Some(&candidate.resource_id), index, total)?;
-                let url = submitter.submit(&mut proposal, state)?;
-                run.resource_result(
-                    &candidate.resource_id,
-                    "submitted",
-                    "Merge request submitted for review",
-                );
-                run.stage("submit_mr", Some(&candidate.resource_id), index + 1, total)?;
-                result.proposals.push(SubmittedProposal {
-                    key: proposal.key,
-                    url,
-                });
+        let mut findings = Vec::new();
+        loop {
+            let observations = pending_observations(state, 1000)?;
+            if observations.is_empty() {
+                break;
             }
-            state.set("findings", &findings)?;
+            if catalog.resources.iter().any(|r| r.source.is_self()) {
+                result.details.analysis_ok = Some(false);
+                run.stage("analysis", None, 0, observations.len())?;
+                let fallback;
+                let runner = match runner {
+                    Some(runner) => runner,
+                    None => {
+                        fallback = default_runner()?;
+                        &fallback
+                    }
+                };
+                let candidates = analyze_observations(&catalog, &observations, runner)?;
+                run.stage("analysis", None, observations.len(), observations.len())?;
+                let total = candidates.len();
+                for (index, candidate) in candidates.into_iter().enumerate() {
+                    run.stage("validation", Some(&candidate.resource_id), index, total)?;
+                    let proposed = temporary.path().join(format!(
+                        "candidate-{}-{index}",
+                        result.details.observations_processed
+                    ));
+                    copy_tree(&source, &proposed)?;
+                    for (path, text) in &candidate.changes {
+                        let path = contained(&proposed, Path::new(path))?;
+                        fs::create_dir_all(
+                            path.parent().context("candidate target parent missing")?,
+                        )?;
+                        fs::write(path, text)?;
+                    }
+                    let validation = evaluate_candidate(&candidate, &source, &proposed)?;
+                    findings.push(Finding {
+                        resource_id: candidate.resource_id.clone(),
+                        issue: candidate.issue.clone(),
+                        evidence: candidate.evidence.clone(),
+                        validation: validation.clone(),
+                    });
+                    let validation_status = serde_json::to_value(validation.status)?;
+                    run.resource_result(
+                        &candidate.resource_id,
+                        validation_status.as_str().unwrap_or("unknown"),
+                        "Candidate validation finished",
+                    );
+                    run.stage("validation", Some(&candidate.resource_id), index + 1, total)?;
+                    if validation.status == ValidationStatus::Failed {
+                        continue;
+                    }
+                    run.stage("proposal", Some(&candidate.resource_id), index, total)?;
+                    let change = to_changeset(&candidate, &validation)?;
+                    let mut proposal =
+                        match crate::proposals::create_proposal(&runtime.repo, &change, state) {
+                            Ok(proposal) => proposal,
+                            Err(error) if error.is::<NoChanges>() => continue,
+                            Err(error) => return Err(error),
+                        };
+                    run.stage("submit_mr", Some(&candidate.resource_id), index, total)?;
+                    let url = submitter.submit(&mut proposal, state)?;
+                    run.resource_result(
+                        &candidate.resource_id,
+                        "submitted",
+                        "Merge request submitted for review",
+                    );
+                    run.stage("submit_mr", Some(&candidate.resource_id), index + 1, total)?;
+                    result.proposals.push(SubmittedProposal {
+                        key: proposal.key,
+                        url,
+                    });
+                }
+                state.set("findings", &findings)?;
+            }
+            run.stage("complete_observations", None, 0, observations.len())?;
+            complete_observations(
+                state,
+                &observations
+                    .iter()
+                    .map(|o| o.id.clone())
+                    .collect::<Vec<_>>(),
+            )?;
+            result.details.observations_processed += observations.len();
+            if result.details.analysis_ok.is_some() {
+                result.details.analysis_ok = Some(true);
+            }
+            run.stage(
+                "complete_observations",
+                None,
+                observations.len(),
+                observations.len(),
+            )?;
         }
-        run.stage("complete_observations", None, 0, observations.len())?;
-        complete_observations(
-            state,
-            &observations
-                .iter()
-                .map(|o| o.id.clone())
-                .collect::<Vec<_>>(),
-        )?;
-        result.details.observations_processed = observations.len();
-        run.stage(
-            "complete_observations",
-            None,
-            observations.len(),
-            observations.len(),
-        )?;
         Ok(())
     };
     let failed_stage = if let Err(error) = work(&mut result) {

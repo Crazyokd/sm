@@ -306,6 +306,9 @@ fn model_failure_keeps_observations_pending_and_records_cycle_failure() {
     )
     .unwrap();
     assert!(!report.ok);
+    let details = serde_json::to_value(&report.details).unwrap();
+    assert_eq!(details["sync_ok"], true);
+    assert_eq!(details["analysis_ok"], false);
     assert!(report.details.retention.is_some());
     assert!(report.details.error.unwrap().contains("model unavailable"));
     assert_eq!(pending_observations(&state, 100).unwrap().len(), 1);
@@ -314,6 +317,113 @@ fn model_failure_keeps_observations_pending_and_records_cycle_failure() {
     assert_eq!(run["status"], "failed");
     assert_eq!(run["stage"], "analysis");
     assert!(run["error"].as_str().unwrap().contains("model unavailable"));
+}
+
+#[test]
+fn nightly_analysis_drains_the_backlog_and_checkpoints_completed_selections() {
+    struct Runner {
+        calls: std::sync::atomic::AtomicUsize,
+        fail_second: bool,
+    }
+    impl AgentRunner for Runner {
+        fn run(&self, _: &str) -> Result<AnalysisResponse> {
+            let call = self.calls.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            if self.fail_second && call == 1 {
+                bail!("next selection unavailable");
+            }
+            Ok(AnalysisResponse {
+                candidates: Vec::new(),
+            })
+        }
+    }
+    let repo = Repo::new();
+    let runtime = runtime(&repo);
+    let state = runtime.state().unwrap();
+    let mut db = state.connect().unwrap();
+    let transaction = db.transaction().unwrap();
+    for index in 0..2005 {
+        let row = json!({"id":format!("event-{index}"),"agent":"codex","session_id":"session","cwd":"/repo","event":"Stop","timestamp":"2026-11-06T00:00:00Z","resource_id":"review","resource_content_hash":null,"evidence_kind":"unknown","signal":"completion","detected_from":"explicit","confidence":"low","turn_id":null,"invocation_id":null,"parent_invocation_id":null,"facts":{},"coverage":"observed"});
+        transaction
+            .execute(
+                "INSERT INTO observations(id,value) VALUES (?1,?2)",
+                [row["id"].as_str().unwrap(), &row.to_string()],
+            )
+            .unwrap();
+    }
+    transaction.commit().unwrap();
+    let failing = Runner {
+        calls: Default::default(),
+        fail_second: true,
+    };
+    let report = cycle_with(
+        &runtime,
+        &state,
+        Some(&failing),
+        &FakeSubmitter(FakeMrApi::default()),
+    )
+    .unwrap();
+    assert!(!report.ok);
+    assert_eq!(report.details.observations_processed, 1000);
+    assert_eq!(pending_observations(&state, 3000).unwrap().len(), 1005);
+    assert_eq!(pending_observations(&state, 1).unwrap()[0].id, "event-1000");
+    let retry = Runner {
+        calls: Default::default(),
+        fail_second: false,
+    };
+    let report = cycle_with(
+        &runtime,
+        &state,
+        Some(&retry),
+        &FakeSubmitter(FakeMrApi::default()),
+    )
+    .unwrap();
+    assert!(report.ok, "{report:?}");
+    assert_eq!(report.details.observations_processed, 1005);
+    assert!(pending_observations(&state, 1).unwrap().is_empty());
+    assert!(report.proposals.is_empty());
+}
+
+#[test]
+fn synchronization_conflicts_do_not_hide_successful_analysis() {
+    struct Empty;
+    impl AgentRunner for Empty {
+        fn run(&self, _: &str) -> Result<AnalysisResponse> {
+            Ok(AnalysisResponse {
+                candidates: Vec::new(),
+            })
+        }
+    }
+    let repo = Repo::new();
+    let runtime = runtime(&repo);
+    let state = runtime.state().unwrap();
+    synchronize(&runtime, &state).unwrap();
+    fs::write(
+        runtime.home.join(".agents/skills/review/SKILL.md"),
+        "Local edit",
+    )
+    .unwrap();
+    record_event(
+        sm::model::Client::Codex,
+        &json!({"resource_id":"review","hook_event_name":"Stop"}),
+        state.directory().unwrap(),
+    )
+    .unwrap();
+    let report = cycle_with(
+        &runtime,
+        &state,
+        Some(&Empty),
+        &FakeSubmitter(FakeMrApi::default()),
+    )
+    .unwrap();
+    assert!(!report.ok);
+    assert_eq!(report.details.observations_processed, 1);
+    let details = serde_json::to_value(&report.details).unwrap();
+    assert_eq!(details["sync_ok"], false);
+    assert_eq!(details["analysis_ok"], true);
+    assert_eq!(
+        fs::read_to_string(runtime.home.join(".agents/skills/review/SKILL.md")).unwrap(),
+        "Local edit"
+    );
 }
 
 #[test]

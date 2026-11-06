@@ -134,6 +134,7 @@ pub fn run_command(
                                 error.kind(),
                                 io::ErrorKind::WouldBlock | io::ErrorKind::Interrupted
                             ) => {}
+                        Err(error) if error.kind() == io::ErrorKind::BrokenPipe => pending = &[],
                         Err(error) => return Err(error.into()),
                     }
                 }

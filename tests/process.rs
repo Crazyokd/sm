@@ -2,6 +2,21 @@ use sm::process::run_command;
 use std::{process::Command, time::Duration};
 
 #[test]
+fn early_child_failure_keeps_its_diagnostic_when_stdin_closes() {
+    let mut command = Command::new("sh");
+    command.args(["-c", "printf 'analysis startup failed\\n' >&2; exit 7"]);
+    let error = run_command(
+        command,
+        Some(&vec![b'x'; 1_000_000]),
+        Duration::from_secs(2),
+    )
+    .unwrap_err()
+    .to_string();
+    assert!(error.contains("analysis startup failed"), "{error}");
+    assert!(error.contains("7"), "{error}");
+}
+
+#[test]
 fn nonzero_exit_cleans_up_detached_output_descendants() {
     let directory = tempfile::tempdir().unwrap();
     let pid_file = directory.path().join("child.pid");
