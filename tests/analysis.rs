@@ -189,6 +189,52 @@ fn removal_of_required_verification_fails_even_if_candidate_weakens_evals() {
     );
 }
 #[test]
+fn invalid_evidence_gets_one_correction_and_still_must_pass_validation() {
+    struct Repair {
+        calls: AtomicUsize,
+        reply: AnalysisResponse,
+        repairable: bool,
+    }
+    impl AgentRunner for Repair {
+        fn run(&self, prompt: &str) -> Result<AnalysisResponse> {
+            assert!(prompt.len() <= 512_000);
+            let input: Value = serde_json::from_str(prompt.lines().last().unwrap())?;
+            assert_eq!(
+                input["observations"][0]["facts"]["text"]
+                    .as_str()
+                    .unwrap()
+                    .len(),
+                500_000
+            );
+            let call = self.calls.fetch_add(1, Ordering::SeqCst);
+            let mut reply = self.reply.clone();
+            if call == 0 || !self.repairable {
+                reply.candidates[0].evidence = vec!["hash-from-tool-output".into()];
+            }
+            Ok(reply)
+        }
+    }
+    for repairable in [true, false] {
+        let (_root, catalog, mut observation, reply) = fixture();
+        observation
+            .facts
+            .insert("text".into(), json!("x".repeat(500_000)));
+        let runner = Repair {
+            calls: AtomicUsize::new(0),
+            reply: serde_json::from_value(reply).unwrap(),
+            repairable,
+        };
+        let result = analyze_observations(&catalog, &[observation], &runner);
+        if repairable {
+            assert_eq!(result.unwrap()[0].evidence, ["event-1"]);
+        } else {
+            assert!(result.unwrap_err().to_string().contains("real evidence"));
+        }
+        assert_eq!(runner.calls.load(Ordering::SeqCst), 2);
+    }
+}
+
+#[test]
 fn missing_evidence_unknown_resource_and_outside_paths_are_rejected() {
     for mutation in ["missing", "invented", "outside", "unknown"] {
         let (_root, catalog, observation, mut reply) = fixture();

@@ -143,6 +143,7 @@ struct AnalysisInput<'a> {
 }
 // Leave room below the agent input limit for transport and client framing.
 const MAX_PROMPT_BYTES: usize = 512_000;
+const EVIDENCE_CORRECTION: &str = "上一轮候选缺少原因或引用了无效证据。请重新检查：issue 不能为空；evidence 必须逐字取自本批 observations[].id，不能使用 facts 内的哈希或 session、turn、invocation 标识。无法提供有效证据时返回空 candidates。";
 pub fn analyze_observations(
     catalog: &Catalog,
     observations: &[Observation],
@@ -212,7 +213,8 @@ pub fn analyze_observations(
         .map(|row| Ok(serde_json::to_vec(row)?.len()))
         .collect::<Result<Vec<_>>>()?;
     let instructions = include_str!("../assets/analyze.md");
-    let base_size = instructions.len() + 1 + serde_json::to_vec(&input)?.len();
+    let base_size =
+        instructions.len() + EVIDENCE_CORRECTION.len() + 2 + serde_json::to_vec(&input)?.len();
     ensure!(
         base_size <= MAX_PROMPT_BYTES,
         "analysis resource context exceeds {MAX_PROMPT_BYTES} bytes"
@@ -236,23 +238,33 @@ pub fn analyze_observations(
             observations[start].id
         );
         input["observations"] = Value::Array(rows[start..end].to_vec());
-        let prompt = format!("{instructions}\n{}", serde_json::to_string(&input)?);
-        let response = runner.run(&prompt)?;
         let evidence: BTreeMap<_, _> = observations[start..end]
             .iter()
             .map(|o| (o.id.as_str(), *o))
             .collect();
+        let has_real_evidence = |draft: &CandidateDraft| {
+            !draft.issue.trim().is_empty()
+                && !draft.evidence.is_empty()
+                && draft
+                    .evidence
+                    .iter()
+                    .all(|id| evidence.contains_key(id.as_str()))
+        };
+        let payload = serde_json::to_string(&input)?;
+        let mut response = runner.run(&format!("{instructions}\n{payload}"))?;
+        if response
+            .candidates
+            .iter()
+            .any(|draft| !has_real_evidence(draft))
+        {
+            response = runner.run(&format!("{instructions}\n{EVIDENCE_CORRECTION}\n{payload}"))?;
+        }
         for draft in response.candidates {
             let resource = resources
                 .get(draft.resource_id.as_str())
                 .context("candidate must select an existing self resource")?;
             ensure!(
-                !draft.issue.trim().is_empty()
-                    && !draft.evidence.is_empty()
-                    && draft
-                        .evidence
-                        .iter()
-                        .all(|id| evidence.contains_key(id.as_str())),
+                has_real_evidence(&draft),
                 "candidate needs a reason and real evidence"
             );
             for id in &draft.evidence {
