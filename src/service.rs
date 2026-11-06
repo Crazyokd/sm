@@ -1,15 +1,15 @@
 use crate::{
     analysis::{
-        AgentRunner, analyze_observations, content_hash, default_runner, editable_text,
-        to_changeset,
+        AgentRunner, RejectedCandidate, analyze_observations, content_hash, default_runner,
+        editable_text, to_changeset,
     },
     apply::{apply_writes, plan_apply},
     evaluation::evaluate_candidate,
     files::{atomic_write, contained, copy_tree, payload_files, reject_symlink_path},
     gitlab,
     model::{
-        ApplyReport, ApplyStatus, Catalog, Client, ResourceResult, Source, ValidationReport,
-        ValidationStatus,
+        ApplyReport, ApplyStatus, Catalog, CheckKind, Client, ResourceResult, Source,
+        ValidationCheck, ValidationReport, ValidationStatus,
     },
     observe::{
         ActiveIndex, ActiveOwned, complete_observations, ingest_events, pending_observations,
@@ -754,7 +754,26 @@ pub fn cycle_with(
                         )?;
                         fs::write(path, text)?;
                     }
-                    let validation = evaluate_candidate(&candidate, &source, &proposed)?;
+                    let mut validation = evaluate_candidate(&candidate, &source, &proposed)?;
+                    let change = if validation.status == ValidationStatus::Failed {
+                        None
+                    } else {
+                        match to_changeset(&candidate, &validation) {
+                            Ok(change) => Some(change),
+                            Err(error) if error.is::<RejectedCandidate>() => {
+                                validation.status = ValidationStatus::Failed;
+                                validation.checks.push(ValidationCheck {
+                                    name: "proposal".into(),
+                                    kind: CheckKind::Static,
+                                    before: None,
+                                    after: false,
+                                    error: Some(redact_text(&format!("{error:#}"), Some(300))),
+                                });
+                                None
+                            }
+                            Err(error) => return Err(error),
+                        }
+                    };
                     findings.push(Finding {
                         resource_id: candidate.resource_id.clone(),
                         issue: candidate.issue.clone(),
@@ -768,11 +787,10 @@ pub fn cycle_with(
                         "Candidate validation finished",
                     );
                     run.stage("validation", Some(&candidate.resource_id), index + 1, total)?;
-                    if validation.status == ValidationStatus::Failed {
+                    let Some(change) = change else {
                         continue;
-                    }
+                    };
                     run.stage("proposal", Some(&candidate.resource_id), index, total)?;
-                    let change = to_changeset(&candidate, &validation)?;
                     let mut proposal =
                         match crate::proposals::create_proposal(&runtime.repo, &change, state) {
                             Ok(proposal) => proposal,
@@ -792,7 +810,10 @@ pub fn cycle_with(
                         url,
                     });
                 }
-                state.set("findings", &findings)?;
+                state.set(
+                    "findings",
+                    &crate::privacy::redact(&serde_json::to_value(&findings)?, None),
+                )?;
             }
             run.stage("complete_observations", None, 0, observations.len())?;
             complete_observations(

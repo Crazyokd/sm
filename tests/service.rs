@@ -320,6 +320,74 @@ fn model_failure_keeps_observations_pending_and_records_cycle_failure() {
 }
 
 #[test]
+fn unsafe_generated_proposals_are_rejected_without_blocking_safe_candidates() {
+    struct Runner;
+    impl AgentRunner for Runner {
+        fn run(&self, prompt: &str) -> Result<AnalysisResponse> {
+            let input: serde_json::Value = serde_json::from_str(prompt.lines().last().unwrap())?;
+            let id = input["observations"][0]["id"].as_str().unwrap();
+            Ok(serde_json::from_value(json!({"candidates":[
+                {"resource_id":"review","issue":"Unsafe api_key=private-secret","evidence":[id],"changes":[{"path":"resources/review/SKILL.md","content":"---\nname: review\ndescription: Review\n---\napi_key=private-secret\n"}]},
+                {"resource_id":"review","issue":"Unsafe generated filename","evidence":[id],"changes":[{"path":"resources/review/api_key=private-secret.md","content":"Verify output\n"}]},
+                {"resource_id":"review","issue":"Keep explicit verification","evidence":[id],"changes":[{"path":"resources/review/SKILL.md","content":"---\nname: review\ndescription: Review\n---\nVerify output\n"}]}
+            ]}))?)
+        }
+    }
+    let repo = Repo::new();
+    let runtime = runtime(&repo);
+    let state = runtime.state().unwrap();
+    record_event(
+        sm::model::Client::Codex,
+        &json!({"resource_id":"review","hook_event_name":"Stop"}),
+        state.directory().unwrap(),
+    )
+    .unwrap();
+    let report = cycle_with(
+        &runtime,
+        &state,
+        Some(&Runner),
+        &FakeSubmitter(FakeMrApi::default()),
+    )
+    .unwrap();
+    assert!(report.ok, "{report:?}");
+    assert_eq!(report.details.analysis_ok, Some(true));
+    assert_eq!(report.details.observations_processed, 1);
+    assert_eq!(report.proposals.len(), 1);
+    assert!(pending_observations(&state, 1).unwrap().is_empty());
+    let findings: Vec<sm::service::Finding> = state.get("findings").unwrap();
+    assert_eq!(findings.len(), 3);
+    assert_eq!(
+        findings[0].validation.status,
+        sm::model::ValidationStatus::Failed
+    );
+    assert_eq!(
+        findings[1].validation.status,
+        sm::model::ValidationStatus::Failed
+    );
+    assert_eq!(
+        findings[2].validation.status,
+        sm::model::ValidationStatus::Partial
+    );
+    assert!(
+        !serde_json::to_string(&findings)
+            .unwrap()
+            .contains("private-secret")
+    );
+    let proposals: std::collections::BTreeMap<String, sm::proposals::Proposal> =
+        state.get("proposals").unwrap();
+    assert_eq!(proposals.len(), 1);
+    assert!(
+        !serde_json::to_string(&proposals)
+            .unwrap()
+            .contains("private-secret")
+    );
+    assert_eq!(
+        fs::read_to_string(runtime.home.join(".agents/skills/review/SKILL.md")).unwrap(),
+        "Approved"
+    );
+}
+
+#[test]
 fn nightly_analysis_drains_the_backlog_and_checkpoints_completed_selections() {
     struct Runner {
         calls: std::sync::atomic::AtomicUsize,

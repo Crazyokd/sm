@@ -339,6 +339,10 @@ pub fn analyze_observations(
     }
     Ok(candidates)
 }
+#[derive(Debug, thiserror::Error)]
+#[error("candidate proposal failed validation")]
+pub struct RejectedCandidate;
+
 pub fn to_changeset(candidate: &Candidate, report: &ValidationReport) -> Result<ChangeSet> {
     let mut writes = candidate.changes.clone();
     if candidate.operation != CandidateOperation::Edit {
@@ -384,7 +388,9 @@ pub fn to_changeset(candidate: &Candidate, report: &ValidationReport) -> Result<
         validation: report.clone(),
         renames: BTreeMap::new(),
     };
-    change.validate()?;
+    change
+        .validate()
+        .map_err(|error| error.context(RejectedCandidate))?;
     Ok(change)
 }
 #[derive(Debug, Clone)]
