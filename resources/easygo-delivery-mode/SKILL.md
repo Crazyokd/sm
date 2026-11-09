@@ -38,6 +38,7 @@ SZ-2 地图同步定位重置等已验证：不依赖缺失的 ROS msg 包、不
 - 每次 model 调用都重读整段上下文 → **cache_read 是成本主因**（一个 200-350 步任务可达 5-28M cache-read tokens）。
 - 一次精准查询胜过整串重复探测：工具调用 ~50% 是精确重复，直接放大 cache_read。
 - 优先小范围精准读（文件行区间/grep 定位），避免整文件反复重读。
+- **CI 重试后更新跟踪对象**：从重试响应或最新 jobs 列表取得当前 attempt 的 job ID，核对所属 pipeline 和提交 SHA，再用该 ID 读取 trace；原失败 attempt 单独保留。已有监控进程采集同一对象时复用其结果，日志内容未变化就复用已有摘要，避免反复读取同一落盘日志。继续以有界、可中断的等待跟踪状态，终态时核验当前 attempt 的结果；旧日志或 API 查询失败不能作为本次通过证据。
 - **结构查询先 codegraph**：找定义/调用/影响面用 codegraph MCP（search/trace/explore/callers），一次亚毫秒查询胜过一串 grep；查询时明确传入实际项目/工作树路径；新工作树先执行 `cg-worktree-index <path>`。出现 different-worktree 或 pending-sync 提示时只将索引用于定位，读取提示文件确认当前分支。仅字面文本才用 Grep。
 
 ## 5.5 动工前去重（收敛/复跑必读）——按此步骤，实测比一句规则省 15-45%
