@@ -375,6 +375,63 @@ fn model_failure_keeps_observations_pending_and_records_cycle_failure() {
 }
 
 #[test]
+fn conflicting_pending_candidate_does_not_block_an_independent_candidate() {
+    struct Runner;
+    impl AgentRunner for Runner {
+        fn run(&self, prompt: &str) -> Result<AnalysisResponse> {
+            let input: serde_json::Value = serde_json::from_str(prompt.lines().last().unwrap())?;
+            let id = input["observations"][0]["id"].as_str().unwrap();
+            Ok(serde_json::from_value(json!({"candidates":[
+                {"resource_id":"review","issue":"Conflicting notes","evidence":[id],"changes":[{"path":"resources/review/NOTES.md","content":"other one\n# a1\n# a2\n# a3\n# a4\n# a5\nother two\n# b1\n# b2\n# b3\n# b4\n# b5\nother three\n"}]},
+                {"resource_id":"review","issue":"Independent note","evidence":[id],"changes":[{"path":"resources/review/NEW.md","content":"Check the result\n"}]}
+            ]}))?)
+        }
+    }
+    let repo = Repo::new();
+    let runtime = runtime(&repo);
+    let state = runtime.state().unwrap();
+    let base = "one\n# a1\n# a2\n# a3\n# a4\n# a5\ntwo\n# b1\n# b2\n# b3\n# b4\n# b5\nthree\n";
+    fs::write(repo.work.join("resources/review/NOTES.md"), base).unwrap();
+    repo.publish("Separated review notes");
+    let prior = base
+        .replace("one", "first one")
+        .replace("two", "first two")
+        .replace("three", "first three");
+    let change = serde_json::from_value(json!({"resource_ids":["review"],"reason":"Pending reviewed notes","writes":{"resources/review/NOTES.md":prior}})).unwrap();
+    let proposal = sm::proposals::create_proposal(&repo.work, &change, &state).unwrap();
+    record_event(
+        sm::model::Client::Codex,
+        &json!({"resource_id":"review","hook_event_name":"Stop"}),
+        state.directory().unwrap(),
+    )
+    .unwrap();
+    let report = cycle_with(
+        &runtime,
+        &state,
+        Some(&Runner),
+        &FakeSubmitter(FakeMrApi::default()),
+    )
+    .unwrap();
+    assert!(report.ok, "{report:?}");
+    assert_eq!(report.details.observations_processed, 1);
+    assert_eq!(report.proposals.len(), 1);
+    assert!(pending_observations(&state, 1).unwrap().is_empty());
+    assert_eq!(
+        fs::read_to_string(proposal.directory.join("resources/review/NOTES.md")).unwrap(),
+        prior
+    );
+    let findings: Vec<sm::service::Finding> = state.get("findings").unwrap();
+    assert_eq!(
+        findings[0].validation.status,
+        sm::model::ValidationStatus::Failed
+    );
+    assert_eq!(
+        findings[1].validation.status,
+        sm::model::ValidationStatus::Partial
+    );
+}
+
+#[test]
 fn unsafe_generated_proposals_are_rejected_without_blocking_safe_candidates() {
     struct Runner;
     impl AgentRunner for Runner {

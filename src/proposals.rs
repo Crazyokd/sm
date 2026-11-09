@@ -309,7 +309,9 @@ pub fn create_proposal(repo: &Path, change: &ChangeSet, state: &State) -> Result
                 if let Err(error) = run_command(merge, None, Duration::from_secs(30)) {
                     if error
                         .downcast_ref::<crate::process::CommandFailure>()
-                        .is_some_and(|failure| failure.code == Some(1))
+                        .is_some_and(|failure| {
+                            failure.code.is_some_and(|code| (1..=127).contains(&code))
+                        })
                     {
                         return Err(error.context("candidate conflicts with the pending proposal; existing changes were preserved").context(RejectedCandidate));
                     }
