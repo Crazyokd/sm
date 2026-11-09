@@ -13,7 +13,8 @@ This workflow mutates remote Git state when pushing a tag, and later mutates the
 
 - Treat the EasyGo root repository and every `src/*` Git repository as separate repositories.
 - A short request like “为 easygo-app 打 tag” means: target `src/easygo-app` at latest `origin/main`, reuse an existing tag on that commit if present, then update `EASYGO_APP_VERSION` in `docker/packages.env` only if it differs.
-- When the user wants the latest `origin/main` package tag, run the `easygo-force-sync` workflow first unless they gave an exact commit/tag/branch or asked not to reset.
+- For latest `origin/main`, fetch and resolve the target child repository's remote ref without switching its checkout. Run `easygo-force-sync` only when the user explicitly requests destructive workspace synchronization; a tagging request alone does not authorize it.
+- Preserve the entry root and child checkouts' branches and WIP. Create a separate EasyGo root Git worktree for the package-pin MR; do not switch, stash, or reset the shared entry checkout as part of this workflow.
 - If the tag name/version is missing or ambiguous and the target ref has no existing package tag, ask before creating the tag. Do not invent a release version silently.
 - If the target ref already has a package tag, reuse that tag and do not create or push a duplicate tag. If the user explicitly requested a different tag name for the same ref, stop and ask before creating a second tag.
 - Prefer `docker/packages.env`; if the user says `docker/package.env`, verify the actual path instead of creating a new file.
@@ -26,7 +27,8 @@ This workflow mutates remote Git state when pushing a tag, and later mutates the
 
 Identify:
 
-- `WORKSPACE`: EasyGo root checkout.
+- `WORKSPACE`: EasyGo root entry checkout.
+- `ROOT_WORKTREE`: absolute path to the separate EasyGo root Git worktree for this task's package-pin MR.
 - `CHILD_REPO`: the child repository to tag, such as `src/easygo-app` or `src/Vda5050_ROS2`.
 - `SOURCE_REF`: usually `origin/main`, or the exact SHA/branch/tag requested by the user.
 - `TAG_NAME`: package tag, usually `vX.Y.Z`; may be discovered from an existing tag on `SOURCE_REF`.
@@ -50,7 +52,7 @@ Note: the snippets below deliberately avoid positional fields such as `$N` and t
 cd "$WORKSPACE"
 ```
 
-If the user requested latest `origin/main`, use `easygo-force-sync` first. Otherwise fetch only the target child repo:
+Record the entry root and target child checkout's branch, HEAD, and working-tree status. Fetch the target child repo without changing its checkout:
 
 ```bash
 git -C "$CHILD_REPO" fetch origin --prune --tags
@@ -110,9 +112,12 @@ else
 fi
 ```
 
-4. Update the EasyGo root version pin on a branch only if needed.
+4. Update the EasyGo root version pin in a separate worktree only if needed.
+
+Prefer the current harness worktree tool when available; the shell below is the manual fallback.
 
 ```bash
+case "$ROOT_WORKTREE" in /*) ;; *) echo "ROOT_WORKTREE must be absolute" >&2; exit 1;; esac
 PIN_VERSION="${TAG_NAME#v}"
 git fetch origin --prune
 TARGET_PACKAGE_ENV="$(git show "origin/$MR_TARGET_BRANCH:docker/packages.env")" || exit 1
@@ -123,8 +128,14 @@ if [ "$CURRENT_PIN" = "$PIN_VERSION" ]; then
   exit 0
 fi
 
-git switch -c "chore/package-$TAG_NAME" origin/"$MR_TARGET_BRANCH"
+git worktree add -b "chore/package-$TAG_NAME" "$ROOT_WORKTREE" "origin/$MR_TARGET_BRANCH" || exit 1
+cg-worktree-index "$ROOT_WORKTREE" || exit 1
+cd "$ROOT_WORKTREE" || exit 1
 ```
+
+Choose an unused worktree path. If the branch or worktree already exists, inspect its ownership and state before reusing it; do not switch the shared checkout as a fallback. Initialize the worktree according to the project's current worktree/index instructions.
+
+Run all subsequent file edits, generation, validation, commits, and MR branch operations from `ROOT_WORKTREE`.
 
 Edit only the exact version line in `docker/packages.env`, for example:
 
@@ -137,6 +148,7 @@ Version values in `docker/packages.env` usually omit the leading `v` from `TAG_N
 5. Validate and commit.
 
 ```bash
+cd "$ROOT_WORKTREE" || exit 1
 if [ -f script/ci/gen-image-env-subsets.py ]; then
   python3 script/ci/gen-image-env-subsets.py || exit 1
   python3 script/ci/gen-image-env-subsets.py --check || exit 1
@@ -153,7 +165,7 @@ fi
 git commit -m "chore: update package pin for $TAG_NAME"
 ```
 
-6. Push the branch and submit an MR to the target branch. Use the available GitLab workflow or `glab`; report the MR URL and CI state, but do not claim CI passed until it actually has.
+6. From `ROOT_WORKTREE`, push the branch and submit an MR to the target branch. Use the available GitLab workflow or `glab`; report the MR URL and CI state, but do not claim CI passed until it actually has.
 
 ## Report
 
@@ -163,6 +175,7 @@ Include:
 - tag name and whether it was reused or pushed
 - `docker/packages.env` variable changed
 - `release-real.py check-env` result
-- EasyGo root branch, commit SHA, MR URL, and current CI state
+- EasyGo root worktree path, branch, commit SHA, MR URL, and current CI state
+- final entry root and child checkout status compared with the recorded baseline; report unexpected changes without overwriting another task's work
 
 When filtering generator, publication, or validation logs, preserve the original exit status with `pipefail` or a separately captured status. Report the MR current head SHA, its matching pipeline, and package publication separately. A different checkout pin cannot establish that the requested target branch is already current.
