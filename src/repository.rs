@@ -19,6 +19,9 @@ pub fn git(repo: &Path, args: &[&str]) -> Result<String> {
 }
 pub fn fetch_approved(repo: &Path, output: &Path) -> Result<PathBuf> {
     git(repo, &["fetch", "origin", "main"])?;
+    export_approved(repo, output)
+}
+pub fn export_approved(repo: &Path, output: &Path) -> Result<PathBuf> {
     let mut command = Command::new("git");
     command.arg("-C").arg(repo).args(["archive", "origin/main"]);
     let archive = run_command(command, None, Duration::from_secs(120))?.stdout;

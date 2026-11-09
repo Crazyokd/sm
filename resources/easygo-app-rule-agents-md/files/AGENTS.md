@@ -49,6 +49,13 @@ MR CI 仍是合并门禁。
   Ready。
 - commit message 使用中文描述变更内容。
 - AI 协作在 commit message 和 MR 描述 trailer 中披露：
-  `Assisted-by: Claude:claude-opus-4-7` 或
-  `Assisted-by: Codex:gpt-5.5`。
+  `Assisted-by: <实际工具>:<本次可信运行信息中的模型标识>`。
+  不照抄旧型号或猜测身份；模型未确认时只写实际工具，并说明模型未确认。
 - AI 工具不能作为作者或 `Signed-off-by`；签署主体必须是实际负责的人。
+
+## 验证与协作边界
+
+- 在独立工作树操作；恢复工作区不等于撤回 MR 中的提交，需核对当前 MR 差异并在授权后用普通 revert 撤回。
+- Rust 检查使用已有 `easygo-app-checks` 入口，记录实际检出、HEAD、工作区差异和退出码；额外修改过的验证副本不能证明原 MR 提交通过。
+- 当前远端结论先 fetch 并核对精确 SHA；涉及时间、范围或饱和边界时独立计算总量并断言验收上限。
+- 替换接口前检查目标正式接口包已有的兼容 Rust crate；避免另写一套手工绑定。CI 选测范围以 `scripts/test_changed.py` 和当前 CI 配置为准，不能识别的代码应明确失败。

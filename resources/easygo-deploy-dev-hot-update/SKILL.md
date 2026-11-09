@@ -31,6 +31,10 @@ Read `python3 script/deploy-dev.py --help` and the relevant definitions in [depl
 
 Pass the requested repo targets to the script and let it expand dependencies. Reuse its package metadata, transfer checksum, architecture, simulated-install, and post-install checks; do not maintain a second dependency list or reimplement these gates in the skill.
 
+## Existing artifact requests
+
+When the user requires installing an existing package without compilation, first identify the artifact and check whether the current script supports that exact input. Do not switch or stash source checkouts, build, or repackage as a substitute. `--deploy-only` can still package source; if there is no supported artifact input, report that limitation before any target write. Preserve artifact checksum, architecture, dependency, installation and runtime checks.
+
 ## Workflow
 
 1. **Resolve the source.** Fetch the relevant source repos, resolve each requested ref to a SHA, and inspect status. The script derives its workspace from its own location and has no source-worktree/ref selector: pin the actual checkouts it will build.
@@ -50,3 +54,5 @@ Pass the requested repo targets to the script and let it expand dependencies. Re
 ## Report
 
 Include exact source refs/SHAs, package versions, target/container, command shape, package-audit and runtime results, and whether local state was restored. State which functional/device checks were actually observed. Mention build fallbacks only if they happened.
+
+Remote identity and time checks must expand on the remote host: quote remote commands so local shell substitutions cannot supply the reported hostname or timestamp. Preserve the original command exit status when filtering output.

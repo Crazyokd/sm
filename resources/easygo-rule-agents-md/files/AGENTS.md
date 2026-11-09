@@ -106,6 +106,7 @@ git -C src/<pkg> rev-parse --show-toplevel
 - 排查硬件问题先查 [docs/hardware_debugging/](docs/hardware_debugging/README.md)，优先确认历史边界和验证矩阵；没有实测证据不要把问题归因到硬件瓶颈。
 - 真机 ROS 2 终端调试使用 `/sros/ota/launch shell`，不要直接写成 `docker exec -it -u std easygo bash`。
 - root shell 只用于系统、权限、`dpkg`、`supervisorctl` 排查。
+- **不同车之间禁止拷贝数据库**，换控制器除外。序列号、标定数据跟车走。
 - Orbbec DCW2 udev 规则属于宿主机，不属于容器。
 - RViz2 不随整车 bringup 自动启动；真机 RViz 调试从本地脚本入口走。
 

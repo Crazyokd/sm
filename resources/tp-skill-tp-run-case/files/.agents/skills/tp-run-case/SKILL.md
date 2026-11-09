@@ -9,13 +9,13 @@ description: Run an existing TP Case and read the verdict from run.error and fai
 
 ## 何时用
 
-用户要跑某个已有 Case、看过不过、或「再跑一遍」。改 EasyGo 源码后再验收，先走 `easygo-tp-hotupdate-verify`，再回到本 skill 的第 2 步。
+用户要跑某个已有 Case、看过不过、或「再跑一遍」。
 
 ## 闭环
 
 **1. 选 Case。** `listCases`。按用户给的名字或 id 对上一项。没有指定就列出让用户选。不要为此新建 Case。
 
-**2. 开跑。** `createRun` `{ caseId }`。再 `waitForRun` `{ runId, timeoutMs }`。`timeoutMs` 按 Case 长度给够（含建图/任务的 EasyGo Case 用三十分钟以上），不要用几秒。没有 MCP 时：`POST /api/runs`，再订 `GET /api/runs/:id/events` 直到 `passed` / `failed` / `canceled`。没有成员 `GET /api/runs/:id`。
+**2. 开跑。** `createRun` `{ caseId }`。再 `waitForRun` `{ runId, timeoutMs }`。`timeoutMs` 按 Case 长度给够（含建图/任务的 Case 用三十分钟以上），不要用几秒。没有 MCP 时：`POST /api/runs`，再订 `GET /api/runs/:id/events` 直到 `passed` / `failed` / `canceled`。没有成员 `GET /api/runs/:id`。
 
 **3. 读结果。**
 

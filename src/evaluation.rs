@@ -14,7 +14,7 @@ struct Cases {
     #[serde(default)]
     forbidden: Vec<String>,
 }
-fn syntax(path: &Path) -> Result<()> {
+pub(crate) fn syntax(path: &Path) -> Result<()> {
     let text = fs::read_to_string(path)?;
     match path.extension().and_then(|e| e.to_str()) {
         Some("json") => {

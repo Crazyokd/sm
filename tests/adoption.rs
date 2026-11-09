@@ -281,6 +281,85 @@ fn handoff_validation_failure_rolls_back_all_ownership_changes() {
 }
 
 #[test]
+fn reviewed_missing_file_restore_requires_the_exact_old_ownership() {
+    let repo = Repo::new();
+    let home = repo.temp.path().join("home");
+    let target = home.join(".agents/skills/review/SKILL.md");
+    let state = repo.state();
+    let catalog = Catalog::load(&repo.work).unwrap();
+    let plan = plan_apply(
+        &catalog,
+        &BTreeMap::from([("review".into(), repo.work.clone())]),
+        &home,
+    );
+    assert!(apply_writes(&plan, &state).unwrap().ok());
+    fs::remove_file(&target).unwrap();
+    for digest in [fingerprint(b"Wrong old content"), fingerprint(b"Approved")] {
+        fs::write(repo.work.join("resources/adoption.json"),json!([{"resource":"review","previous_resource":"review","target":".agents/skills/review/SKILL.md","sha256":digest,"executable":false,"restore_missing":true}]).to_string()).unwrap();
+        adopt(&repo.work, &catalog, &home, &plan, &state).unwrap();
+        let report = apply_writes(&plan, &state).unwrap();
+        assert_eq!(report.ok(), digest == fingerprint(b"Approved"));
+    }
+    assert_eq!(fs::read_to_string(&target).unwrap(), "Approved");
+}
+
+#[test]
+fn reviewed_same_owner_reconciliation_accepts_only_the_new_exact_fingerprint_once() {
+    let repo = Repo::new();
+    let home = repo.temp.path().join("home");
+    let target = home.join(".agents/skills/review/SKILL.md");
+    let state = repo.state();
+    let catalog = Catalog::load(&repo.work).unwrap();
+    let plan = plan_apply(
+        &catalog,
+        &BTreeMap::from([("review".into(), repo.work.clone())]),
+        &home,
+    );
+    assert!(apply_writes(&plan, &state).unwrap().ok());
+    fs::write(&target, "Reviewed local edit").unwrap();
+    fs::write(
+        repo.work.join("resources/review/SKILL.md"),
+        "Reviewed local edit",
+    )
+    .unwrap();
+    fs::write(repo.work.join("resources/adoption.json"),json!([{"resource":"review","previous_resource":"review","target":".agents/skills/review/SKILL.md","sha256":fingerprint(b"Reviewed local edit"),"executable":false}]).to_string()).unwrap();
+    let plan = plan_apply(
+        &catalog,
+        &BTreeMap::from([("review".into(), repo.work.clone())]),
+        &home,
+    );
+    adopt(&repo.work, &catalog, &home, &plan, &state).unwrap();
+    assert!(apply_writes(&plan, &state).unwrap().ok());
+    assert_eq!(fs::read_to_string(&target).unwrap(), "Reviewed local edit");
+    fs::write(&target, "Later unreviewed edit").unwrap();
+    adopt(&repo.work, &catalog, &home, &plan, &state).unwrap();
+    assert!(!apply_writes(&plan, &state).unwrap().ok());
+    assert_eq!(
+        fs::read_to_string(&target).unwrap(),
+        "Later unreviewed edit"
+    );
+    fs::write(&target, "Reviewed local edit").unwrap();
+    fs::set_permissions(&target, fs::Permissions::from_mode(0o700)).unwrap();
+    fs::set_permissions(
+        repo.work.join("resources/review/SKILL.md"),
+        fs::Permissions::from_mode(0o700),
+    )
+    .unwrap();
+    fs::write(repo.work.join("resources/adoption.json"),json!([{"resource":"review","previous_resource":"review","target":".agents/skills/review/SKILL.md","sha256":fingerprint(b"Reviewed local edit"),"executable":true}]).to_string()).unwrap();
+    let plan = plan_apply(
+        &catalog,
+        &BTreeMap::from([("review".into(), repo.work.clone())]),
+        &home,
+    );
+    adopt(&repo.work, &catalog, &home, &plan, &state).unwrap();
+    assert!(apply_writes(&plan, &state).unwrap().ok());
+    fs::remove_file(&target).unwrap();
+    fs::write(repo.work.join("resources/adoption.json"),json!([{"resource":"review","previous_resource":"review","target":".agents/skills/review/SKILL.md","sha256":fingerprint(b"Reviewed local edit"),"executable":true,"restore_missing":true}]).to_string()).unwrap();
+    adopt(&repo.work, &catalog, &home, &plan, &state).unwrap();
+    assert!(apply_writes(&plan, &state).unwrap().ok());
+}
+
+#[test]
 fn reviewed_fingerprint_adopts_exact_existing_files_once_and_preserves_later_edits() {
     let repo = Repo::new();
     let home = repo.temp.path().join("home");

@@ -66,10 +66,10 @@ AI 助手先用 `uname -n` 自检：主机名包含 `sros-dev-env` 即在容器�
 ### 编译
 
 ```bash
-cmake --preset=amd64-debug && ninja -C build-amd64 -j$(scripts/build_jobs.sh)
+cmake --preset=amd64-debug && DISTCC_HOSTS="$(scripts/distcc_hosts.sh)" ninja -C build-amd64 -j$(scripts/build_jobs.sh)
 ```
 
-并发度必须走 `scripts/build_jobs.sh`（配了 distcc 取集群总槽位，否则 `nproc`）。写死 `-j$(nproc)`
+并发度必须先走 `scripts/distcc_hosts.sh` 过滤不可达主机，再用 `scripts/build_jobs.sh` 计算可用槽位。写死 `-j$(nproc)`
 会把 46 槽的 distcc 集群压到本机 8 核，实测全量冷编译 621s vs 296s。
 ccache/distcc 的串接由 `CMakeLists.txt` 烧进 `build.ninja`，不依赖 shell 环境变量。
 
@@ -96,14 +96,14 @@ ccache/distcc 的串接由 `CMakeLists.txt` 烧进 `build.ninja`，不依赖 she
 ## CI/CD
 
 - 配置：`.gitlab-ci.yml`，阶段 `prepare → lint → build → test → pack → deploy → long_duration_test → release → trigger-integration-tests → notify → backport`
-- 维护中的 release 分支由 `scripts/maintained_release_branches.json` 这一份快照承担事实源；`backport.py` / CI `auto_backport` job 都从这里读，禁止重新硬编码。窗口大小由 `release.py::MAINTAINED_BRANCH_WINDOW` 控制（默认 3，与当前稳态维护 release 数量一致）
-- `release.py` 每次 cut 新 release 分支时（`hand_release_main()` 中 `update_maintained_branches_snapshot()`）基于 ONES `[待发布]` 标记的 release 工作项**最新 N 个候选** + 本次新分支 union 去重，按 (major, minor) 升序后裁剪取末尾 N 个写清单。前置校验：本次新分支必须 ≥ 候选最新版本（否则强保新分支会挤掉较新维护分支，造成"退化"），不满足时拒绝刷新并 fail-fast；正常 `hand_release_main` 调用路径下新分支永远是 cmake_version 升版结果，校验恒过。ONES 不可达走 fallback：读旧快照按 (major, minor) 排序后取末尾 N 个 + 当前新分支同策略，并把旧快照里 ones_sources 的 branch→ONES 映射带回，尽量保留审计来源；fallback 路径同样不阻断发版
+- 维护中的 release 分支由 `scripts/maintained_release_branches.json` 这一份快照承担事实源；`backport.py` / CI `auto_backport` job 都从这里读，禁止重新硬编码。`release.py::MAINTAINED_BRANCH_WINDOW`（默认 3）限定 ONES 对应的已存在维护分支数量，最终清单还会额外合入本次新 release。
+- `release.py` cut 新 release 后刷新清单：从 ONES 标题含 `[待发布]` 的全部候选中，先过滤 origin 尚不存在的分支，再取最新 N 个，额外合入本次成功切出的 release，去重后按版本升序写入。提前规划但尚未建分支的 ONES 版本不占维护名额，也不与本次 release 比较大小。本次新 release 也可能入选维护窗口，必须保留其真实 ONES 来源；仅由 `extra_release_branch` 记录已确认的额外项。ONES 不可达时用旧快照兜底，只替换该显式标记且无 ONES 来源的旧额外项；旧快照缺标记或身份不明时保守保留，继承可用来源并过滤远端已不存在的分支。远端查询或写入失败时保留旧清单、继续升版，提交信息必须明确标记 `maintained release branches not refreshed`。
 - 紧急人工修正：直接编辑 JSON 并 commit；commit message 需含 `manual edit maintained_release_branches` 便于追溯
 - 自动 backport：带 `backport` 标签的 MR 合入 main 后，`.gitlab-ci.yml::auto_backport` 触发 `scripts/ci_auto_backport.py`，由 sros-bot（`GITLAB_ROBOT_TOKEN`，`api + write_repository` scope）建 cherry-pick MR，默认把 `assignee` / `reviewer` 都设为原 MR 作者；当原作者无法被设为 reviewer（离职 / 权限组不覆盖 / bot 权限不足）时会自动降级为只带 assignee 重试一次。冲突或异常时还会发飞书卡片 `<at>` @ 原作者；成功路径只在原 MR 上评论结果，不打扰群
 
 ## GitLab API 访问
 
-查 CI 日志、操作 MR/Issue 等需求详见 [用户级 gitlab-api Skill](~/.agents/skills/gitlab-api/SKILL.md)。
+查 CI 日志、操作 MR/Issue 等需求详见 [.agents/skills/gitlab-api/SKILL.md](./.agents/skills/gitlab-api/SKILL.md)。
 
 ## MR 与提交规范
 
@@ -138,7 +138,7 @@ ccache/distcc 的串接由 `CMakeLists.txt` 烧进 `build.ninja`，不依赖 she
 
 ## 网络协议
 
-- 定义：`cfg/sros-resources/protobuf/main.proto`（TCP，端口 5001）
+- 定义：`cfg/sros-resources/protobuf/main.proto`（TCP，端口 5001，来自配置 `network.riot_server_port`）
 - 分发：`modules/network/network_module.cpp`
 - `CMD_SET_MANUAL_SPEED (0x10)`: 速度从 `param_int`(vx)/`param_int1`(w)/`param_int3`(vy) 读取，**不是** `pose`
 - `CMD_SET_LOCATION_INITIAL_POSE`: 必须在 `CMD_START_LOCATION` **之前**单独发送
@@ -159,6 +159,8 @@ sros 对外的边界（另一侧是独立的进程 / 上位系统 / 设备）：
 - **SRC 底盘（`src/sdk` SrcSdk，串口 + SRTOS 寄存器）**：另一处理器上的 srtos 固件，plan_v 下发、反馈回填；仿真时换成 `GzSimSrcSdk`（gRPC→Gazebo）。
 
 ## 仿真系统
+
+仿真专用参数及其目录必须按内部参数配置 `permission=0`，不得作为 `permission=99` 的普通参数展示到 Matrix；仍需运行时读取的参数保留 `is_valid=1`。优先使用既有 CSV 权限机制，不另加页面或接口过滤。新增或调整此类参数时，遵循 [配置参数权限说明](cfg/sros-resources/config/README.md#配置参数权限说明)。
 
 仿真系统的架构、部署命令、gRPC 接口、验证脚本、已知陷阱等详见 [simulation/AGENTS.md](./simulation/AGENTS.md) 与 [simulation/CLAUDE.md](./simulation/CLAUDE.md)。
 
@@ -185,6 +187,7 @@ sros 对外的边界（另一侧是独立的进程 / 上位系统 / 设备）：
 | `remote-build` | 远程编译 + 部署 |
 | `gitlab-api` | GitLab REST API：CI 日志、MR/Issue/Pipeline |
 | `sros-config-parameter` | SROS 功能参数新增、评审、单位/车型/目录与升级验证 |
+| `rk3399-flash` | Ubuntu 下给 RK3399 国产控制器（VC400-rk3399/VC500）刷 update.img、串口检查 eMMC |
 
 ## 语言
 

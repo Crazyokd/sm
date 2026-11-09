@@ -29,6 +29,30 @@ struct Fixture {
 }
 
 #[tokio::test]
+async fn related_proposals_show_closed_and_merged_states() {
+    let f = Fixture::new();
+    for (key, status) in [
+        ("closed", sm::proposals::ProposalStatus::Closed),
+        ("merged", sm::proposals::ProposalStatus::Merged),
+    ] {
+        let proposal = Proposal { key:key.into(), directory:f.repo.work.clone(), branch:format!("sm/{key}"), change:serde_json::from_value(json!({"resource_ids":["review"],"reason":key,"writes":{"resources/review/SKILL.md":"Review"}})).unwrap(), status, mr_url:Some(format!("https://git.example.invalid/{key}")) };
+        proposal.save(&f.state).unwrap();
+    }
+    let (_, page) = f.get("/resources/review").await;
+    assert!(page.contains("已关闭") && page.contains("已合并"));
+}
+
+#[tokio::test]
+async fn jobs_discloses_cached_approved_source_when_remote_sync_failed() {
+    let f = Fixture::new();
+    f.state.add_run("cycle", &json!({"ok":false,"proposals":[],"details":{"sync_ok":false,"analysis_ok":true,"using_cached_source":true,"approved_revision":"approved-sha","sync_error":"network unavailable","observations_processed":1}})).unwrap();
+    let (_, page) = f.get("/jobs").await;
+    assert!(page.contains("分析使用已缓存的审核版本"));
+    assert!(page.contains("approved-sha"));
+    assert!(page.contains("network unavailable"));
+}
+
+#[tokio::test]
 async fn nightly_history_distinguishes_sync_and_analysis_results() {
     for (sync_ok, analysis_ok, sync_label, analysis_label) in [
         (Some(false), Some(true), "需处理", "完成"),

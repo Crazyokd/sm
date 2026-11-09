@@ -10,8 +10,7 @@
 - **Case**：`@tp/cases` 编树与安装器。不属于任何一个 Adapter。叶子必须来自已加载 Adapter 的目录。
 - 三方只依赖 `@tp/contract`，经 Registry / Run Queue / Contract 解耦。日志 `@tp/log`。记账 `@tp/metrics`：主机记 Case/Run/队列/Worker/HTTP，读数 `GET /api/metrics`（`collect()` 快照 DTO）；Adapter 在 isolate 记 session/tick。Server 源码不得出现具体 Adapter，只靠 `adapterModules` / `TP_ADAPTER_MODULES` 加载。
 - **MCP**：独立 stdio 进程，只依赖 `@tp/contract`，HTTP 调已启动的 Server。不嵌进 Server，不解释 actor。
-- EasyGo 概念不得进入平台核心。平台不调用 deploy，不校验版本。
-- 操作员 skill：跑已有 Case `.agents/skills/tp-run-case/SKILL.md`；改编排 `.agents/skills/tp-edit-case/SKILL.md`；EasyGo 热更新后再跑 `.agents/skills/easygo-tp-hotupdate-verify/SKILL.md`。
+- 操作员 skill：跑已有 Case `.agents/skills/tp-run-case/SKILL.md`；改编排 `.agents/skills/tp-edit-case/SKILL.md`。
 - 引擎对齐 BT.CPP v4（tick/halt、节点状态、控制节点与装饰器）。允许 `ReactiveSequence` / `ReactiveFallback`，以及 `Repeat` / `RetryUntilSuccessful` 的 `-1`。
 - Run 可以一直 `RUNNING`；只有取消才 halt 整树并回收 Worker / Session。`Fallback` 是 BT 节点，不是兼容层。
 

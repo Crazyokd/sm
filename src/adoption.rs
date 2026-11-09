@@ -25,6 +25,8 @@ struct Adoption {
     executable: Option<bool>,
     previous_resource: Option<String>,
     #[serde(default)]
+    restore_missing: bool,
+    #[serde(default)]
     previous_resources: Vec<String>,
     shared_with: Option<String>,
 }
@@ -118,8 +120,53 @@ pub fn adopt(
         }
         let path = contained(&scope, &entry.target)?;
         reject_symlink_path(&path)?;
-        let key = format!("{}:{}", entry.resource, entry.target.display());
-        if consumed.contains(&key) || owned.contains_key(&(entry.resource.clone(), path.clone())) {
+        let reconciliation = entry.previous_resource.as_deref() == Some(entry.resource.as_str());
+        let key = if reconciliation {
+            format!(
+                "reconcile:{}:{}:{}:{:?}:{}",
+                entry.resource,
+                entry.target.display(),
+                entry.sha256,
+                entry.executable,
+                entry.restore_missing
+            )
+        } else {
+            format!("{}:{}", entry.resource, entry.target.display())
+        };
+        if consumed.contains(&key)
+            || (!reconciliation && owned.contains_key(&(entry.resource.clone(), path.clone())))
+        {
+            continue;
+        }
+        if entry.restore_missing {
+            ensure!(
+                reconciliation && entry.executable.is_some(),
+                "missing restore requires the same reviewed owner and mode"
+            );
+            if !path.exists() {
+                let old_key = (entry.resource.clone(), path.clone());
+                if let Some(StoredWrite {
+                    body: StoredBody::FileFingerprint { sha256, executable },
+                    ..
+                }) = owned.get(&old_key)
+                {
+                    let digest = sha256
+                        .iter()
+                        .map(|byte| format!("{byte:02x}"))
+                        .collect::<String>();
+                    if digest == entry.sha256
+                        && Some(*executable) == entry.executable
+                        && plan
+                            .writes
+                            .iter()
+                            .any(|write| write.resource_id == entry.resource && write.path == path)
+                    {
+                        owned.remove(&old_key);
+                        changed.insert(old_key);
+                        consumed.insert(key);
+                    }
+                }
+            }
             continue;
         }
         if !path.is_file() {
@@ -260,7 +307,17 @@ pub fn adopt(
             let Some(old) = owned.get(&previous_key) else {
                 continue;
             };
-            if !matches_current(&old.body, &bytes, executable)? {
+            if reconciliation {
+                if !matches!(
+                    (&old.body, &claim.body),
+                    (
+                        StoredBody::FileFingerprint { .. },
+                        StoredBody::FileFingerprint { .. }
+                    )
+                ) {
+                    continue;
+                }
+            } else if !matches_current(&old.body, &bytes, executable)? {
                 continue;
             }
             let remaining = match (&old.body, &claim.body) {

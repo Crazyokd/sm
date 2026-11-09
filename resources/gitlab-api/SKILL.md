@@ -5,7 +5,7 @@ description: 通过 GitLab REST API 查 CI 日志、操作 MR/Issue/Pipeline。�
 
 # GitLab API 访问
 
-需要查 CI 日志、操作 MR/Issue 时，**优先用 REST API 而不是 `glab` CLI**——容器里 `glab` 不一定装。环境变量 `GITLAB_PRIVATE_TOKEN` 已注入到 DevContainer，直接 `curl` 即可。
+需要查 CI 日志、操作 MR/Issue 时，**优先用 REST API 而不是 `glab` CLI**——容器里 `glab` 不一定装。优先复用本机已有认证；环境确实提供 `GITLAB_PRIVATE_TOKEN` 时可用 `curl`，否则使用已认证的 `glab api`。认证缺失或请求失败就明确报告，不假定 token 已设置，不扫描、打印或截取凭据。
 
 - Base URL：`http://git.standard-robots.com/api/v4`
 - 通用 header：`-H "PRIVATE-TOKEN: $GITLAB_PRIVATE_TOKEN"`

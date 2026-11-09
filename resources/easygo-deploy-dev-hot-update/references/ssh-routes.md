@@ -9,7 +9,7 @@ WRAPPER_DIR="$(.agents/skills/easygo-deploy-dev-hot-update/scripts/make_nested_s
 PATH="$WRAPPER_DIR/bin:$PATH" ssh <wrapper-host> 'hostname'
 ```
 
-If the target behind the hop chain needs password authentication, supply the resolved robot credentials (`std` / `SRpasswd@2017` by default):
+If the target behind the hop chain needs password authentication, resolve the username and password from the current task or local credential store; require both values and do not use a hard-coded fallback:
 
 ```bash
 WRAPPER_DIR="$(.agents/skills/easygo-deploy-dev-hot-update/scripts/make_nested_ssh_wrapper.sh --target-user "$SSH_USER" --target-pass "$SSH_PASS" <wrapper-host> <hop1> [<hop2> ...] -- <target-ip-or-alias>)"

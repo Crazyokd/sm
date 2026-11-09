@@ -34,7 +34,7 @@ description: Add, modify, review, or troubleshoot SROS function parameters in cf
 - `is_valid`、`is_editable`、`is_update_online`、`permission`、`min_version_requirement` 逐项按需求确认，不要从模板继承。
 - `value_type` 必须匹配代码读取类型和前端控件。已合入或部署的参数不得直接改 `id`、`key` 或 `value_type`；类型设计错误时按仓库规则废弃旧项并新增参数。尚未合入的新增项应在提交前修正。
 - `default_value` 通常应是实际缺省值。部分历史复合字符串把字段名写在该列，Matrix 又会把它展示为“默认值”；遇到此模式必须核对真实前端和升级语义，不能因为有旧样例就照抄。
-- 新增参数的 `value` 要能让首次安装得到正确行为。升级会同步除 `value` 外的元数据，修改 `default_value` 或单位不会自动覆盖车辆已有值。
+- 新增参数的 `value` 要能让首次安装得到正确行为。升级保留的字段见 [字段约定](../../../cfg/sros-resources/config/README.md#字段约定)；修改 `default_value` 或单位不会自动覆盖车辆已有值。
 
 ## 单位与 Matrix
 

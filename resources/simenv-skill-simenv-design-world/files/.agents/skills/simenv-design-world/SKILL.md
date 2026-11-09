@@ -25,7 +25,7 @@ description: 从测试/功能需求反推该造一个什么样的世界（SDF �
 写完 SDF 先跑：
 
 ```bash
-python3 ~/.cache/simenv-scenarios/connectivity.py deploy/assets/worlds/<world>.sdf
+python3 ~/.cache/simenv-scenarios/connectivity.py deploy/assets/worlds/<world>/gazebo/world.sdf
 ```
 
 要看到：起点到终点**可达**、**不该到的区域不可达**、最窄通道（按车半宽膨胀后）留有余量。
@@ -47,29 +47,31 @@ python3 ~/.cache/simenv-scenarios/connectivity.py deploy/assets/worlds/<world>.s
 
 - 静态几何放一个 `<model>` 里（`<static>true</static>`），场地**外墙不要动**：换几何本来就要重开图，
   外墙不动才能让 `origin_offset_mm` 的语义稳定；
-- 世界名 = 文件名 = manifest 的 `world`；模型来自 pinned EasyGo 修订（记在
+- 世界名 = bundle 目录名（`deploy/assets/worlds/<world>/`）= manifest 的 `world`；SDF 固定放
+  `gazebo/world.sdf`。模型来自 pinned EasyGo 修订（记在
   `deploy/assets/EASYGO_WORLD_SOURCE_SHA`，换 SHA 同步镜像 LABEL）；本仓自造的几何要在 manifest 里
   写明 `source_sha` 与理由；
-- 改完必须 `docker build -f deploy/Dockerfile -t simenv-world:local .`（世界打进镜像）；
+- 改完必须 `docker build -f deploy/Dockerfile -t simenv-world-gazebo:local .`（世界打进镜像）；
 - 命名/端口/坐标口径按 `AGENTS.md` 的"契约"一节（`robotN`、`ROS_DOMAIN_ID=11+(N-1)`、`frontend=18088+100N`、
   `api=18089+100N`）。
 
-## 5. bundle 里该声明什么（这个世界对应的"一组场景 + 一张图 + 可定位坐标"）
+## 5. bundle 里该声明什么（这个世界对应的"一张图 + 可定位坐标"）
 
-写 `deploy/assets/worlds/<world>.world.json`：
+写 `deploy/assets/worlds/<world>/bundle.json`（格式与逐字段语义见 skill `simenv-build-map` §5）：
 
-- `stations[]`：**只放车真会停的位置**（地图系 mm），且必须落在地图**观测过**的区域内；
-- `initial_poses[]`：世界位姿，**给就要给全**（缺一台 `simenv start` 直接失败），放**有特征处**，
-  朝向朝任务方向（车先动起来比原地转更稳）；
-- `scenarios[]`：把需求对应的 harness 脚本名列进去（一组场景对应一张图、一组坐标）；
-- `origin_offset_mm`：开图后**实测**写入（开图流程见 skill `simenv-build-map`）。
+- `stations[]`：**只放车真会停的位置**（**世界系 m/rad**），且必须落在地图**观测过**的区域内；
+- `initial_poses[]`：世界位姿，**给就要给全**（缺一台 `simenv start` 直接失败；与 `--poses` 同给也失败），
+  放**有特征处**，朝向朝任务方向（车先动起来比原地转更稳）；
+- `vehicles.easygo` 节的 `origin_offset_mm`：开图后**实测**写入（开图流程见 skill `simenv-build-map`）；
+- scenarios 不进 bundle：场景组归 harness runner，一张图对应一组坐标即可。
 
 ## 6. 迭代法与收口
 
 1. 写/改 SDF → `connectivity.py` 自检 → `docker build`；
 2. 走 **`simenv-build-map`** 开图 + 量偏移 + 写 manifest；
-3. `go test ./...`（三道校验，含"声明坐标必须落在观测过的区域"）；
-4. `simenv start --world <world>` 退出 0 且两车位姿差在容差内 → `run_worlds.sh <world>` 跑场景组；
+3. `go test ./...`（资产校验，含"声明坐标必须落在观测过的区域"）；
+4. `simenv start --world <world> --env-image simenv-world-gazebo:local --app-image …` 退出 0 且
+   两车位姿差在容差内 → 跑 harness 场景组；
 5. **几何一改就要重开图**（地图绑定世界），所以尺寸尽量一次算对。
 
 ## 7. 别让世界的锅背错
@@ -85,5 +87,5 @@ python3 ~/.cache/simenv-scenarios/connectivity.py deploy/assets/worlds/<world>.s
 ## 相关
 
 - 开图与 bundle：skill `simenv-build-map`；起停：skill `simenv-run`；
-- 合同：`docs/superpowers/specs/2026-10-12-world-bundle-design.md`（§4 bundle、§5.6 地形缺陷、§5.7 解锁链路与归属）；
+- 合同：`docs/superpowers/specs/2026-11-05-ports-architecture.md`（§5 bundle 格式）；
 - 工具：`~/.cache/simenv-scenarios/connectivity.py` 等（见 `simenv-build-map`）。

@@ -1,7 +1,7 @@
 use crate::{
     analysis::{
-        AgentRunner, RejectedCandidate, analyze_observations, content_hash, default_runner,
-        editable_text, to_changeset,
+        AgentRunner, analyze_with_pending, content_hash, default_runner, editable_text,
+        to_changeset,
     },
     apply::{apply_writes, plan_apply},
     evaluation::evaluate_candidate,
@@ -16,7 +16,7 @@ use crate::{
     },
     privacy::redact_text,
     process::{available, run_command},
-    proposals::{NoChanges, Proposal},
+    proposals::{NoChanges, Proposal, RejectedCandidate},
     repository::{fetch_approved, fetch_upstream},
     state::State,
     telemetry::RunTracker,
@@ -672,6 +672,10 @@ pub struct CycleDetails {
     pub application: BTreeMap<String, ResourceResult>,
     pub sync_ok: Option<bool>,
     pub analysis_ok: Option<bool>,
+    pub using_cached_source: bool,
+    pub approved_revision: Option<String>,
+    pub sync_error: Option<String>,
+    pub proposal_refresh_error: Option<String>,
     pub observations_processed: usize,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub retention: Option<crate::retention::RetentionReport>,
@@ -686,9 +690,15 @@ pub struct CycleReport {
 }
 pub trait Submitter: Send + Sync {
     fn submit(&self, proposal: &mut Proposal, state: &State) -> Result<String>;
+    fn refresh(&self, _repo: &Path, _state: &State) -> Result<()> {
+        Ok(())
+    }
 }
 pub struct NativeSubmitter;
 impl Submitter for NativeSubmitter {
+    fn refresh(&self, repo: &Path, state: &State) -> Result<()> {
+        gitlab::refresh_proposals(repo, state)
+    }
     fn submit(&self, proposal: &mut Proposal, state: &State) -> Result<String> {
         gitlab::submit_mr(proposal, state)
     }
@@ -715,11 +725,29 @@ pub fn cycle_with(
         run.stage("fetch_approved", None, 0, 1)?;
         result.details.sync_ok = Some(false);
         let temporary = tempfile::tempdir()?;
-        let source = fetch_approved(&runtime.repo, &temporary.path().join("approved"))?;
+        let approved = temporary.path().join("approved");
+        let source = match fetch_approved(&runtime.repo, &approved) {
+            Ok(source) => source,
+            Err(error) => {
+                result.details.sync_error = Some(redact_text(&format!("{error:#}"), Some(1200)));
+                result.details.using_cached_source = true;
+                crate::repository::export_approved(&runtime.repo, &approved)?
+            }
+        };
+        result.details.approved_revision = Some(crate::repository::git(
+            &runtime.repo,
+            &["rev-parse", "origin/main"],
+        )?);
         let (catalog, applied) = apply_source_tracked(&source, runtime, state, Some(&mut run))?;
-        result.ok = applied.ok();
-        result.details.sync_ok = Some(applied.ok());
+        result.ok = applied.ok() && !result.details.using_cached_source;
+        result.details.sync_ok = Some(result.ok);
         result.details.application = applied.results;
+        run.stage("refresh_proposals", None, 0, 1)?;
+        if let Err(error) = submitter.refresh(&runtime.repo, state) {
+            result.ok = false;
+            result.details.proposal_refresh_error =
+                Some(redact_text(&format!("{error:#}"), Some(1200)));
+        }
         let mut findings = Vec::new();
         loop {
             let observations = pending_observations(state, 1000)?;
@@ -737,7 +765,19 @@ pub fn cycle_with(
                         &fallback
                     }
                 };
-                let candidates = analyze_observations(&catalog, &observations, runner)?;
+                let pending: BTreeMap<String, Proposal> = state.get("proposals")?;
+                let pending = pending
+                    .into_values()
+                    .filter(|p| {
+                        matches!(
+                            p.status,
+                            crate::proposals::ProposalStatus::Draft
+                                | crate::proposals::ProposalStatus::Submitted
+                        )
+                    })
+                    .map(|p| p.change)
+                    .collect::<Vec<_>>();
+                let candidates = analyze_with_pending(&catalog, &observations, runner, &pending)?;
                 run.stage("analysis", None, observations.len(), observations.len())?;
                 let total = candidates.len();
                 for (index, candidate) in candidates.into_iter().enumerate() {
@@ -791,10 +831,33 @@ pub fn cycle_with(
                         continue;
                     };
                     run.stage("proposal", Some(&candidate.resource_id), index, total)?;
+                    if let Some(error) = &result.details.proposal_refresh_error {
+                        anyhow::bail!(
+                            "proposal status could not be refreshed; candidate retained: {error}"
+                        );
+                    }
                     let mut proposal =
                         match crate::proposals::create_proposal(&runtime.repo, &change, state) {
                             Ok(proposal) => proposal,
                             Err(error) if error.is::<NoChanges>() => continue,
+                            Err(error) if error.is::<RejectedCandidate>() => {
+                                if let Some(finding) = findings.last_mut() {
+                                    finding.validation.status = ValidationStatus::Failed;
+                                    finding.validation.checks.push(ValidationCheck {
+                                        name: "pending_proposal".into(),
+                                        kind: CheckKind::Static,
+                                        before: None,
+                                        after: false,
+                                        error: Some(redact_text(&format!("{error:#}"), Some(300))),
+                                    });
+                                }
+                                run.resource_result(
+                                    &candidate.resource_id,
+                                    "failed",
+                                    "Candidate rejected; pending changes preserved",
+                                );
+                                continue;
+                            }
                             Err(error) => return Err(error),
                         };
                     run.stage("submit_mr", Some(&candidate.resource_id), index, total)?;
@@ -878,6 +941,8 @@ pub fn cycle_with(
         .details
         .error
         .clone()
+        .or_else(|| result.details.sync_error.clone())
+        .or_else(|| result.details.proposal_refresh_error.clone())
         .or_else(|| application_error(&result.details.application));
     if let Err(persistence) = run.finish(&result, result.ok, error.as_deref()) {
         if let Some(error) = error {

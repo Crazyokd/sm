@@ -33,7 +33,7 @@ git status --short --branch
 for d in . src/*; do
   [ -d "$d/.git" ] || continue
   printf '%s ' "$d"
-  git -C "$d" status --short --branch | sed -n '1p'
+  git -C "$d" status --short --branch
 done
 ```
 
@@ -51,3 +51,5 @@ done
 - Prefer `origin/main`; use the remote default branch only when `origin/main` is absent.
 - Treat `src/easygo-app`, `src/easygo-music-resources`, and other `src/*` entries as independent repository boundaries.
 - SM installs this Skill and maintains its local Git exclusion so `git stash --include-untracked` leaves it in place. `git stash --all` also includes ignored files and can still remove it; restore the Skill through SM if that happens.
+
+筛选同步日志时启用 `pipefail` 或单独保存原同步脚本的退出码；管道末端 `tail` 的 `$?` 不能代表同步成功。报告所有子仓剩余状态，不能仅截取首行来声称没有未跟踪文件。

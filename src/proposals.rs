@@ -21,6 +21,10 @@ use std::{
 #[derive(Debug, thiserror::Error)]
 #[error("proposal has no changes against approved content")]
 pub struct NoChanges;
+
+#[derive(Debug, thiserror::Error)]
+#[error("candidate proposal failed validation")]
+pub struct RejectedCandidate;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ChangeSet {
@@ -103,7 +107,17 @@ impl ChangeSet {
     pub fn key(&self) -> Result<String> {
         let mut ids = self.resource_ids.clone();
         ids.sort();
-        Ok(digest(serde_json::to_vec(&json!([ids, self.reason]))?)[..16].into())
+        let targets: Vec<_> = self.writes.keys().collect();
+        let mut deletions = self.deletions.clone();
+        deletions.sort();
+        Ok(digest(serde_json::to_vec(&json!([
+            ids,
+            targets,
+            deletions,
+            self.renames,
+            self.writes.get("catalog.json")
+        ]))?)[..16]
+            .into())
     }
 }
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -111,6 +125,8 @@ impl ChangeSet {
 pub enum ProposalStatus {
     Draft,
     Submitted,
+    Merged,
+    Closed,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Proposal {
@@ -148,9 +164,35 @@ impl Proposal {
 }
 pub fn create_proposal(repo: &Path, change: &ChangeSet, state: &State) -> Result<Proposal> {
     change.validate()?;
-    let key = change.key()?;
-    let previous: BTreeMap<String, Proposal> = state.get("proposals")?;
-    let previous = previous.get(&key);
+    let identity = change.key()?;
+    let proposals: BTreeMap<String, Proposal> = state.get("proposals")?;
+    let previous = proposals.values().find(|proposal| {
+        matches!(
+            proposal.status,
+            ProposalStatus::Draft | ProposalStatus::Submitted
+        ) && proposal.change.key().is_ok_and(|key| key == identity)
+    });
+    let key = previous.map_or_else(
+        || {
+            if proposals.contains_key(&identity) {
+                digest(format!("{identity}:{}", proposals.len()))[..16].to_owned()
+            } else {
+                identity
+            }
+        },
+        |proposal| proposal.key.clone(),
+    );
+    let mut change = change.clone();
+    if let Some(previous) = previous {
+        let evidence: BTreeSet<_> = previous
+            .change
+            .evidence
+            .iter()
+            .chain(&change.evidence)
+            .cloned()
+            .collect();
+        change.evidence = evidence.into_iter().collect();
+    }
     let directory = state.directory()?.join("proposals").join(&key);
     let branch = format!("sm/{key}");
     let parent = directory.parent().context("proposal parent missing")?;
@@ -231,10 +273,67 @@ pub fn create_proposal(repo: &Path, change: &ChangeSet, state: &State) -> Result
         }
         contained(&prepared, Path::new(path))?;
     }
-    for (path, text) in &change.writes {
+    for (path, text) in &mut change.writes {
         let target = contained(&prepared, Path::new(path))?;
         fs::create_dir_all(target.parent().context("write target has no parent")?)?;
+        if previous.is_some() && target.is_file() {
+            let present = !git(
+                &prepared,
+                &["ls-tree", "--name-only", "origin/main", "--", path],
+            )?
+            .is_empty();
+            let mut command = Command::new("git");
+            command
+                .arg("-C")
+                .arg(&prepared)
+                .args(["show", &format!("origin/main:{path}")]);
+            let baseline = if present {
+                run_command(command, None, Duration::from_secs(120))?.stdout
+            } else {
+                Vec::new()
+            };
+            let current = fs::read(&target)?;
+            if current != baseline && current != text.as_bytes() {
+                let ours = staging.path().join("merge-ours");
+                let base = staging.path().join("merge-base");
+                let incoming = staging.path().join("merge-incoming");
+                fs::write(&ours, &current)?;
+                fs::write(&base, &baseline)?;
+                fs::write(&incoming, text.as_bytes())?;
+                let mut merge = Command::new("git");
+                merge
+                    .args(["merge-file", "--quiet"])
+                    .arg(&ours)
+                    .arg(&base)
+                    .arg(&incoming);
+                if let Err(error) = run_command(merge, None, Duration::from_secs(30)) {
+                    if error
+                        .downcast_ref::<crate::process::CommandFailure>()
+                        .is_some_and(|failure| failure.code == Some(1))
+                    {
+                        return Err(error.context("candidate conflicts with the pending proposal; existing changes were preserved").context(RejectedCandidate));
+                    }
+                    return Err(error);
+                }
+                *text = fs::read_to_string(ours)?;
+            }
+        }
         fs::write(target, text)?;
+    }
+    change
+        .validate()
+        .map_err(|error| error.context(RejectedCandidate))?;
+    for path in change.writes.keys() {
+        if change
+            .validation
+            .checks
+            .iter()
+            .any(|check| check.name == format!("syntax:{path}"))
+        {
+            crate::evaluation::syntax(&contained(&prepared, Path::new(path))?)
+                .context("merged proposal failed static verification")
+                .map_err(|error| error.context(RejectedCandidate))?;
+        }
     }
     for path in &change.deletions {
         let target = contained(&prepared, Path::new(path))?;

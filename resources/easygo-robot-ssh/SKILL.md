@@ -61,7 +61,7 @@ bash .agents/skills/easygo-robot-ssh/scripts/easygo_robot_ssh.sh test easygo
 bash .agents/skills/easygo-robot-ssh/scripts/easygo_robot_ssh.sh setup easygo
 
 # 只在当前命令临时使用；不要写进仓库、文档或历史脚本
-EASYGO_SSH_PASSWORD='...' bash .agents/skills/easygo-robot-ssh/scripts/easygo_robot_ssh.sh setup easygo
+EASYGO_SSH_PASSWORD="$ROBOT_PASSWORD" bash .agents/skills/easygo-robot-ssh/scripts/easygo_robot_ssh.sh setup easygo
 ```
 
 ## 临时目标

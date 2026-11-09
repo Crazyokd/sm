@@ -165,6 +165,7 @@ pub fn run(args: Args, runtime: &Runtime) -> Result<CommandOutcome> {
         Commands::Propose { change } => {
             let change: ChangeSet = serde_json::from_slice(&fs::read(change)?)?;
             let _guard = crate::service::JobGuard::acquire(state.directory()?)?;
+            crate::gitlab::refresh_proposals(&runtime.repo, &state)?;
             let mut proposal = create_proposal(&runtime.repo, &change, &state)?;
             println!("{}", crate::gitlab::submit_mr(&mut proposal, &state)?);
             0

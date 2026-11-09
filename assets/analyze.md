@@ -4,5 +4,6 @@
 每项建议必须引用真实 evidence id，说明原因并保持必要检查。一次执行发现明确冗余时也可以建议改进。
 当前输入仅为一个证据批次；未出现的记录不表示资源未使用或无效，只能引用本批次列出的 evidence id。
 evidence 只能逐字取自 observations[].id；facts 内的哈希及 session、turn、invocation 标识均不是 evidence id。
+pending_proposals 是已有待审提案；同一资源和修改位置的问题已被覆盖时不要重复建议，有新增问题时说明与待审内容的关系，不得撤销其中无关的修改。
 operation 可为 edit、retire、reclassify。edit 提供所选资源内的完整新文件文本；retire 仅在有明确替代或无效证据时建议；reclassify 仅调整已有的用户级／项目级归属。
 不要编造验证结果。没有足够证据时返回空 candidates。只返回符合给定结构的 JSON。

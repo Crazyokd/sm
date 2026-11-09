@@ -41,6 +41,7 @@ rust:
     - rustup component add rustfmt clippy
   script:
     - python3 tests/test_hindsight_codex.py
+    - python3 tests/test_app_checks.py
     - cargo fmt --check
     - cargo clippy --all-targets --locked -- -D warnings
     - cargo test --locked

@@ -189,6 +189,37 @@ fn removal_of_required_verification_fails_even_if_candidate_weakens_evals() {
     );
 }
 #[test]
+fn analysis_sees_pending_resource_changes_before_proposing_another_fix() {
+    struct Pending;
+    impl AgentRunner for Pending {
+        fn run(&self, prompt: &str) -> Result<AnalysisResponse> {
+            let input: Value = serde_json::from_str(prompt.lines().last().unwrap())?;
+            assert_eq!(input["pending_proposals"][0]["resource_ids"][0], "review");
+            assert_eq!(
+                input["pending_proposals"][0]["paths"][0],
+                "resources/review/SKILL.md"
+            );
+            assert!(
+                input["pending_proposals"][0]["reason"]
+                    .as_str()
+                    .unwrap()
+                    .contains("Two redundant steps")
+            );
+            Ok(AnalysisResponse {
+                candidates: Vec::new(),
+            })
+        }
+    }
+    let (_root, catalog, observation, _) = fixture();
+    let change: sm::proposals::ChangeSet = serde_json::from_value(json!({"resource_ids":["review"],"reason":"Two redundant steps","writes":{"resources/review/SKILL.md":AFTER}})).unwrap();
+    assert!(
+        sm::analysis::analyze_with_pending(&catalog, &[observation], &Pending, &[change])
+            .unwrap()
+            .is_empty()
+    );
+}
+
+#[test]
 fn invalid_evidence_gets_one_correction_and_still_must_pass_validation() {
     struct Repair {
         calls: AtomicUsize,

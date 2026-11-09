@@ -11,7 +11,7 @@ use rusqlite::params;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value, json};
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     fs::{self, OpenOptions},
     io::{BufRead, BufReader, Seek, SeekFrom, Write},
     os::unix::fs::{MetadataExt, OpenOptionsExt, PermissionsExt},
@@ -50,6 +50,7 @@ pub enum ResourceSignal {
 #[serde(rename_all = "snake_case")]
 pub enum DetectionSource {
     Explicit,
+    NativeName,
     ActivePath,
     #[default]
     Unattributed,
@@ -448,6 +449,11 @@ fn resource_signal(payload: &HookPayload) -> ResourceSignal {
                 Some("Skill" | "skill")
             ) {
                 ResourceSignal::Activation
+            } else if matches!(
+                payload.facts.get("tool_name").and_then(Value::as_str),
+                Some("Read" | "read_file" | "read")
+            ) {
+                ResourceSignal::Load
             } else if payload.facts.get("outcome").and_then(Value::as_str) == Some("failure") {
                 ResourceSignal::Failure
             } else {
@@ -467,6 +473,7 @@ fn confidence(source: DetectionSource, signal: ResourceSignal) -> Confidence {
             ResourceSignal::ToolExecution | ResourceSignal::Unknown => Confidence::Medium,
         },
         DetectionSource::ActivePath => Confidence::Low,
+        DetectionSource::NativeName => Confidence::Medium,
         DetectionSource::Unattributed => Confidence::Unknown,
     }
 }
@@ -558,12 +565,47 @@ pub fn record_event(agent: Client, payload: &Value, directory: &Path) -> Result<
     reject_symlink_path(&active)?;
     if active.is_file() {
         let index: ActiveIndex = serde_json::from_slice(&fs::read(active)?)?;
+        if envelope.resource_id.is_none()
+            && matches!(
+                payload.get("tool_name").and_then(Value::as_str),
+                Some("Skill" | "skill")
+            )
+        {
+            if let Some(name) = payload
+                .get("tool_input")
+                .and_then(|input| input.get("skill"))
+                .and_then(Value::as_str)
+            {
+                let matches: BTreeSet<_> = index
+                    .owned
+                    .iter()
+                    .filter(|owned| {
+                        owned
+                            .path
+                            .file_name()
+                            .is_some_and(|file| file == "SKILL.md")
+                            && owned
+                                .path
+                                .parent()
+                                .and_then(Path::file_name)
+                                .is_some_and(|file| file == name)
+                    })
+                    .map(|owned| &owned.resource_id)
+                    .collect();
+                if matches.len() == 1 {
+                    envelope.resource_id = matches.into_iter().next().cloned();
+                    envelope.detected_from = DetectionSource::NativeName;
+                }
+            }
+        }
         let input = serde_json::to_string(payload.get("tool_input").unwrap_or(&Value::Null))?;
-        envelope.resource_content_hash = envelope
-            .resource_id
-            .as_ref()
-            .and_then(|id| index.hashes.get(id))
-            .cloned();
+        if envelope.detected_from == DetectionSource::Explicit {
+            envelope.resource_content_hash = envelope
+                .resource_id
+                .as_ref()
+                .and_then(|id| index.hashes.get(id))
+                .cloned();
+        }
         if envelope.resource_id.is_none() {
             let matches: std::collections::BTreeSet<_> = index
                 .owned

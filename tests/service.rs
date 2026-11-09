@@ -273,6 +273,61 @@ fn one_invalid_native_payload_does_not_hide_other_resources() {
     assert_eq!(report.results["bad"].status, ApplyStatus::Failed);
 }
 #[test]
+fn offline_sync_keeps_failure_visible_and_analyzes_the_cached_approved_revision() {
+    struct Empty;
+    impl AgentRunner for Empty {
+        fn run(&self, _: &str) -> Result<AnalysisResponse> {
+            Ok(AnalysisResponse {
+                candidates: Vec::new(),
+            })
+        }
+    }
+    struct Offline;
+    impl Submitter for Offline {
+        fn submit(&self, _: &mut sm::proposals::Proposal, _: &State) -> Result<String> {
+            panic!("no candidate needs submission")
+        }
+        fn refresh(&self, _: &std::path::Path, _: &State) -> Result<()> {
+            bail!("GitLab unavailable")
+        }
+    }
+    let repo = Repo::new();
+    let runtime = runtime(&repo);
+    let state = runtime.state().unwrap();
+    synchronize(&runtime, &state).unwrap();
+    fs::write(
+        repo.work.join("resources/review/SKILL.md"),
+        "Unapproved local edit",
+    )
+    .unwrap();
+    record_event(
+        sm::model::Client::Codex,
+        &json!({"resource_id":"review","hook_event_name":"Stop"}),
+        state.directory().unwrap(),
+    )
+    .unwrap();
+    fs::rename(&repo.remote, repo.temp.path().join("offline.git")).unwrap();
+    let report = cycle_with(&runtime, &state, Some(&Empty), &Offline).unwrap();
+    assert!(!report.ok);
+    assert_eq!(report.details.sync_ok, Some(false));
+    assert_eq!(report.details.analysis_ok, Some(true));
+    assert_eq!(report.details.observations_processed, 1);
+    let details = serde_json::to_value(&report.details).unwrap();
+    assert_eq!(details["using_cached_source"], true);
+    assert!(details["sync_error"].is_string());
+    assert!(
+        details["proposal_refresh_error"]
+            .as_str()
+            .unwrap()
+            .contains("GitLab unavailable")
+    );
+    assert_eq!(
+        fs::read_to_string(runtime.home.join(".agents/skills/review/SKILL.md")).unwrap(),
+        "Approved"
+    );
+}
+
+#[test]
 fn empty_cycle_does_not_call_model_or_publish_proposals() {
     let repo = Repo::new();
     let runtime = runtime(&repo);

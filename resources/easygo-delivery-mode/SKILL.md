@@ -30,7 +30,7 @@ SZ-2 地图同步定位重置等已验证：不依赖缺失的 ROS msg 包、不
 
 ## 4. 已知环境阻塞（确证后上报，勿空转）
 
-- **easygo-follow-msgs 0.3.11 版本墙**：外部 ROS msg 包（SROS/core/follow.git），crates.io/rsproxy 无、容器里是 0.3.5、easygo-app 要 0.3.11。cargo 解析必报版本错。需构建 0.3.11 进容器 /opt/sros 并补 patch 才能解。
+- ROS/接口 SDK 版本问题先依据当前 Cargo 约束、正式接口包和容器实际安装版本确认；历史报错不作为当前缺陷证据。通过已有 `easygo-app-checks` 入口显式选择匹配 SDK，不自动改写共享 `/opt/sros` 来拼出一次通过。
 - 硬件类（EVT WiFi 模块 SDIO 枚举、电池通讯、驱动器力矩限幅等）→ 定位到硬件/驱动器侧则给分流结论，不烧软件重试。
 
 ## 5. 成本纪律（kimi/deepseek-v4-flash 逐调用记账）
@@ -38,7 +38,7 @@ SZ-2 地图同步定位重置等已验证：不依赖缺失的 ROS msg 包、不
 - 每次 model 调用都重读整段上下文 → **cache_read 是成本主因**（一个 200-350 步任务可达 5-28M cache-read tokens）。
 - 一次精准查询胜过整串重复探测：工具调用 ~50% 是精确重复，直接放大 cache_read。
 - 优先小范围精准读（文件行区间/grep 定位），避免整文件反复重读。
-- **结构查询先 codegraph**：找定义/调用/影响面用 codegraph MCP（search/trace/explore/callers），一次亚毫秒查询胜过一串 grep；Easygo 主索引已就绪且从 worktree 自动解析。仅字面文本才用 Grep。
+- **结构查询先 codegraph**：找定义/调用/影响面用 codegraph MCP（search/trace/explore/callers），一次亚毫秒查询胜过一串 grep；查询时明确传入实际项目/工作树路径；新工作树先执行 `cg-worktree-index <path>`。出现 different-worktree 或 pending-sync 提示时只将索引用于定位，读取提示文件确认当前分支。仅字面文本才用 Grep。
 
 ## 5.5 动工前去重（收敛/复跑必读）——按此步骤，实测比一句规则省 15-45%
 
@@ -71,3 +71,5 @@ MR 描述必须**结构化四段 + 溯源链接**，评审者据此核对，缺�
 ## 6. 已定位/已解决问题索引（查 guide，别重做）
 
 已解决/已定位问题与其 MR 的完整索引见 **guide 资产 `easygo-resolved-issues`**（随本任务注入）。动工/复跑前先查它命中项，命中则去重复查给结论，不重开 MR。
+
+未实现功能与未执行验收分别列出：已知缺少实现时继续完成实现或明确列为未完成，不能用缺少运行环境代替实现结论。复用同一源码/环境状态下已有检查结果，独立审查和相关变化后的验证仍保留。

@@ -98,6 +98,7 @@ impl MrApi for FakeMrApi {
             .unwrap()
             .iter()
             .filter(|mr| mr.source_branch == branch)
+            .filter(|mr| mr.state == "opened")
             .cloned()
             .collect())
     }
@@ -105,6 +106,7 @@ impl MrApi for FakeMrApi {
         let mut records = self.mrs.lock().unwrap();
         let mr = Mr {
             iid: records.len() as u64 + 1,
+            state: "opened".into(),
             web_url: format!("https://git.example.invalid/mr/{}", records.len() + 1),
             source_branch: input.source_branch.clone(),
             target_branch: input.target_branch.clone(),

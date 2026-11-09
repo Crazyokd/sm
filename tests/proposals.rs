@@ -216,11 +216,147 @@ fn proposal_identity_ignores_resource_order_and_preserves_unicode_reasons() {
     second.resource_ids.reverse();
     assert_eq!(first.key().unwrap(), second.key().unwrap());
     second.reason.push_str("，保留校验");
+    assert_eq!(first.key().unwrap(), second.key().unwrap());
+    second
+        .writes
+        .insert("resources/other/SKILL.md".into(), "Other change".into());
     assert_ne!(first.key().unwrap(), second.key().unwrap());
+}
+
+#[test]
+fn remote_closed_proposals_are_not_reused_for_a_new_change() {
+    let repo = Repo::new();
+    let state = repo.state();
+    let api = FakeMrApi::default();
+    let mut proposal = create_proposal(&repo.work, &change(), &state).unwrap();
+    submit_mr_with(&mut proposal, &state, &api).unwrap();
+    api.mrs.lock().unwrap()[0].state = "merged".into();
+    sm::gitlab::refresh_proposals_with(&state, &api).unwrap();
+    let saved: BTreeMap<String, Proposal> = state.get("proposals").unwrap();
+    assert_eq!(
+        saved[&proposal.key].status,
+        sm::proposals::ProposalStatus::Merged
+    );
+    let next = create_proposal(&repo.work, &change(), &state).unwrap();
+    assert_ne!(next.key, proposal.key);
+    let saved: BTreeMap<String, Proposal> = state.get("proposals").unwrap();
+    assert_eq!(saved.len(), 2);
+}
+
+#[test]
+fn merged_candidate_is_revalidated_before_replacing_a_pending_proposal() {
+    let repo = Repo::new();
+    let state = repo.state();
+    let base = "# top\n# spacer1\n# spacer2\n# spacer3\n# spacer4\n# bottom\n";
+    fs::write(repo.work.join("resources/review/settings.toml"), base).unwrap();
+    repo.publish("Configuration baseline");
+    let mut first = change();
+    first.writes = BTreeMap::from([(
+        "resources/review/settings.toml".into(),
+        base.replace("# top", "[extra]\na=1"),
+    )]);
+    first.validation.checks = vec![sm::model::ValidationCheck {
+        name: "syntax:resources/review/settings.toml".into(),
+        kind: sm::model::CheckKind::Static,
+        before: None,
+        after: true,
+        error: None,
+    }];
+    let original = create_proposal(&repo.work, &first, &state).unwrap();
+    let mut second = first.clone();
+    second.writes.insert(
+        "resources/review/settings.toml".into(),
+        base.replace("# bottom", "[extra]\nb=2"),
+    );
+    assert!(create_proposal(&repo.work, &second, &state).is_err());
+    assert_eq!(
+        fs::read_to_string(original.directory.join("resources/review/settings.toml")).unwrap(),
+        first.writes["resources/review/settings.toml"]
+    );
+}
+
+#[test]
+fn proposal_identity_keeps_write_and_delete_operations_separate() {
+    let write = change();
+    let mut delete = write.clone();
+    delete.deletions = delete.writes.keys().cloned().collect();
+    delete.writes.clear();
+    assert_ne!(write.key().unwrap(), delete.key().unwrap());
+}
+
+#[test]
+fn pending_new_file_can_be_retried_and_conflicting_updates_keep_the_saved_draft() {
+    let repo = Repo::new();
+    let state = repo.state();
+    let mut first = change();
+    first.writes = BTreeMap::from([("resources/review/NEW.md".into(), "First content\n".into())]);
+    let proposal = create_proposal(&repo.work, &first, &state).unwrap();
+    let mut retry = first.clone();
+    retry.reason = "Reworded new file reason".into();
+    let retried = create_proposal(&repo.work, &retry, &state).unwrap();
+    assert_eq!(retried.key, proposal.key);
+    let mut conflict = first.clone();
+    conflict.writes.insert(
+        "resources/review/NEW.md".into(),
+        "Different content\n".into(),
+    );
+    assert!(create_proposal(&repo.work, &conflict, &state).is_err());
+    assert_eq!(
+        fs::read_to_string(proposal.directory.join("resources/review/NEW.md")).unwrap(),
+        "First content\n"
+    );
+}
+
+#[test]
+fn pending_proposal_updates_preserve_independent_existing_changes() {
+    let repo = Repo::new();
+    let state = repo.state();
+    fs::write(
+        repo.work.join("resources/review/SKILL.md"),
+        "first\n\n\n\n\nlast\n",
+    )
+    .unwrap();
+    repo.publish("Separated checks");
+    let mut first = change();
+    first.writes.insert(
+        "resources/review/SKILL.md".into(),
+        "improved first\n\n\n\n\nlast\n".into(),
+    );
+    create_proposal(&repo.work, &first, &state).unwrap();
+    let mut second = change();
+    second.reason = "Independent last check".into();
+    second.writes.insert(
+        "resources/review/SKILL.md".into(),
+        "first\n\n\n\n\nimproved last\n".into(),
+    );
+    let proposal = create_proposal(&repo.work, &second, &state).unwrap();
+    assert_eq!(
+        fs::read_to_string(proposal.directory.join("resources/review/SKILL.md")).unwrap(),
+        "improved first\n\n\n\n\nimproved last\n"
+    );
+    assert!(proposal.change.writes["resources/review/SKILL.md"].contains("improved first"));
+}
+
+#[test]
+fn reworded_pending_proposals_keep_the_same_mr_and_all_previous_evidence() {
+    let repo = Repo::new();
+    let state = repo.state();
+    let api = FakeMrApi::default();
+    let first = change();
+    let mut proposal = create_proposal(&repo.work, &first, &state).unwrap();
+    let url = submit_mr_with(&mut proposal, &state, &api).unwrap();
+    let mut second = first.clone();
+    second.reason = "Same improvement described differently".into();
+    second.evidence = vec!["event-2".into()];
+    let mut proposal = create_proposal(&repo.work, &second, &state).unwrap();
+    assert_eq!(submit_mr_with(&mut proposal, &state, &api).unwrap(), url);
+    assert_eq!(api.mrs.lock().unwrap().len(), 1);
+    assert!(proposal.change.evidence.contains(&"event-1".into()));
+    assert!(proposal.change.evidence.contains(&"event-2".into()));
 }
 #[test]
 fn gitlab_nullable_description_is_accepted_at_the_external_boundary() {
-    let mr:sm::gitlab::Mr=serde_json::from_value(json!({"iid":1,"web_url":"https://git.example.invalid/mr/1","source_branch":"sm/one","target_branch":"main","title":"Draft: update","description":null})).unwrap();
+    let mr:sm::gitlab::Mr=serde_json::from_value(json!({"iid":1,"state":"opened","web_url":"https://git.example.invalid/mr/1","source_branch":"sm/one","target_branch":"main","title":"Draft: update","description":null})).unwrap();
     assert!(mr.description.is_empty());
 }
 #[test]
@@ -340,7 +476,7 @@ fn existing_mr_survives_main_advancement_and_refreshes_evidence() {
     input.validation.status = sm::model::ValidationStatus::Partial;
     input
         .writes
-        .insert("resources/review/SKILL.md".into(), "Improved again".into());
+        .insert("resources/review/SKILL.md".into(), "Improved".into());
     let mut proposal = create_proposal(&repo.work, &input, &state).unwrap();
     assert_eq!(submit_mr_with(&mut proposal, &state, &api).unwrap(), first);
     let mrs = api.mrs.lock().unwrap();

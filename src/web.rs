@@ -158,6 +158,7 @@ fn templates() -> Result<Environment<'static>> {
             "apply" => "投放文件",
             "apply_existing" => "接管已有资源",
             "cache_metadata" => "更新资源状态",
+            "refresh_proposals" => "核对提案状态",
             "ingest" => "消化本地记录",
             "analysis" => "分析自建资源",
             "validation" => "验证候选修改",
@@ -1338,6 +1339,10 @@ fn submit_change(context: &WebContext, change: &ChangeSet) -> WebResult<Response
         },
         message: redact_text(&error.to_string(), Some(500)),
     })?;
+    context
+        .submitter
+        .refresh(&context.runtime.repo, &context.state)
+        .map_err(WebError::bad)?;
     let mut proposal =
         crate::proposals::create_proposal(&context.runtime.repo, change, &context.state)
             .map_err(WebError::bad)?;

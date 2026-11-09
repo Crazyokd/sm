@@ -19,7 +19,7 @@ This workflow mutates remote Git state when pushing a tag, and later mutates the
 - Prefer `docker/packages.env`; if the user says `docker/package.env`, verify the actual path instead of creating a new file.
 - Update only the relevant `*_VERSION=` lines in `docker/packages.env`. Do not change package source code in the EasyGo root MR.
 - For package tags, prefer annotated tags when the repo already uses tag objects. Match the target repo's existing tag style if it differs.
-- Before changing `packages.env`, confirm the tag points to the intended SHA and the pushed tag pipeline/package publication is ready or expected by the requested workflow.
+- Before changing `packages.env`, confirm the exact tag SHA and actual package publication; a tag or green tag creation alone is not publication evidence. Keep unavailable publication explicit and do not claim downstream readiness.
 - Run `python3 script/release-real.py check-env` after editing `docker/packages.env`. Treat failures as blockers, not warnings.
 
 ## Resolve Inputs
@@ -114,13 +114,15 @@ fi
 
 ```bash
 PIN_VERSION="${TAG_NAME#v}"
-CURRENT_PIN="$(sed -n "s/^${PACKAGE_ENV_VAR}=//p" docker/packages.env | head -n 1)"
+git fetch origin --prune
+TARGET_PACKAGE_ENV="$(git show "origin/$MR_TARGET_BRANCH:docker/packages.env")" || exit 1
+CURRENT_PIN="$(printf '%s\n' "$TARGET_PACKAGE_ENV" | sed -n "s/^${PACKAGE_ENV_VAR}=//p")"
+[ -n "$CURRENT_PIN" ] || { echo "target branch package variable missing" >&2; exit 1; }
 if [ "$CURRENT_PIN" = "$PIN_VERSION" ]; then
-  echo "docker/packages.env already has $PACKAGE_ENV_VAR=$PIN_VERSION; no EasyGo root MR needed"
+  echo "target branch already has $PACKAGE_ENV_VAR=$PIN_VERSION; no EasyGo root MR needed"
   exit 0
 fi
 
-git fetch origin --prune
 git switch -c "chore/package-$TAG_NAME" origin/"$MR_TARGET_BRANCH"
 ```
 
@@ -135,10 +137,19 @@ Version values in `docker/packages.env` usually omit the leading `v` from `TAG_N
 5. Validate and commit.
 
 ```bash
-python3 script/release-real.py check-env
-git diff -- docker/packages.env
+if [ -f script/ci/gen-image-env-subsets.py ]; then
+  python3 script/ci/gen-image-env-subsets.py || exit 1
+  python3 script/ci/gen-image-env-subsets.py --check || exit 1
+fi
+python3 script/release-real.py check-env || exit 1
+git diff -- docker/packages.env docker/real/layers docker/sim/layers
 git status --short
-git add docker/packages.env
+git add -- docker/packages.env
+if [ -f script/ci/gen-image-env-subsets.py ]; then
+  # Inspect the diff, then list only the exact generated files changed by this pin.
+  # Example for an App-only pin; do not stage whole layer directories.
+  git add -- docker/real/layers/app.env docker/sim/layers/app.env
+fi
 git commit -m "chore: update package pin for $TAG_NAME"
 ```
 
@@ -153,3 +164,5 @@ Include:
 - `docker/packages.env` variable changed
 - `release-real.py check-env` result
 - EasyGo root branch, commit SHA, MR URL, and current CI state
+
+When filtering generator, publication, or validation logs, preserve the original exit status with `pipefail` or a separately captured status. Report the MR current head SHA, its matching pipeline, and package publication separately. A different checkout pin cannot establish that the requested target branch is already current.

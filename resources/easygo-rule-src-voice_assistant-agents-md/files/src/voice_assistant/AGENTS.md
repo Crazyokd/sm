@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This repository is the EasyGo voice assistant backend. `app/` contains the Python backend. Key areas are `app/api/` for FastAPI routes, `app/services/` for ASR, planner, TTS, task gateway, and validation logic, and `app/prompts/` for LLM prompt templates. Tests live in `tests/`. Runtime config is in `config/`, and developer, testing, and local-model deployment notes are in `docs/`.
+This repository is the EasyGo voice assistant backend. `app/` contains the Python backend. Key areas are `app/api/` for FastAPI routes, `app/services/` for ASR, task routing, TTS, task gateway, and validation logic. Tests live in `tests/`. Runtime config is in `config/`, and developer, testing, and local-model deployment notes are in `docs/`.
 
 The current EasyGo voice assistant frontend is not maintained in this repository. Frontend UI, recorder entry points, panels, and page state live in the EasyGo frontend repository (`standard-fe/easygo`, checked out at `src/easygo-fe` in the EasyGo workspace), especially `src/components/voice-assistant/`, `src/modules/voice-assistant/`, and `src/pages/voice-assistant/`.
 
@@ -18,15 +18,15 @@ Use 4-space indentation in Python. Follow existing naming: snake_case for Python
 
 ## Testing Guidelines
 
-Backend tests use `pytest`. Add or update tests for every behavior change, especially around planner responses, inventory validation, and script behavior. Prefer focused unit tests over broad end-to-end coverage. Mock external services such as DashScope, Vosk, and Edge TTS in tests.
+Backend tests use `pytest`. Add or update tests for every behavior change, especially around ordinary-mode rule responses, inventory validation, and script behavior. Prefer focused unit tests over broad end-to-end coverage. Mock external services such as DashScope, Vosk, and Edge TTS in tests.
 
 ## Commit & Pull Request Guidelines
 
-Recent history uses short conventional prefixes such as `feat:`, `fix:`, `docs:`, and `chore:`. Keep commit subjects imperative and specific, for example: `fix: retry invalid planner output once`. PRs should state user-visible changes, config changes, and test evidence.
+Recent history uses short conventional prefixes such as `feat:`, `fix:`, `docs:`, and `chore:`. Keep commit subjects imperative and specific, for example: `fix: reject unsupported ordinary-mode input`. PRs should state user-visible changes, config changes, and test evidence.
 
 ## Security & Configuration Tips
 
-Do not hardcode API keys. Use `LLM_API_KEY` in `.env.runtime` for cloud ASR, planner, and TTS. All other voice settings come from easygo-app function parameters (`voice.*`). Keep local models and runtime artifacts out of git. Verify `LLM_API_KEY` and the backend port before debugging application logic.
+Do not hardcode API keys. Use `LLM_API_KEY` in `.env.runtime` for cloud ASR and TTS; Ultra uses `ULTRA_LLM_API_KEY`. Ordinary mode uses deterministic rules; Ultra owns model-based planning. All other operator voice settings come from easygo-app function parameters (`voice.*`). Keep local models and runtime artifacts out of git. Verify the relevant API key and backend port before debugging application logic.
 
 
 <claude-mem-context>

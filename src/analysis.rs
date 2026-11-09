@@ -4,7 +4,7 @@ use crate::{
     observe::Observation,
     privacy::{redact, redact_text},
     process::{available, run_command},
-    proposals::ChangeSet,
+    proposals::{ChangeSet, RejectedCandidate},
     wire::truncate,
 };
 use anyhow::{Context, Result, bail, ensure};
@@ -140,6 +140,13 @@ struct AnalysisInput<'a> {
     resources: Vec<Description<'a>>,
     projects: &'a BTreeMap<String, String>,
     observations: Vec<&'a Observation>,
+    pending_proposals: Vec<PendingProposal<'a>>,
+}
+#[derive(Serialize)]
+struct PendingProposal<'a> {
+    resource_ids: &'a [String],
+    reason: String,
+    paths: Vec<&'a String>,
 }
 // Leave room below the agent input limit for transport and client framing.
 const MAX_PROMPT_BYTES: usize = 512_000;
@@ -148,6 +155,14 @@ pub fn analyze_observations(
     catalog: &Catalog,
     observations: &[Observation],
     runner: &dyn AgentRunner,
+) -> Result<Vec<Candidate>> {
+    analyze_with_pending(catalog, observations, runner, &[])
+}
+pub fn analyze_with_pending(
+    catalog: &Catalog,
+    observations: &[Observation],
+    runner: &dyn AgentRunner,
+    pending: &[ChangeSet],
 ) -> Result<Vec<Candidate>> {
     let resources: BTreeMap<_, _> = catalog
         .resources
@@ -202,6 +217,14 @@ pub fn analyze_observations(
         resources: descriptions,
         projects: &catalog.projects,
         observations: observations.clone(),
+        pending_proposals: pending
+            .iter()
+            .map(|change| PendingProposal {
+                resource_ids: &change.resource_ids,
+                reason: redact_text(&change.reason, Some(400)),
+                paths: change.writes.keys().chain(&change.deletions).collect(),
+            })
+            .collect(),
     };
     let mut input = redact(&serde_json::to_value(input)?, None);
     let rows = input["observations"]
@@ -351,10 +374,6 @@ pub fn analyze_observations(
     }
     Ok(candidates)
 }
-#[derive(Debug, thiserror::Error)]
-#[error("candidate proposal failed validation")]
-pub struct RejectedCandidate;
-
 pub fn to_changeset(candidate: &Candidate, report: &ValidationReport) -> Result<ChangeSet> {
     let mut writes = candidate.changes.clone();
     if candidate.operation != CandidateOperation::Edit {

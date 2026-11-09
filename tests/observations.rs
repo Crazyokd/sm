@@ -25,6 +25,36 @@ fn state(root: &std::path::Path) -> State {
     state
 }
 #[test]
+fn ssh_passwords_are_redacted_without_destroying_local_placeholders() {
+    for command in [
+        "sshpass -p private-secret ssh robot",
+        "sshpass -p'private-secret' ssh robot",
+        "sshpass --password=\"private-secret\" ssh robot",
+        "sshpass -v -p private-secret ssh robot",
+        "sshpass -P 'Password:' -v -p private-secret ssh robot",
+        "sshpass -p \"prefix\\\"private-secret\" ssh robot",
+        "sshpass -p '$private-secret' ssh robot",
+        "SSHPASS='<private-secret>' sshpass -e ssh robot",
+        "SSHPASS=private-secret sshpass -e ssh robot",
+        "credentials (`operator` / `private-secret` by default)",
+        "credentials (`operator` / `$private-secret` by default)",
+    ] {
+        assert!(
+            !redact_text(command, None).contains("private-secret"),
+            "synthetic input: {command}; redacted: {}",
+            redact_text(command, None)
+        );
+    }
+    for command in [
+        "sshpass -p \"$ROBOT_PASSWORD\" ssh robot",
+        "SSHPASS=${ROBOT_PASSWORD} sshpass -e ssh robot",
+        "credentials (`<user>` / `<password>` from local environment)",
+    ] {
+        assert_eq!(redact_text(command, None), command);
+    }
+}
+
+#[test]
 fn secrets_are_removed_from_nested_and_free_text_records() {
     for secret in [
         "OPENAI_API_KEY=dummy-sensitive",
@@ -90,6 +120,40 @@ fn explicit_activation_keeps_lifecycle_and_correlation_metadata() {
     assert_eq!(row.turn_id.as_deref(), Some("turn-1"));
     assert_eq!(row.invocation_id.as_deref(), Some("invocation-1"));
     assert_eq!(row.parent_invocation_id.as_deref(), Some("parent-1"));
+}
+
+#[test]
+fn native_skill_name_is_explicit_but_reading_its_file_is_only_a_load() {
+    let root = tempdir().unwrap();
+    let state = state(root.path());
+    state
+        .set("catalog", &state.get::<Catalog>("catalog").unwrap())
+        .unwrap();
+    fs::write(root.path().join("active.json"), json!({"owned":[{"resource_id":"review","path":"/home/dev/.agents/skills/review/SKILL.md"}],"hashes":{"review":"approved-hash"}}).to_string()).unwrap();
+    record_event(Client::Codex, &json!({"hook_event_name":"PostToolUse","tool_name":"Skill","tool_input":{"skill":"review"},"tool_use_id":"skill-1"}), root.path()).unwrap();
+    record_event(Client::Codex, &json!({"hook_event_name":"PostToolUse","tool_name":"Read","tool_input":{"file_path":"/home/dev/.agents/skills/review/SKILL.md"},"tool_use_id":"read-1"}), root.path()).unwrap();
+    let rows = ingest_events(root.path(), &state).unwrap();
+    let activation = rows
+        .iter()
+        .find(|x| x.invocation_id.as_deref() == Some("skill-1"))
+        .unwrap();
+    assert_eq!(activation.resource_id.as_deref(), Some("review"));
+    assert_eq!(activation.detected_from, DetectionSource::NativeName);
+    assert_eq!(activation.signal, ResourceSignal::Activation);
+    assert_eq!(activation.confidence, Confidence::Medium);
+    assert!(activation.resource_content_hash.is_none());
+    let read = rows
+        .iter()
+        .find(|x| x.invocation_id.as_deref() == Some("read-1"))
+        .unwrap();
+    assert_eq!(read.signal, ResourceSignal::Load);
+    assert_eq!(read.confidence, Confidence::Low);
+    fs::write(root.path().join("active.json"), json!({"owned":[{"resource_id":"review","path":"/home/dev/.agents/skills/review/SKILL.md"},{"resource_id":"other","path":"/home/dev/project/.agents/skills/review/SKILL.md"}],"hashes":{"review":"approved-hash","other":"other-hash"}}).to_string()).unwrap();
+    record_event(Client::Codex, &json!({"hook_event_name":"PostToolUse","tool_name":"Skill","tool_input":{"skill":"review"},"tool_use_id":"skill-2"}), root.path()).unwrap();
+    let ambiguous = ingest_events(root.path(), &state).unwrap().remove(0);
+    assert!(ambiguous.resource_id.is_none());
+    assert_eq!(ambiguous.signal, ResourceSignal::Activation);
+    assert_eq!(ambiguous.confidence, Confidence::Unknown);
 }
 
 #[test]

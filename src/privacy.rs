@@ -16,10 +16,28 @@ static AUTH: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)(bearer|basic)\s+[A-Za-z0-9._~+/=-]+").expect("fixed authorization regex")
 });
 static ASSIGNMENT: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"(?i)(\b[a-z0-9_.-]*(?:api[_-]?key|password|passwd|token|secret|private[_-]?key|cookie|authorization)[a-z0-9_.-]*\b["']?\s*[:=]\s*)("[^"\n]*"|'[^'\n]*'|[^\s,;}&]+)"#).expect("fixed assignment regex")
+    Regex::new(r#"(?i)(\b[a-z0-9_.-]*(?:api[_-]?key|password|passwd|token|secret|private[_-]?key|cookie|authorization)[a-z0-9_.-]*\b["']?\s*[:=]\s*)("(?:\\.|[^"\\\n])*"|'[^'\n]*'|\$\{[^}\n]*\}|[^\s,;}&]+)"#).expect("fixed assignment regex")
 });
 static URL_AUTH: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(https?://)[^/\s@]+:[^/\s@]+@").expect("fixed URL credential regex")
+});
+static SSH_PASSWORD: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"(\bsshpass(?:\s+(?:"(?:\\.|[^"\\\n])*"|'[^'\n]*'|[^\s;|&]+))*?\s+(?:-p\s*|--password(?:=|\s+))|\bSSHPASS\s*=\s*)("(?:\\.|[^"\\\n])*"|'[^'\n]*'|\$\{[^}\n]*\}|[^\s;|&]+)"#)
+        .expect("fixed SSH password regex")
+});
+static LOCAL_VARIABLE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^\$(?:[A-Za-z_][A-Za-z0-9_]*|\{[A-Za-z_][A-Za-z0-9_]*(?::[?+-][^{}\n]*)?\})$")
+        .expect("fixed local variable regex")
+});
+fn local_reference(value: &str) -> bool {
+    let raw = value.trim_matches(['\'', '"']);
+    raw == "[redacted]"
+        || (!value.starts_with('\'') && LOCAL_VARIABLE.is_match(raw))
+        || matches!(raw, "<password>" | "<token>" | "<secret>" | "<api_key>")
+}
+static CREDENTIAL_PAIR: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)(credentials\s*\(\s*`[^`\n]+`\s*/\s*`)([^`\n]+)(`)")
+        .expect("fixed credential pair regex")
 });
 fn policy_flag(key: &str, value: &str) -> bool {
     key.eq_ignore_ascii_case("HERMES_REDACT_SECRETS") && matches!(value, "true" | "false")
@@ -31,10 +49,27 @@ pub fn redact_text(text: &str, limit: Option<usize>) -> String {
         let raw = captures[2].trim_matches(['\'', '"']);
         let key =
             captures[1].trim_end_matches(|c: char| c.is_ascii_whitespace() || "=:\"'".contains(c));
-        if raw.starts_with(['$', '<']) || raw.starts_with("[redacted]") || policy_flag(key, raw) {
+        if local_reference(&captures[2]) || policy_flag(key, raw) {
             captures[0].to_owned()
         } else {
             format!("{}\"[redacted]\"", &captures[1])
+        }
+    });
+    let value = SSH_PASSWORD.replace_all(&value, |captures: &Captures<'_>| {
+        if local_reference(&captures[2]) {
+            captures[0].to_owned()
+        } else {
+            format!("{}\"[redacted]\"", &captures[1])
+        }
+    });
+    let value = CREDENTIAL_PAIR.replace_all(&value, |captures: &Captures<'_>| {
+        if matches!(
+            &captures[2],
+            "[redacted]" | "<password>" | "<token>" | "<secret>"
+        ) {
+            captures[0].to_owned()
+        } else {
+            format!("{}[redacted]{}", &captures[1], &captures[3])
         }
     });
     let value = URL_AUTH.replace_all(&value, "${1}[redacted]@");

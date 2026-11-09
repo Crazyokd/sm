@@ -24,6 +24,13 @@ fn nonblocking(pipe: &impl AsFd) -> Result<()> {
 const STDOUT_LIMIT: usize = 64 * 1024 * 1024;
 const STDERR_LIMIT: usize = 64 * 1024;
 
+#[derive(Debug, thiserror::Error)]
+#[error("{message}")]
+pub struct CommandFailure {
+    pub code: Option<i32>,
+    message: String,
+}
+
 fn read_pipe(
     pipe: &mut Option<impl Read>,
     bytes: &mut Vec<u8>,
@@ -208,11 +215,15 @@ pub fn run_command(
     }
     let output = result?;
     if !output.status.success() {
-        bail!(
-            "{program} exited {}: {}",
-            output.status,
-            failure_details(&output.stdout, &output.stderr, false)
-        );
+        return Err(CommandFailure {
+            code: output.status.code(),
+            message: format!(
+                "{program} exited {}: {}",
+                output.status,
+                failure_details(&output.stdout, &output.stderr, false)
+            ),
+        }
+        .into());
     }
     Ok(output)
 }

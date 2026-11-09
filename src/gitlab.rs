@@ -9,11 +9,12 @@ use crate::{
 use anyhow::{Context, Result, bail, ensure};
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use serde_json::Value;
-use std::{fs, path::Path, process::Command, time::Duration};
+use std::{collections::BTreeMap, fs, path::Path, process::Command, time::Duration};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Mr {
     pub iid: u64,
+    pub state: String,
     pub web_url: String,
     pub source_branch: String,
     pub target_branch: String,
@@ -149,6 +150,40 @@ impl MrApi for Glab {
 pub fn submit_mr(proposal: &mut Proposal, state: &State) -> Result<String> {
     let api = Glab::for_repo(&proposal.directory)?;
     submit_mr_with(proposal, state, &api)
+}
+pub fn refresh_proposals(repo: &Path, state: &State) -> Result<()> {
+    let proposals: BTreeMap<String, Proposal> = state.get("proposals")?;
+    if !proposals
+        .values()
+        .any(|p| p.status == ProposalStatus::Submitted)
+    {
+        return Ok(());
+    }
+    refresh_proposals_with(state, &Glab::for_repo(repo)?)
+}
+pub fn refresh_proposals_with(state: &State, api: &dyn MrApi) -> Result<()> {
+    let mut proposals: BTreeMap<String, Proposal> = state.get("proposals")?;
+    for proposal in proposals
+        .values_mut()
+        .filter(|p| p.status == ProposalStatus::Submitted)
+    {
+        let Some(url) = &proposal.mr_url else {
+            continue;
+        };
+        let iid = url.rsplit('/').next().context("MR id missing")?.parse()?;
+        let mr = api.get(iid)?;
+        ensure!(
+            mr.source_branch == proposal.branch,
+            "remote proposal branch differs"
+        );
+        proposal.status = match mr.state.as_str() {
+            "opened" | "locked" => ProposalStatus::Submitted,
+            "merged" => ProposalStatus::Merged,
+            "closed" => ProposalStatus::Closed,
+            _ => bail!("unknown GitLab proposal state"),
+        };
+    }
+    state.set("proposals", &proposals)
 }
 pub fn submit_mr_with(proposal: &mut Proposal, state: &State, api: &dyn MrApi) -> Result<String> {
     let existing = api.opened(&proposal.branch)?;
