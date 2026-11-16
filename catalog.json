@@ -2443,6 +2443,22 @@
       "project": "simenv"
     },
     {
+      "id": "simenv-skill-simenv-replay-video",
+      "kind": "skill",
+      "files": {
+        "root": "resources/simenv-skill-simenv-replay-video",
+        "entries": [
+          {
+            "target": ".agents/skills/simenv-replay-video",
+            "tree": "files/.agents/skills/simenv-replay-video"
+          }
+        ]
+      },
+      "origin": "self",
+      "scope": "project",
+      "project": "simenv"
+    },
+    {
       "id": "simenv-rule-agents-md",
       "kind": "rule",
       "files": {
