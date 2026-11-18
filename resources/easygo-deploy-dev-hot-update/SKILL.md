@@ -40,7 +40,9 @@ When the user requires installing an existing package without compilation, first
 1. **Resolve the source.** Fetch the relevant source repos, resolve each requested ref to a SHA, and inspect status. The script derives its workspace from its own location and has no source-worktree/ref selector: pin the actual checkouts it will build.
 2. **Protect local work.** Record original branch/HEAD and WIP for each checkout being switched. Stash tracked/untracked WIP under a unique `codex-deploy-*` name, then detach to the resolved SHA. Keep that source state through build and deployment.
 3. **Preflight the target.** Confirm SSH access, host identity, container, architecture, current packages, package audit, and relevant service state. Stop if access fails or the container/package state is not healthy enough to deploy.
-4. **Build and deploy through the script.** The normal invocation performs build, packaging, gates, and installation:
+4. **Build and deploy through the script.** Before each launch, allocate a unique evidence directory for that attempt. Record the EasyGo root SHA, actual script path and content hash, source checkout SHAs/status, resolved target/container, and command shape without credentials. For a script extracted from another ref, also record its source path and resolved commit SHA. Save complete stdout/stderr, the original command exit status, and artifact metadata/checksums. Retries keep earlier attempts' logs and metadata intact, including when the script, source, or target changes.
+
+   The normal invocation performs build, packaging, gates, and installation:
 
    ```bash
    cd "$WORKSPACE"
@@ -53,6 +55,6 @@ When the user requires installing an existing package without compilation, first
 
 ## Report
 
-Include exact source refs/SHAs, package versions, target/container, command shape, package-audit and runtime results, and whether local state was restored. State which functional/device checks were actually observed. Mention build fallbacks only if they happened.
+Include exact source refs/SHAs, package versions, target/container, command shape, package-audit and runtime results, and whether local state was restored. For each deployment attempt, identify the root/script revision, evidence directory, exit status, and any changed inputs. State which functional/device checks were actually observed. Mention build fallbacks only if they happened.
 
 Remote identity and time checks must expand on the remote host: quote remote commands so local shell substitutions cannot supply the reported hostname or timestamp. Preserve the original command exit status when filtering output.
