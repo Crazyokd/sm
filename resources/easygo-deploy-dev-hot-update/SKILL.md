@@ -53,6 +53,12 @@ When the user requires installing an existing package without compilation, first
 5. **Verify independently.** On the target, compare installed package versions with the deployed artifact metadata and require an empty `dpkg --audit`. Check the relevant supervised programs/processes and bounded fresh logs or APIs for runtime startup. Treat stale versions, audit output, or missing expected runtime processes as failure. For app deployments, report initialization/localization separately from any observed navigation or charging test.
 6. **Restore local state.** Return switched checkouts to their original branch/HEAD and restore their WIP. Confirm final status and remove only temporary stashes/wrappers created by this workflow.
 
+## Remote Check Commands
+
+For checks spanning the local shell, SSH, and a container shell, construct and quote each layer once. Prefer structured arguments with `subprocess.run` and `shlex.join`, or a quoted here-document, over repeated nested escaping. Preserve format strings such as `dpkg-query -f='${binary:Package}\t${Version}\t${db:Status-Status}\n'` literally through every shell layer until they reach `dpkg-query`.
+
+When feeding a script through SSH to a container's `bash -s`, forward stdin with `docker exec -i`. A quoted here-document controls expansion but does not make Docker forward stdin. Confirm that each required probe ran, preserve its exit status, and require the expected package/service fields. Distinguish a confirmed empty `dpkg --audit` from a script that never ran; missing execution evidence leaves the check unverified.
+
 ## Report
 
 Include exact source refs/SHAs, package versions, target/container, command shape, package-audit and runtime results, and whether local state was restored. For each deployment attempt, identify the root/script revision, evidence directory, exit status, and any changed inputs. State which functional/device checks were actually observed. Mention build fallbacks only if they happened.
