@@ -15,7 +15,11 @@ description: Run an existing TP Case and read the verdict from run.error and fai
 
 **1. 选 Case。** `listCases`。按用户给的名字或 id 对上一项。没有指定就列出让用户选。不要为此新建 Case。
 
-**2. 开跑。** `createRun` `{ caseId }`。再 `waitForRun` `{ runId, timeoutMs }`。`timeoutMs` 按 Case 长度给够（含建图/任务的 Case 用三十分钟以上），不要用几秒。没有 MCP 时：`POST /api/runs`，再订 `GET /api/runs/:id/events` 直到 `passed` / `failed` / `canceled`。没有成员 `GET /api/runs/:id`。
+**2. 开跑。** `createBatch` `{ caseIds: [id] }`；多选用非空且唯一的 `caseIds`，跑 Group 时先用 `listGroups` / `getGroup` 确认，再传 `{ groupId }`。`caseIds` 与 `groupId` 只能选一个。返回一个 Batch，从 `batch.runs` 取得成员 Run 的 id；对每个成员调用 `waitForRun` `{ runId, timeoutMs }`。`timeoutMs` 按 Case 长度给够（含建图/任务的 Case 用三十分钟以上），不要用几秒。
+
+用 `listBatches` 查批次，`getBatch` `{ id: batch.id }` 查固定成员、状态及计数；用户要停整批时调用 `cancelBatch` `{ id: batch.id }`，再逐个等待成员终态。等待完成后读取各成员的第 3 步证据；批次 `failed` / `canceled` 不能算验收通过，`queued` / `running` 仍未结束。
+
+没有 MCP 时：同样的请求体 `POST /api/batches`，从响应的 `runs` 逐个订阅 `GET /api/runs/:id/events` 直到 `passed` / `failed` / `canceled`。批次查询用 `GET /api/batches` / `GET /api/batches/:id`，整批停止用 `POST /api/batches/:id/cancel`。没有成员 `GET /api/runs/:id`。
 
 **3. 读结果。**
 
