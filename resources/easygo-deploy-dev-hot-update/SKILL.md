@@ -31,6 +31,8 @@ Read `python3 script/deploy-dev.py --help` and the relevant definitions in [depl
 
 Pass the requested repo targets to the script and let it expand dependencies. Reuse its package metadata, transfer checksum, architecture, simulated-install, and post-install checks; do not maintain a second dependency list or reimplement these gates in the skill.
 
+For an App build, resolve the HMI music manifest selected by the actual deployment build before starting compilation. Check its provenance/ref, readability in the build container, and agreement with the target source's HMI mappings. Select a matching manifest through an input supported by the current script. If selection is unsupported or the manifest is incompatible, report the precise build-input gap before retrying. Do not delete HMI mappings or silently fall back to an old container default. Record any temporary input adapter explicitly and preserve the script's existing gates.
+
 ## Existing artifact requests
 
 When the user requires installing an existing package without compilation, first identify the artifact and check whether the current script supports that exact input. Do not switch or stash source checkouts, build, or repackage as a substitute. `--deploy-only` can still package source; if there is no supported artifact input, report that limitation before any target write. Preserve artifact checksum, architecture, dependency, installation and runtime checks.
@@ -64,3 +66,5 @@ When feeding a script through SSH to a container's `bash -s`, forward stdin with
 Include exact source refs/SHAs, package versions, target/container, command shape, package-audit and runtime results, and whether local state was restored. For each deployment attempt, identify the root/script revision, evidence directory, exit status, and any changed inputs. State which functional/device checks were actually observed. Mention build fallbacks only if they happened.
 
 Remote identity and time checks must expand on the remote host: quote remote commands so local shell substitutions cannot supply the reported hostname or timestamp. Preserve the original command exit status when filtering output.
+
+When collecting package metadata, preserve literal `dpkg-query` format placeholders such as `${Package}` and `${Version}` through the remote/container command. Prefer structured argument lists or Python subprocess/shlex.join over multiple layers of nested shell interpolation. When forwarding a verification script on stdin to a container shell, use `docker exec -i ... bash -s` so the container receives the script.
