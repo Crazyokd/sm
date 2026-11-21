@@ -1074,6 +1074,14 @@
       "project": null
     },
     {
+      "id": "easygo-ble-monitor",
+      "kind": "skill",
+      "payload": "resources/easygo-ble-monitor",
+      "origin": "self",
+      "scope": "project",
+      "project": "easygo"
+    },
+    {
       "id": "easygo-delivery-mode",
       "kind": "skill",
       "payload": "resources/easygo-delivery-mode",

@@ -42,6 +42,7 @@ rust:
   script:
     - python3 tests/test_hindsight_codex.py
     - python3 tests/test_app_checks.py
+    - PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s resources/easygo-ble-monitor/tests -v
     - python3 tests/test_simenv_replay_video.py
     - cargo fmt --check
     - cargo clippy --all-targets --locked -- -D warnings
